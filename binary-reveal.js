@@ -94,7 +94,7 @@ if ('IntersectionObserver' in window) {
   }
 
   const pageObserver = new IntersectionObserver(updateVisibility, { rootMargin: '-90px 0px -64px 0px' });
-  const headerObserver = new IntersectionObserver(updateVisibility);
+  const viewportObserver = new IntersectionObserver(updateVisibility);
   const dynamicObserver = new MutationObserver((changes) => {
     for (const element of new Set(changes.map(({ target }) => target))) {
       if (element.firstElementChild?.classList.contains('binary-text-run')) continue;
@@ -119,7 +119,7 @@ if ('IntersectionObserver' in window) {
       if (texts.has(element) || element.closest('.binary-background')) continue;
       const duration = element.matches('h1, h2, h3, h4') ? 480 : element.matches('a, button, label, output') ? 160 : 280;
       texts.set(element, { duration, letters: prepareBinaryText(element), progress: 0, decoded: 0, visible: false });
-      const observer = element.closest('.site-header') || element.matches('.skip-link') ? headerObserver : pageObserver;
+      const observer = element.closest('.site-header, .site-footer, .skip-link') ? viewportObserver : pageObserver;
       observer.observe(element);
       if (element.matches('#project-summary, #brief-status, #toggle-background, output')) {
         dynamicObserver.observe(element, { childList: true });
