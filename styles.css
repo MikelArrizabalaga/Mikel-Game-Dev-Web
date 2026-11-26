@@ -106,7 +106,6 @@ nav .nav-brief { color: var(--action); }
   justify-self: center;
   user-select: none;
 }
-.hero-digits, .hero-message { grid-area: 1 / 1; }
 .hero-digits {
   display: flex;
   justify-content: center;
@@ -117,13 +116,15 @@ nav .nav-brief { color: var(--action); }
 }
 .hero-digits span:first-child { color: var(--action); }
 .hero-mark[data-length="0"] .hero-digits span,
-.hero-mark[data-length="1"] .hero-digits span:last-child,
-.hero-mark[data-show-message] .hero-digits { visibility: hidden; }
+.hero-mark[data-length="1"] .hero-digits span:last-child { visibility: hidden; }
 .hero-message {
   visibility: hidden;
   width: min(100%, 18ch);
+  min-height: 2.2em;
+  margin-top: .35em;
   color: var(--action);
   font: 700 clamp(1.25rem, 2.7vw, 2.5rem)/1.1 "Space Grotesk", var(--font-text);
+  text-align: center;
 }
 .hero-mark[data-show-message] .hero-message { visibility: visible; }
 .hero-message-text::after {

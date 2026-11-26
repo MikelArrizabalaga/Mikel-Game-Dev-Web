@@ -156,8 +156,9 @@ function initHeroTyping() {
       timer = setTimeout(typeNext, 600);
     } else {
       timer = setTimeout(() => {
-        resetTyping();
-        timer = setTimeout(typeNext, 90);
+        line = 0;
+        length = 0;
+        typeNext();
       }, 1700);
     }
   }
