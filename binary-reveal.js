@@ -12,6 +12,7 @@ function prepareBinaryText(element) {
   collectText(element);
 
   const letters = [];
+  const words = [];
   for (const node of textNodes) {
     const run = document.createElement('span');
     run.className = 'binary-text-run';
@@ -29,6 +30,7 @@ function prepareBinaryText(element) {
       overlay.setAttribute('aria-hidden', 'true');
       overlay.dataset.bits = [...token].map(character => character.codePointAt(0).toString(2).padStart(8, '0')).join('');
       const characters = graphemes ? Array.from(graphemes.segment(token), part => part.segment) : [...token];
+      words.push({ overlay, start: letters.length, length: characters.length, progress: 0 });
       for (const character of characters) {
         const letter = document.createElement('span');
         letter.className = 'binary-glyph';
@@ -41,15 +43,21 @@ function prepareBinaryText(element) {
     }
     node.replaceWith(run);
   }
-  return letters;
+  return { letters, words };
 }
 
 function renderBinaryText(state, changedWords) {
   if (!state.letters) return;
-  const showDigits = state.position >= blankEnd;
-  if (showDigits !== state.showDigits) {
-    state.element.classList.toggle('binary-blank', !showDigits);
-    state.showDigits = showDigits;
+  const bitProgress = Math.max(0, Math.min(1, (state.position - typingStart) / typingDuration));
+  if (bitProgress !== state.bitProgress) {
+    const typed = bitProgress * state.letters.length;
+    for (const word of state.words) {
+      const progress = Math.max(0, Math.min(1, (typed - word.start) / word.length));
+      if (progress === word.progress) continue;
+      word.overlay.style.setProperty('--typed-bits', `${progress * 100}%`);
+      word.progress = progress;
+    }
+    state.bitProgress = bitProgress;
   }
   const decoded = Math.floor(Math.max(0, state.position) / state.duration * state.letters.length);
   for (let index = Math.min(decoded, state.decoded); index < Math.max(decoded, state.decoded); index++) {
@@ -74,9 +82,9 @@ function alignDigits(changedWords) {
   }
 }
 
-// The timeline starts with 90 ms of blank space and 140 ms of visible digits.
-const revealStart = -230;
-const blankEnd = -140;
+const typingStart = -400;
+const typingDuration = 340;
+const revealStart = typingStart - 90;
 
 function enableBinaryReveal() {
   const staticText = matchMedia('(prefers-reduced-motion: reduce), (forced-colors: active)');
@@ -88,7 +96,10 @@ function enableBinaryReveal() {
   function prepare(element, changedWords) {
     const state = texts.get(element);
     if (state.letters) return;
-    state.letters = prepareBinaryText(element);
+    const { letters, words } = prepareBinaryText(element);
+    state.letters = letters;
+    state.words = words;
+    state.bitProgress = 0;
     state.decoded = 0;
     renderBinaryText(state, changedWords);
   }
@@ -141,6 +152,7 @@ function enableBinaryReveal() {
       const state = texts.get(target);
       active.delete(state);
       state.letters = null;
+      state.words = null;
       state.decoded = 0;
       state.position = state.visible ? state.duration : revealStart;
     }
@@ -160,7 +172,7 @@ function enableBinaryReveal() {
         let duration = 280;
         if (element.matches('h1, h2, h3, h4')) duration = 480;
         else if (element.matches('a, button, label, output')) duration = 160;
-        texts.set(element, { element, duration, letters: null, position: revealStart, decoded: 0, visible: false });
+        texts.set(element, { duration, letters: null, position: revealStart, decoded: 0, visible: false });
         const observer = element.closest('.site-header, .site-footer, .skip-link') ? viewportObserver : pageObserver;
         observer.observe(element);
         nearbyObserver.observe(element);

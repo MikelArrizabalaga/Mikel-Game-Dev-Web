@@ -285,7 +285,8 @@ h3 { font-size: clamp(1.25rem, 2.25vw, 1.75rem); line-height: 1.2; letter-spacin
   .binary-digits::before {
     content: attr(data-bits);
     display: block;
-    inline-size: round(down, 100%, calc(1ch + .035em));
+    inline-size: var(--typed-bits, 0%);
+    inline-size: round(down, var(--typed-bits, 0%), calc(1ch + .035em));
     overflow: hidden;
   }
   .button-primary { --bit-color: white; }
@@ -293,7 +294,7 @@ h3 { font-size: clamp(1.25rem, 2.25vw, 1.75rem); line-height: 1.2; letter-spacin
     color: inherit;
     -webkit-text-fill-color: currentColor;
   }
-  .binary-blank .binary-digits, :focus-visible .binary-word > .binary-digits, label:focus-within .binary-word > .binary-digits { visibility: hidden; }
+  :focus-visible .binary-word > .binary-digits, label:focus-within .binary-word > .binary-digits { visibility: hidden; }
 }
 @keyframes binary-drift {
   from { transform: translate(-50%, -50%) rotate(-16deg) translateY(var(--binary-half-shift, 0px)); }
