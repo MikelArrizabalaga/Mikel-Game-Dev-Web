@@ -205,6 +205,8 @@ h3 { font-size: clamp(1.25rem, 2.25vw, 1.75rem); line-height: 1.2; letter-spacin
 .work-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; background: var(--line); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 .work-card:last-child:nth-child(odd) { grid-column: 1 / -1; }
 .work-card { padding: clamp(16px, 2.4vw, 26px); background: var(--paper); }
+.work-card-image { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: contain; background: #f4f1ee; margin-bottom: 14px; }
+.work-card-icon { display: block; float: right; width: 80px; height: 80px; margin: 0 0 8px 12px; }
 .work-card h4 { margin: 0; font-size: 1.25rem; }
 .work-card .work-tech { margin-top: 5px; }
 .work-card .work-tech + p { max-width: 64ch; margin-top: 10px; color: var(--muted); line-height: 1.6; }

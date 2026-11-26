@@ -13,6 +13,12 @@ const files = new Map([
   ['/assets/social-preview.png', ['assets/social-preview.png', 'image/png']],
   ['/assets/the-next-stop.jpg', ['assets/the-next-stop.jpg', 'image/jpeg']],
   ['/assets/dont-anger-the-boss.webp', ['assets/dont-anger-the-boss.webp', 'image/webp']],
+  ['/assets/res-vr.webp', ['assets/res-vr.webp', 'image/webp']],
+  ['/assets/previr-ctx.webp', ['assets/previr-ctx.webp', 'image/webp']],
+  ['/assets/eli-k-on.webp', ['assets/eli-k-on.webp', 'image/webp']],
+  ['/assets/bio-tutorial.webp', ['assets/bio-tutorial.webp', 'image/webp']],
+  ['/assets/vuela-liz.webp', ['assets/vuela-liz.webp', 'image/webp']],
+  ['/assets/hur.webp', ['assets/hur.webp', 'image/webp']],
   ['/assets/fonts/geist.woff2', ['assets/fonts/geist.woff2', 'font/woff2']],
   ['/assets/fonts/spacegrotesk.woff2', ['assets/fonts/spacegrotesk.woff2', 'font/woff2']],
 ]);
