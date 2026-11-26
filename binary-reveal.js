@@ -27,9 +27,7 @@ function prepareBinaryText(element) {
       word.className = 'binary-word';
       overlay.className = 'binary-digits';
       overlay.setAttribute('aria-hidden', 'true');
-      // Zero-width breaks wrap surplus digits onto a second, clipped line.
-      const bits = [...token].map(character => character.codePointAt(0).toString(2).padStart(8, '0')).join('');
-      overlay.dataset.bits = [...bits].join('\u200b');
+      overlay.dataset.bits = [...token].map(character => character.codePointAt(0).toString(2).padStart(8, '0')).join('');
       const characters = graphemes ? Array.from(graphemes.segment(token), part => part.segment) : [...token];
       for (const character of characters) {
         const letter = document.createElement('span');

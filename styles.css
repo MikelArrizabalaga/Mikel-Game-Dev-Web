@@ -16,6 +16,7 @@
 :root {
   color-scheme: light;
   --font-text: "Geist", "Segoe UI", system-ui, sans-serif;
+  --font-bits: ui-monospace, Consolas, monospace;
   font-family: var(--font-text);
   --paper: #fff;
   --ink: #211a17;
@@ -54,8 +55,8 @@ button { cursor: pointer; }
   margin: 0;
   transform: translate(-50%, -50%) rotate(-16deg);
   color: #e7dfd9;
-  opacity: .71;
-  font: 500 .875rem/1.4375rem ui-monospace, Consolas, monospace;
+  opacity: .55;
+  font: 500 .875rem/1.4375rem var(--font-bits);
   letter-spacing: .16em;
 }
 
@@ -266,21 +267,25 @@ h3 { font-size: clamp(1.25rem, 2.25vw, 1.75rem); line-height: 1.2; letter-spacin
     right: 0;
     top: 50%;
     transform: translateY(-50%);
-    height: 1.1em;
     overflow: hidden;
     color: var(--bit-color, var(--action));
     -webkit-text-fill-color: currentColor;
-    font: inherit;
-    font-variant-numeric: tabular-nums;
-    letter-spacing: 0;
+    -webkit-text-stroke: 0;
+    font-family: var(--font-bits);
+    font-size: 1em;
+    font-weight: 600;
+    letter-spacing: .035em;
     line-height: 1.1;
-    white-space: normal;
-    overflow-wrap: normal;
-    word-break: normal;
+    white-space: nowrap;
     pointer-events: none;
     user-select: none;
   }
-  .binary-digits::before { content: attr(data-bits); }
+  .binary-digits::before {
+    content: attr(data-bits);
+    display: block;
+    inline-size: round(down, 100%, calc(1ch + .035em));
+    overflow: hidden;
+  }
   .button-primary { --bit-color: white; }
   :focus-visible .binary-glyph:not(.is-decoded), label:focus-within .binary-glyph:not(.is-decoded) {
     color: inherit;
