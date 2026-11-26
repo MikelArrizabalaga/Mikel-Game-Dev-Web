@@ -90,6 +90,7 @@ Se conectó el repositorio local con el remoto `origin`, se conservó el commit 
 | [`9c75660`](https://github.com/MikelArrizabalaga/Mikel-Game-Dev-Web/commit/9c75660651c0279f801197be0262b9daf30c323c) | Commit inicial del repositorio remoto con la licencia MIT. |
 | [`41eae4b`](https://github.com/MikelArrizabalaga/Mikel-Game-Dev-Web/commit/41eae4bc8b1e91f095e99287a0d5c29d8da7e8a2) | Primera versión publicada de la web. |
 | [`e06600d`](https://github.com/MikelArrizabalaga/Mikel-Game-Dev-Web/commit/e06600d19fb9f9e1763a3fbc5342d11b443e5bab) | Revisión de la presentación, el catálogo y el contacto, con el control para pausar el fondo. |
+| [`cee8235`](https://github.com/MikelArrizabalaga/Mikel-Game-Dev-Web/commit/cee8235c8ac66045f57c02f8eb532bb177a0d9b5) | Portfolio, demo de shaders, tarjeta social y descifrado letra a letra. Se contrastaron los recursos públicos con los del commit tras el despliegue. |
 
 ## Revisiones y pruebas
 
