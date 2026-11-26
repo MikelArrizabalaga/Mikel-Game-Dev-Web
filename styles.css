@@ -106,7 +106,7 @@ nav .nav-brief { color: var(--action); }
   justify-self: center;
   user-select: none;
 }
-.hero-digits, .hero-code { grid-area: 1 / 1; }
+.hero-digits, .hero-message { grid-area: 1 / 1; }
 .hero-digits {
   display: flex;
   justify-content: center;
@@ -118,16 +118,15 @@ nav .nav-brief { color: var(--action); }
 .hero-digits span:first-child { color: var(--action); }
 .hero-mark[data-length="0"] .hero-digits span,
 .hero-mark[data-length="1"] .hero-digits span:last-child,
-.hero-mark[data-show-code] .hero-digits { visibility: hidden; }
-.hero-code {
+.hero-mark[data-show-message] .hero-digits { visibility: hidden; }
+.hero-message {
   visibility: hidden;
-  width: 22ch;
+  width: min(100%, 18ch);
   color: var(--action);
-  font: 650 clamp(1rem, 2.2vw, 1.75rem)/1.4 var(--font-bits);
-  white-space: nowrap;
+  font: 700 clamp(1.25rem, 2.7vw, 2.5rem)/1.1 "Space Grotesk", var(--font-text);
 }
-.hero-mark[data-show-code] .hero-code { visibility: visible; }
-.hero-code-text::after {
+.hero-mark[data-show-message] .hero-message { visibility: visible; }
+.hero-message-text::after {
   content: '';
   display: inline-block;
   width: .5ch;

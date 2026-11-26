@@ -118,8 +118,8 @@ function initNavigation() {
 
 function initHeroTyping() {
   const mark = document.querySelector('.hero-mark');
-  const output = mark.querySelector('.hero-code-text');
-  const messages = ['player.jump()', 'shader.set("glow", 1)', 'vfx.play("impact")'];
+  const output = mark.querySelector('.hero-message-text');
+  const messages = ['Shaders y VFX a medida', 'Herramientas para tu equipo', 'De la idea a lo jugable'];
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
   if (motion.matches) return;
 
@@ -137,7 +137,7 @@ function initHeroTyping() {
     }
 
     const message = messages[line];
-    if (line === 0 && length === 0) mark.setAttribute('data-show-code', '');
+    if (line === 0 && length === 0) mark.setAttribute('data-show-message', '');
     output.textContent = message.slice(0, length);
     if (length < message.length) {
       length++;
@@ -153,7 +153,7 @@ function initHeroTyping() {
     if (!motion.matches) return;
     clearTimeout(timer);
     delete mark.dataset.length;
-    mark.removeAttribute('data-show-code');
+    mark.removeAttribute('data-show-message');
   });
   timer = setTimeout(typeNext, 90);
 }
