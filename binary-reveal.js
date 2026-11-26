@@ -46,68 +46,100 @@ function prepareBinaryText(element) {
   return letters;
 }
 
-function renderBinaryText(state) {
+function renderBinaryText(state, changedWords) {
+  if (!state.letters) return;
   const decoded = Math.floor(state.progress * state.letters.length);
-  const changedWords = new Set();
   for (let index = Math.min(decoded, state.decoded); index < Math.max(decoded, state.decoded); index++) {
     const letter = state.letters[index];
     letter.classList.toggle('is-decoded', index < decoded);
     changedWords.add(letter.parentElement);
   }
-  for (const word of changedWords) {
-    const next = word.querySelector('.binary-glyph:not(.is-decoded)');
-    const overlay = word.lastElementChild;
-    overlay.hidden = !next;
-    if (next) overlay.style.left = next === word.firstChild ? '0' : `${next.offsetLeft}px`;
-  }
   state.decoded = decoded;
 }
 
-if ('IntersectionObserver' in window) {
-  const motion = matchMedia('(prefers-reduced-motion: reduce)');
+function alignDigits(changedWords) {
+  // Read all character positions before changing overlay styles.
+  const positions = [];
+  for (const word of changedWords) {
+    const next = word.querySelector('.binary-glyph:not(.is-decoded)');
+    const left = next && next !== word.firstChild ? next.offsetLeft : 0;
+    positions.push({ overlay: word.lastElementChild, hidden: !next, left });
+  }
+  for (const { overlay, hidden, left } of positions) {
+    overlay.hidden = hidden;
+    if (!hidden) overlay.style.left = left + 'px';
+  }
+}
+
+function enableBinaryReveal() {
+  const staticText = matchMedia('(prefers-reduced-motion: reduce), (forced-colors: active)');
   const texts = new Map();
   const active = new Set();
   let frame = null;
   let previousTime = null;
 
+  function prepare(element, changedWords) {
+    const state = texts.get(element);
+    if (state.letters) return;
+    state.letters = prepareBinaryText(element);
+    state.decoded = 0;
+    renderBinaryText(state, changedWords);
+  }
+
   function animateTexts(time) {
     const elapsed = previousTime === null ? 0 : time - previousTime;
     previousTime = time;
+    const changedWords = new Set();
     for (const state of active) {
       if (state.visible) state.progress = Math.min(1, state.progress + elapsed / state.duration);
       else state.progress = Math.max(0, state.progress - elapsed / (state.duration * .65));
-      renderBinaryText(state);
-
+      renderBinaryText(state, changedWords);
       if (state.progress === Number(state.visible)) active.delete(state);
     }
+    alignDigits(changedWords);
     frame = active.size ? requestAnimationFrame(animateTexts) : null;
     if (frame === null) previousTime = null;
   }
 
   function updateVisibility(entries) {
-    for (const entry of entries) {
-      const state = texts.get(entry.target);
-      state.visible = entry.isIntersecting;
-      if (!motion.matches && state.progress !== Number(state.visible)) active.add(state);
+    const changedWords = new Set();
+    for (const { target, isIntersecting } of entries) {
+      const state = texts.get(target);
+      state.visible = isIntersecting;
+      if (staticText.matches || state.progress === Number(isIntersecting)) continue;
+      prepare(target, changedWords);
+      active.add(state);
     }
+    alignDigits(changedWords);
     if (active.size && frame === null) frame = requestAnimationFrame(animateTexts);
   }
 
   const pageObserver = new IntersectionObserver(updateVisibility, { rootMargin: '-90px 0px -64px 0px' });
   const viewportObserver = new IntersectionObserver(updateVisibility);
-  const dynamicObserver = new MutationObserver((changes) => {
-    for (const element of new Set(changes.map(({ target }) => target))) {
-      if (element.firstElementChild?.classList.contains('binary-text-run')) continue;
-      const state = texts.get(element);
-      state.letters = prepareBinaryText(element);
-      state.progress = Number(state.visible);
+  const nearbyObserver = new IntersectionObserver(entries => {
+    const changedWords = new Set();
+    for (const { target, isIntersecting } of entries) {
+      if (!isIntersecting || staticText.matches) continue;
+      prepare(target, changedWords);
+      nearbyObserver.unobserve(target);
+    }
+    alignDigits(changedWords);
+  }, { rootMargin: '100px 0px' });
+
+  const dynamicObserver = new MutationObserver(changes => {
+    for (const { target } of changes) {
+      if (target.firstElementChild?.classList.contains('binary-text-run')) continue;
+      // The control supplied fresh text. Animate it on its next visibility change.
+      const state = texts.get(target);
+      active.delete(state);
+      state.letters = null;
       state.decoded = 0;
-      renderBinaryText(state);
+      state.progress = Number(state.visible);
     }
   });
 
   function syncMotionPreference() {
-    if (motion.matches) {
+    if (staticText.matches) {
       if (frame !== null) cancelAnimationFrame(frame);
       frame = null;
       previousTime = null;
@@ -115,22 +147,30 @@ if ('IntersectionObserver' in window) {
       return;
     }
 
-    for (const element of document.querySelectorAll(binaryTextSelector)) {
-      if (texts.has(element) || element.closest('.binary-background')) continue;
-      const duration = element.matches('h1, h2, h3, h4') ? 480 : element.matches('a, button, label, output') ? 160 : 280;
-      texts.set(element, { duration, letters: prepareBinaryText(element), progress: 0, decoded: 0, visible: false });
-      const observer = element.closest('.site-header, .site-footer, .skip-link') ? viewportObserver : pageObserver;
-      observer.observe(element);
-      if (element.matches('#project-summary, #brief-status, #toggle-background, output')) {
-        dynamicObserver.observe(element, { childList: true });
+    if (!texts.size) {
+      for (const element of document.querySelectorAll(binaryTextSelector)) {
+        let duration = 280;
+        if (element.matches('h1, h2, h3, h4')) duration = 480;
+        else if (element.matches('a, button, label, output')) duration = 160;
+        texts.set(element, { duration, letters: null, progress: 0, decoded: 0, visible: false });
+        const observer = element.closest('.site-header, .site-footer, .skip-link') ? viewportObserver : pageObserver;
+        observer.observe(element);
+        nearbyObserver.observe(element);
+        if (element.matches('#project-summary, #brief-status, #toggle-background, output')) {
+          dynamicObserver.observe(element, { childList: true });
+        }
       }
     }
+    const changedWords = new Set();
     for (const state of texts.values()) {
       state.progress = Number(state.visible);
-      renderBinaryText(state);
+      renderBinaryText(state, changedWords);
     }
+    alignDigits(changedWords);
   }
 
-  motion.addEventListener('change', syncMotionPreference);
+  staticText.addEventListener('change', syncMotionPreference);
   syncMotionPreference();
 }
+
+if ('IntersectionObserver' in window) enableBinaryReveal();

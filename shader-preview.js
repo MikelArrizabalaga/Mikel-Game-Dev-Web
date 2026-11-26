@@ -1,6 +1,5 @@
-function enablePolygonPreview() {
-  const canvas = document.querySelector('#polygon-preview');
-  const preview = canvas.closest('.shader-preview');
+function enablePolygonPreview(preview) {
+  const canvas = preview.querySelector('canvas');
   const gl = canvas.getContext('webgl');
   if (!gl) return;
 
@@ -79,7 +78,30 @@ function enablePolygonPreview() {
   rotation.addEventListener('input', renderPolygon);
   canvas.addEventListener('webglcontextlost', () => { preview.hidden = true; });
   renderPolygon();
-  preview.hidden = false;
+  return true;
 }
 
-enablePolygonPreview();
+function initPolygonPreview() {
+  const preview = document.querySelector('.shader-preview');
+  function activate() {
+    preview.hidden = !enablePolygonPreview(preview);
+    preview.style.removeProperty('visibility');
+  }
+
+  if (!('IntersectionObserver' in window)) {
+    activate();
+    return;
+  }
+
+  // Reserve the demo's space so activating WebGL cannot move the contact form.
+  preview.style.visibility = 'hidden';
+  preview.hidden = false;
+  const observer = new IntersectionObserver(entries => {
+    if (!entries.some(entry => entry.isIntersecting)) return;
+    observer.disconnect();
+    activate();
+  }, { rootMargin: '200px 0px' });
+  observer.observe(preview);
+}
+
+initPolygonPreview();

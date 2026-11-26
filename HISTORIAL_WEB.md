@@ -59,6 +59,8 @@ Al abrir el enlace desde Edge en este equipo no apareció un borrador en un clie
 
 ## Archivos y ejecución
 
+La revisión de rendimiento prepara el descifrado al acercarse a cada texto y agrupa las mediciones de posición antes de mover los dígitos. El resumen del formulario usa texto normal durante la edición y la demo inicializa WebGL al aproximarse a la pantalla. En Chromium local, con una ventana de 390 × 844 px, la mediana de cinco cargas pasó de 4.505 a 927 elementos HTML. Al añadir 20 caracteres a una descripción de 1.000 caracteres, el tiempo de tareas del navegador pasó de 207 a 54 ms en esa prueba.
+
 | Archivo | Función |
 | --- | --- |
 | `index.html` | Portada, servicios, trabajos, proceso de colaboración y contacto. |
