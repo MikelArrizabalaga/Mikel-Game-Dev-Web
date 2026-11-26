@@ -11,6 +11,7 @@ const files = new Map([
   ['/shader-preview.js', ['shader-preview.js', 'text/javascript; charset=utf-8']],
   ['/assets/favicon.png', ['assets/favicon.png', 'image/png']],
   ['/assets/social-preview.png', ['assets/social-preview.png', 'image/png']],
+  ['/assets/the-next-stop.jpg', ['assets/the-next-stop.jpg', 'image/jpeg']],
   ['/assets/fonts/geist.woff2', ['assets/fonts/geist.woff2', 'font/woff2']],
   ['/assets/fonts/spacegrotesk.woff2', ['assets/fonts/spacegrotesk.woff2', 'font/woff2']],
 ]);

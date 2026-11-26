@@ -167,6 +167,7 @@ h3 { font-size: clamp(1.25rem, 2.25vw, 1.75rem); line-height: 1.2; letter-spacin
   border-top: 1px solid var(--line);
 }
 .work-entry > div:first-child { max-width: 62ch; }
+.work-cover { display: block; width: 100%; height: auto; }
 .work-context, .work-tech { color: var(--action); font-size: .875rem; font-weight: 680; }
 .work-context { margin-bottom: 6px; }
 .work-entry h3 + p { margin-top: 10px; color: var(--muted); line-height: 1.6; }
