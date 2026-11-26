@@ -12,6 +12,7 @@ const files = new Map([
   ['/assets/favicon.png', ['assets/favicon.png', 'image/png']],
   ['/assets/social-preview.png', ['assets/social-preview.png', 'image/png']],
   ['/assets/the-next-stop.jpg', ['assets/the-next-stop.jpg', 'image/jpeg']],
+  ['/assets/dont-anger-the-boss.webp', ['assets/dont-anger-the-boss.webp', 'image/webp']],
   ['/assets/fonts/geist.woff2', ['assets/fonts/geist.woff2', 'font/woff2']],
   ['/assets/fonts/spacegrotesk.woff2', ['assets/fonts/spacegrotesk.woff2', 'font/woff2']],
 ]);

@@ -196,6 +196,7 @@ h3 { font-size: clamp(1.25rem, 2.25vw, 1.75rem); line-height: 1.2; letter-spacin
 .work-context { margin-bottom: 6px; }
 .work-entry h3 + p { margin-top: 10px; color: var(--muted); line-height: 1.6; }
 .work-tech { margin-top: 14px; }
+.work-release { margin-top: 8px; color: var(--muted); font-size: .875rem; }
 .shader-preview { min-width: 0; padding: 14px; border: 1px solid var(--line); border-top: 2px solid var(--accent); background: var(--pale); }
 .shader-preview h4 { margin: 0 0 9px; font-size: .95rem; }
 .shader-preview canvas { display: block; width: 100%; height: auto; border: 1px solid var(--line); background: var(--paper); }
