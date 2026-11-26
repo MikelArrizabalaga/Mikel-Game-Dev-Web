@@ -100,18 +100,41 @@ nav .nav-brief { color: var(--action); }
 .button-text:hover { background: var(--pale); }
 
 .hero-mark {
-  width: min(100%, 470px);
   justify-self: center;
-  filter: drop-shadow(0 16px 18px #62200f29);
   user-select: none;
 }
-.hero-mark img { display: block; width: 100%; height: auto; }
-@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-  .hero-mark img { transition: transform .35s ease-out; }
-  .hero-mark:hover img { transform: perspective(850px) translateY(-6px) rotateY(-7deg) rotateZ(-2deg); }
+.hero-digits {
+  display: flex;
+  justify-content: center;
+  gap: .035em;
+  color: var(--accent);
+  font: 700 clamp(6rem, 14vw, 12rem)/.95 var(--font-bits);
+  letter-spacing: -.08em;
+}
+.hero-digits span:first-child { color: var(--action); }
+.hero-mark[data-length="0"] .hero-digits span,
+.hero-mark[data-length="1"] .hero-digits span:last-child { visibility: hidden; }
+.hero-code {
+  width: 25ch;
+  min-height: 2.5em;
+  margin: 12px auto 0;
+  padding: .55em .25em 0;
+  border-top: 1px solid var(--line);
+  color: var(--ink);
+  font: 600 clamp(.72rem, 1.2vw, .9rem)/1.4 var(--font-bits);
+  white-space: nowrap;
+}
+.hero-prompt { color: var(--action); }
+.hero-code-text::after {
+  content: '';
+  display: inline-block;
+  width: .5ch;
+  height: .85em;
+  margin-left: .25ch;
+  background: var(--accent);
 }
 @supports (-webkit-text-stroke: 1px currentColor) {
-  .hero h1 em { -webkit-text-fill-color: transparent; -webkit-text-stroke: clamp(1.45px, .177vw, 2.5px) #cc3918; }
+  .hero h1 em, .hero-digits span:first-child { -webkit-text-fill-color: transparent; -webkit-text-stroke: clamp(1.45px, .177vw, 2.5px) #cc3918; }
   .hero-period { -webkit-text-fill-color: currentColor; -webkit-text-stroke: 0; }
 }
 
@@ -233,7 +256,7 @@ h3 { font-size: clamp(1.25rem, 2.25vw, 1.75rem); line-height: 1.2; letter-spacin
   .hero h1 { font-size: clamp(2.42rem, 9.8vw, 4rem); }
   .hero-description { margin-top: 15px; }
   .hero-actions { margin-top: 18px; }
-  .hero-mark { width: min(83%, 330px); }
+  .hero-digits { font-size: clamp(6rem, 18vw, 8rem); }
   .section-heading, .collaboration, .project-layout, .service-layout, .work-entry { grid-template-columns: minmax(0, 1fr); }
   .service-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .service-options button { min-height: 49px; padding-inline: 10px; font-size: .9rem; }
@@ -301,6 +324,6 @@ h3 { font-size: clamp(1.25rem, 2.25vw, 1.75rem); line-height: 1.2; letter-spacin
   to { transform: translate(-50%, -50%) rotate(-16deg) translateY(calc(-1 * var(--binary-half-shift, 0px))); }
 }
 @media (forced-colors: active) {
-  .hero h1 em { color: CanvasText; -webkit-text-fill-color: currentColor; -webkit-text-stroke: 0; }
+  .hero h1 em, .hero-digits span:first-child { color: CanvasText; -webkit-text-fill-color: currentColor; -webkit-text-stroke: 0; }
   .service-options button[aria-selected="true"] { border: 2px solid Highlight; }
 }

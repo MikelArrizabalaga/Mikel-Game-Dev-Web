@@ -116,7 +116,50 @@ function initNavigation() {
   updateNavigation();
 }
 
+function initHeroTyping() {
+  const mark = document.querySelector('.hero-mark');
+  const output = mark.querySelector('.hero-code-text');
+  const messages = [output.textContent, 'shader.set("glow", 1)', 'vfx.play("impact")'];
+  const motion = matchMedia('(prefers-reduced-motion: reduce)');
+  if (motion.matches) return;
+
+  let timer;
+  let digitCount = 0;
+  let line = 0;
+  let length = 0;
+  mark.dataset.length = 0;
+  output.textContent = '';
+
+  function typeNext() {
+    if (digitCount < 2) {
+      mark.dataset.length = ++digitCount;
+      timer = setTimeout(typeNext, 140);
+      return;
+    }
+
+    const message = messages[line];
+    output.textContent = message.slice(0, length);
+    if (length < message.length) {
+      length++;
+      timer = setTimeout(typeNext, 39);
+    } else if (line < messages.length - 1) {
+      line++;
+      length = 0;
+      timer = setTimeout(typeNext, 600);
+    }
+  }
+
+  motion.addEventListener('change', () => {
+    if (!motion.matches) return;
+    clearTimeout(timer);
+    delete mark.dataset.length;
+    output.textContent = messages[0];
+  });
+  timer = setTimeout(typeNext, 90);
+}
+
 initServiceTabs();
 initProjectBrief();
 initNavigation();
+initHeroTyping();
 document.querySelectorAll('[data-needs-js]').forEach((element) => { element.hidden = false; });
