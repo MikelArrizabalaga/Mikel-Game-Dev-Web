@@ -22,3 +22,17 @@ function renderPattern() {
 }
 
 new ResizeObserver(renderPattern).observe(background);
+
+const motionToggle = document.querySelector('#toggle-background');
+const motionPreference = matchMedia('(prefers-reduced-motion: reduce)');
+
+function updateMotionControl() {
+  motionToggle.hidden = motionPreference.matches;
+}
+
+motionToggle.addEventListener('click', () => {
+  const paused = background.classList.toggle('is-paused');
+  motionToggle.textContent = paused ? 'Reanudar fondo' : 'Pausar fondo';
+});
+motionPreference.addEventListener('change', updateMotionControl);
+updateMotionControl();
