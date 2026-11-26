@@ -209,13 +209,9 @@ h3 { font-size: clamp(1.25rem, 2.25vw, 1.75rem); line-height: 1.2; letter-spacin
 .collaboration .section-heading { display: block; margin: 0; }
 .collaboration .section-heading p { margin-top: 12px; }
 .process { border-top: 1px solid var(--line); }
-.process details { border-bottom: 1px solid var(--line); background: #ffffffd9; }
-.process summary { display: flex; align-items: center; justify-content: space-between; gap: 15px; min-height: 52px; padding: 12px 15px; list-style: none; font-weight: 700; cursor: pointer; }
-.process summary::-webkit-details-marker { display: none; }
-.process summary::after { content: '+'; color: var(--action); font-size: 1.25rem; line-height: 1; }
-.process details[open] summary::after { content: '−'; }
-.process summary:hover { color: var(--action); }
-.process p { max-width: 61ch; padding: 0 15px 16px; color: var(--muted); line-height: 1.55; }
+.process-step { padding: 16px 15px; border-bottom: 1px solid var(--line); background: #ffffffd9; }
+.process-step h3 { font-size: 1.125rem; letter-spacing: -.02em; }
+.process-step p { max-width: 61ch; margin-top: 6px; color: var(--muted); line-height: 1.55; }
 
 .project-layout {
   display: grid;

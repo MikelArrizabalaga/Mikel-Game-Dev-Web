@@ -1,4 +1,4 @@
-const binaryTextSelector = 'h1, h2, h3, h4, p, a, button, dt, dd, summary, label, output, #project-summary, .footer-inner > span';
+const binaryTextSelector = 'h1, h2, h3, h4, p, a, button, dt, dd, label, output, #project-summary, .footer-inner > span';
 const graphemes = typeof Intl.Segmenter === 'function' ? new Intl.Segmenter('es') : null;
 
 function prepareBinaryText(element) {

@@ -36,7 +36,7 @@ La web presenta los servicios freelance de Mikel Arrizabalaga a estudios de vide
 
 - **Portada.** Presenta el trabajo freelance en videojuegos y Technical Art. «Cuéntame tu proyecto» lleva al contacto y «Ver servicios» abre el catálogo.
 - **Catálogo.** Cinco pestañas para videojuegos y programación, Technical Art, shaders, VFX y software y herramientas. Cada una explica el servicio, da un ejemplo de encargo y describe una posible entrega. «Preparar este encargo» selecciona el servicio en el formulario.
-- **Cómo trabajo.** Tres etapas desplegables para definir el alcance, probar avances y preparar la entrega.
+- **Cómo trabajo.** Las tres etapas y sus explicaciones se muestran directamente para definir el alcance, probar avances y preparar la entrega.
 - **Contacto.** El formulario prepara en el navegador un resumen con el servicio, la fase y la descripción. Se puede copiar o abrir como borrador dirigido a `arrizamikel@gmail.com`. El visitante decide cuándo enviarlo desde su aplicación de correo.
 - **Fondo.** Repite `mikel arrizabalaga` en binario sobre blanco. El patrón se desplaza como una sola capa y permanece anclado a la ventana al navegar. El pie incluye «Pausar fondo», y se respeta la preferencia de reducir movimiento del dispositivo.
 
