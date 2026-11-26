@@ -119,7 +119,7 @@ function initNavigation() {
 function initHeroTyping() {
   const mark = document.querySelector('.hero-mark');
   const output = mark.querySelector('.hero-message-text');
-  const messages = ['Shaders y VFX a medida', 'Herramientas para tu equipo', 'De la idea a lo jugable'];
+  const messages = ['En programar videojuegos', 'En shaders y VFX', 'En el trato cercano'];
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
   const pauseButton = document.querySelector('#toggle-background');
 
