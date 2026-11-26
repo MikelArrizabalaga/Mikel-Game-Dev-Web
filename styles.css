@@ -248,6 +248,9 @@ h3 { font-size: clamp(1.25rem, 2.25vw, 1.75rem); line-height: 1.2; letter-spacin
   nav a { font-size: .875rem; }
   .service-panel dl, .form-selects { grid-template-columns: minmax(0, 1fr); }
 }
+@media (max-width: 340px) {
+  nav { column-gap: 2px; }
+}
 @media (prefers-reduced-motion: no-preference) {
   .button, nav a, .service-options button { transition: background-color .15s ease, border-color .15s ease, color .15s ease; }
   .binary-background pre { animation: binary-drift 16s linear infinite; }
@@ -285,9 +288,8 @@ h3 { font-size: clamp(1.25rem, 2.25vw, 1.75rem); line-height: 1.2; letter-spacin
   .binary-digits::before {
     content: attr(data-bits);
     display: block;
-    inline-size: var(--typed-bits, 0%);
-    inline-size: round(down, var(--typed-bits, 0%), calc(1ch + .035em));
-    overflow: hidden;
+    clip-path: inset(0 calc(100% - var(--typed-bits, 0%)) 0 0);
+    clip-path: inset(0 calc(100% - round(down, var(--typed-bits, 0%), calc(1ch + .035em))) 0 0);
   }
   .button-primary { --bit-color: white; }
   :focus-visible .binary-glyph:not(.is-decoded), label:focus-within .binary-glyph:not(.is-decoded) {

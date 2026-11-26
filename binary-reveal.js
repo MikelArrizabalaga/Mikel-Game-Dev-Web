@@ -30,7 +30,7 @@ function prepareBinaryText(element) {
       overlay.setAttribute('aria-hidden', 'true');
       overlay.dataset.bits = [...token].map(character => character.codePointAt(0).toString(2).padStart(8, '0')).join('');
       const characters = graphemes ? Array.from(graphemes.segment(token), part => part.segment) : [...token];
-      words.push({ overlay, start: letters.length, length: characters.length, progress: 0 });
+      words.push({ overlay, start: letters.length, length: characters.length });
       for (const character of characters) {
         const letter = document.createElement('span');
         letter.className = 'binary-glyph';
@@ -51,11 +51,18 @@ function renderBinaryText(state, changedWords) {
   const bitProgress = Math.max(0, Math.min(1, (state.position - typingStart) / typingDuration));
   if (bitProgress !== state.bitProgress) {
     const typed = bitProgress * state.letters.length;
-    for (const word of state.words) {
+    const previous = state.bitProgress * state.letters.length;
+    const firstChanged = Math.min(typed, previous);
+    const lastChanged = Math.max(typed, previous);
+    let index = state.typingWord;
+    while (index > 0 && state.words[index].start > firstChanged) index--;
+    for (; index < state.words.length; index++) {
+      const word = state.words[index];
+      if (word.start >= lastChanged) break;
+      state.typingWord = index;
+      if (word.start + word.length <= firstChanged) continue;
       const progress = Math.max(0, Math.min(1, (typed - word.start) / word.length));
-      if (progress === word.progress) continue;
       word.overlay.style.setProperty('--typed-bits', `${progress * 100}%`);
-      word.progress = progress;
     }
     state.bitProgress = bitProgress;
   }
@@ -100,6 +107,7 @@ function enableBinaryReveal() {
     state.letters = letters;
     state.words = words;
     state.bitProgress = 0;
+    state.typingWord = 0;
     state.decoded = 0;
     renderBinaryText(state, changedWords);
   }
