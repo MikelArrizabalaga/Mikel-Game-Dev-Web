@@ -6,8 +6,11 @@ const files = new Map([
   ['/index.html', ['index.html', 'text/html; charset=utf-8']],
   ['/styles.css', ['styles.css', 'text/css; charset=utf-8']],
   ['/binary-background.js', ['binary-background.js', 'text/javascript; charset=utf-8']],
+  ['/binary-reveal.js', ['binary-reveal.js', 'text/javascript; charset=utf-8']],
   ['/app.js', ['app.js', 'text/javascript; charset=utf-8']],
+  ['/shader-preview.js', ['shader-preview.js', 'text/javascript; charset=utf-8']],
   ['/assets/favicon.png', ['assets/favicon.png', 'image/png']],
+  ['/assets/social-preview.png', ['assets/social-preview.png', 'image/png']],
 ]);
 
 const port = 4173;

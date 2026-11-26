@@ -67,8 +67,9 @@ function updateSummary() {
   }
   summary.textContent = lines.join('\n') || 'El resumen aparecerá al completar los campos.';
   copyButton.disabled = !lines.length;
+  const emailBody = ['Hola Mikel,', '', ...lines].join('\n').replaceAll('\n', '\r\n');
   emailLink.href = recipient + '?subject=' + encodeURIComponent('Consulta sobre un proyecto') +
-    '&body=' + encodeURIComponent(['Hola Mikel,', '', ...lines].join('\r\n'));
+    '&body=' + encodeURIComponent(emailBody);
   feedback.textContent = '';
 }
 
