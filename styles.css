@@ -271,9 +271,10 @@ h3 { font-size: clamp(1.25rem, 2.25vw, 1.75rem); line-height: 1.2; letter-spacin
     color: var(--bit-color, var(--action));
     -webkit-text-fill-color: currentColor;
     -webkit-text-stroke: 0;
-    font-family: var(--font-bits);
+    font-family: "Segoe UI", system-ui, sans-serif;
     font-size: 1em;
     font-weight: 600;
+    font-variant-numeric: tabular-nums;
     letter-spacing: .035em;
     line-height: 1.1;
     white-space: nowrap;
