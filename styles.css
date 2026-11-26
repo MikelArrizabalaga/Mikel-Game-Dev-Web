@@ -100,20 +100,18 @@ nav .nav-brief { color: var(--action); }
 .button-text:hover { background: var(--pale); }
 
 .hero-mark {
+  width: min(100%, 470px);
   justify-self: center;
-  display: flex;
-  align-items: baseline;
-  gap: .035em;
-  padding-bottom: .08em;
-  color: var(--action);
-  font: 700 clamp(5.8rem, 13.8vw, 12rem)/1 ui-monospace, Consolas, monospace;
-  letter-spacing: -.13em;
-  transform: rotate(-16deg);
+  filter: drop-shadow(0 16px 18px #62200f29);
   user-select: none;
 }
-.hero-mark span:last-child { color: var(--accent); }
+.hero-mark img { display: block; width: 100%; height: auto; }
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .hero-mark img { transition: transform .35s ease-out; }
+  .hero-mark:hover img { transform: perspective(850px) translateY(-6px) rotateY(-7deg) rotateZ(-2deg); }
+}
 @supports (-webkit-text-stroke: 1px currentColor) {
-  .hero h1 em, .hero-mark .zero { -webkit-text-fill-color: transparent; -webkit-text-stroke: clamp(1.45px, .177vw, 2.5px) #cc3918; }
+  .hero h1 em { -webkit-text-fill-color: transparent; -webkit-text-stroke: clamp(1.45px, .177vw, 2.5px) #cc3918; }
   .hero-period { -webkit-text-fill-color: currentColor; -webkit-text-stroke: 0; }
 }
 
@@ -235,7 +233,7 @@ h3 { font-size: clamp(1.25rem, 2.25vw, 1.75rem); line-height: 1.2; letter-spacin
   .hero h1 { font-size: clamp(2.42rem, 9.8vw, 4rem); }
   .hero-description { margin-top: 15px; }
   .hero-actions { margin-top: 18px; }
-  .hero-mark { justify-self: end; margin-right: 9%; font-size: clamp(4.2rem, 14vw, 6.5rem); }
+  .hero-mark { width: min(83%, 330px); }
   .section-heading, .collaboration, .project-layout, .service-layout, .work-entry { grid-template-columns: minmax(0, 1fr); }
   .service-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .service-options button { min-height: 49px; padding-inline: 10px; font-size: .9rem; }
@@ -303,6 +301,6 @@ h3 { font-size: clamp(1.25rem, 2.25vw, 1.75rem); line-height: 1.2; letter-spacin
   to { transform: translate(-50%, -50%) rotate(-16deg) translateY(calc(-1 * var(--binary-half-shift, 0px))); }
 }
 @media (forced-colors: active) {
-  .hero h1 em, .hero-mark .zero { color: CanvasText; -webkit-text-fill-color: currentColor; -webkit-text-stroke: 0; }
+  .hero h1 em { color: CanvasText; -webkit-text-fill-color: currentColor; -webkit-text-stroke: 0; }
   .service-options button[aria-selected="true"] { border: 2px solid Highlight; }
 }
