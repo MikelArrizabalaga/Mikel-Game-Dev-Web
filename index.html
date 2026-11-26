@@ -47,10 +47,10 @@
       <div class="hero-copy">
         <p class="eyebrow">Desarrollo freelance para estudios y empresas</p>
         <h1 id="hero-title" aria-label="Videojuegos y Technical Art."><span>Videojuegos y</span> <em>Technical Art<span class="hero-period">.</span></em></h1>
-        <p class="hero-description">Programo mecánicas y sistemas de juego. También creo shaders, VFX y herramientas a medida para tu equipo.</p>
+        <p class="hero-description">Ayudo a estudios y empresas a convertir ideas en prototipos jugables y a integrar mecánicas, shaders, VFX y herramientas en proyectos en marcha.</p>
         <div class="hero-actions">
           <a class="button button-primary" href="#proyecto">Cuéntame tu proyecto</a>
-          <a class="button button-text" href="#servicios">Ver servicios</a>
+          <a class="button button-text" href="#trabajos">Ver trabajos</a>
         </div>
       </div>
       <div class="hero-mark" aria-hidden="true">
@@ -82,7 +82,10 @@
               <div><dt>Ejemplo de encargo</dt><dd>Programar el movimiento, el salto y las colisiones de un personaje.</dd></div>
               <div><dt>Posible entrega</dt><dd>Una mecánica jugable y el código preparado para integrarlo en tu proyecto.</dd></div>
             </dl>
-            <a class="service-link" href="#proyecto" data-brief-service="videojuegos" data-needs-js hidden>Preparar este encargo</a>
+            <div class="service-actions">
+              <a class="service-link" href="#proyecto" data-brief-service="videojuegos" data-needs-js hidden>Preparar este encargo</a>
+              <a class="service-link" href="#next-stop-title">Ver mi aportación en The Next Stop</a>
+            </div>
           </article>
 
           <article class="service-panel" id="service-technical-art">
@@ -102,7 +105,10 @@
               <div><dt>Ejemplo de encargo</dt><dd>Crear un material de agua con controles de color, movimiento y transparencia.</dd></div>
               <div><dt>Posible entrega</dt><dd>El shader integrado, un material de ejemplo y una explicación de sus parámetros.</dd></div>
             </dl>
-            <a class="service-link" href="#proyecto" data-brief-service="shaders" data-needs-js hidden>Preparar este encargo</a>
+            <div class="service-actions">
+              <a class="service-link" href="#proyecto" data-brief-service="shaders" data-needs-js hidden>Preparar este encargo</a>
+              <a class="service-link" href="#shader-work-title">Ver la muestra de shaders</a>
+            </div>
           </article>
 
           <article class="service-panel" id="service-vfx">
@@ -133,6 +139,16 @@
         <h2 id="work-title">Trabajos</h2>
       </div>
       <div class="work-list">
+        <article class="work-entry" aria-labelledby="next-stop-title">
+          <div>
+            <p class="work-context">Colaboración con Paranoid Delusion</p>
+            <h3 id="next-stop-title">The Next Stop</h3>
+            <p>Colaboré en programación y arte técnico, con ajustes en las interacciones y la interfaz de diálogo. Es una aventura de misterio en un metro atrapado en un bucle temporal.</p>
+            <p class="work-tech">Unity · C#</p>
+            <a class="service-link" href="https://store.steampowered.com/app/3795470/The_Next_Stop/">Ver The Next Stop en Steam</a>
+          </div>
+          <img class="work-cover" src="assets/the-next-stop.jpg" width="616" height="353" loading="lazy" decoding="async" alt="Portada de The Next Stop, con un pasajero sentado en un andén junto al tren">
+        </article>
         <article class="work-entry" aria-labelledby="shader-work-title">
           <div>
             <p class="work-context">Proyecto propio de shaders</p>
@@ -151,45 +167,35 @@
             <p>Versión de la forma para el navegador en WebGL.</p>
           </div>
         </article>
-        <article class="work-entry" aria-labelledby="next-stop-title">
-          <div>
-            <p class="work-context">Colaboración con Paranoid Delusion</p>
-            <h3 id="next-stop-title">The Next Stop</h3>
-            <p>En esta aventura de misterio, el jugador investiga un crimen en un metro atrapado en un bucle temporal. Colaboré en programación y arte técnico, con ajustes en las interacciones y en la interfaz de diálogo.</p>
-            <p class="work-tech">Unity · C#</p>
-            <a class="service-link" href="https://store.steampowered.com/app/3795470/The_Next_Stop/">Ver The Next Stop en Steam</a>
-          </div>
-          <img class="work-cover" src="assets/the-next-stop.jpg" width="616" height="353" loading="lazy" decoding="async" alt="Portada de The Next Stop, con un pasajero sentado en un andén junto al tren">
-        </article>
       </div>
     </section>
 
     <section id="colaboracion" class="shell section collaboration" aria-labelledby="collaboration-title">
       <div class="section-heading">
         <h2 id="collaboration-title">Cómo trabajo</h2>
-        <p>Revisamos una primera versión pronto, cuando aún es fácil ajustar el rumbo.</p>
+        <p>Tendrás una primera versión para probar antes de cerrar la entrega.</p>
       </div>
       <div class="process">
         <div class="process-step">
           <h3>Definimos el alcance</h3>
-          <p>Acordamos el objetivo, qué necesitas recibir y cómo encaja el trabajo con lo que tu equipo ya tiene.</p>
+          <p>Acordamos qué debe resolver el encargo, qué recibirás y cómo lo integraremos con tu proyecto.</p>
         </div>
         <div class="process-step">
           <h3>Probamos avances</h3>
-          <p>Te paso una versión que puedas probar. Con tus comentarios, ajusto la mecánica, la herramienta o el efecto antes de cerrar la entrega.</p>
+          <p>Te paso una primera versión. Probamos juntos cómo funciona y uso tus comentarios para hacer los ajustes.</p>
         </div>
         <div class="process-step">
           <h3>Preparo la entrega</h3>
-          <p>Dejo el código y las indicaciones de integración acordadas para que tu equipo pueda continuar el trabajo.</p>
+          <p>Entrego el código o los recursos acordados, junto con las indicaciones para que tu equipo pueda integrarlos.</p>
         </div>
       </div>
     </section>
 
     <section id="proyecto" class="shell section project-section" aria-labelledby="project-title">
       <div class="section-heading">
-        <h2 id="project-title">Tu proyecto</h2>
+        <h2 id="project-title">Hablemos de tu proyecto</h2>
         <div>
-          <p>¿Qué estás construyendo y en qué te puedo ayudar?</p>
+          <p>Cuéntame en qué estás trabajando. Puedes escribirme directamente o preparar un borrador con el formulario.</p>
           <a class="email-link" href="mailto:arrizamikel@gmail.com">arrizamikel@gmail.com</a>
         </div>
       </div>

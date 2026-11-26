@@ -107,8 +107,10 @@ function initProjectBrief() {
 function initNavigation() {
   const navLinks = document.querySelectorAll('.site-header nav a');
   function updateNavigation() {
+    const target = document.getElementById(location.hash.slice(1));
+    const section = target?.closest('main > section');
     for (const link of navLinks) {
-      if (link.hash === location.hash) link.setAttribute('aria-current', 'location');
+      if (link.hash.slice(1) === section?.id) link.setAttribute('aria-current', 'location');
       else link.removeAttribute('aria-current');
     }
   }

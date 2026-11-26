@@ -179,6 +179,7 @@ h3 { font-size: clamp(1.25rem, 2.25vw, 1.75rem); line-height: 1.2; letter-spacin
 .service-panel dd { margin-top: 4px; line-height: 1.5; }
 .service-link { display: inline-flex; align-items: center; min-height: 44px; margin-top: 8px; font-weight: 680; color: var(--action); text-underline-offset: 4px; }
 .service-link:hover { color: #7f230c; }
+.service-actions { display: flex; flex-wrap: wrap; column-gap: 20px; }
 
 .work-list { background: #ffffffec; }
 .work-entry {
