@@ -17,7 +17,7 @@ function prepareBinaryText(element) {
     run.className = 'binary-text-run';
     // Bound each overlay even for a pasted URL or unbroken text in the brief.
     for (const token of node.data.match(/\s+|\S{1,48}/gu)) {
-      if (!/[\p{L}\p{N}]/u.test(token)) {
+      if (/^\s+$/u.test(token)) {
         run.append(token);
         continue;
       }
@@ -46,7 +46,12 @@ function prepareBinaryText(element) {
 
 function renderBinaryText(state, changedWords) {
   if (!state.letters) return;
-  const decoded = Math.floor(state.progress * state.letters.length);
+  const showDigits = state.position >= blankEnd;
+  if (showDigits !== state.showDigits) {
+    state.element.classList.toggle('binary-blank', !showDigits);
+    state.showDigits = showDigits;
+  }
+  const decoded = Math.floor(Math.max(0, state.position) / state.duration * state.letters.length);
   for (let index = Math.min(decoded, state.decoded); index < Math.max(decoded, state.decoded); index++) {
     const letter = state.letters[index];
     letter.classList.toggle('is-decoded', index < decoded);
@@ -69,6 +74,10 @@ function alignDigits(changedWords) {
   }
 }
 
+// The timeline starts with 90 ms of blank space and 140 ms of visible digits.
+const revealStart = -230;
+const blankEnd = -140;
+
 function enableBinaryReveal() {
   const staticText = matchMedia('(prefers-reduced-motion: reduce), (forced-colors: active)');
   const texts = new Map();
@@ -89,10 +98,11 @@ function enableBinaryReveal() {
     previousTime = time;
     const changedWords = new Set();
     for (const state of active) {
-      if (state.visible) state.progress = Math.min(1, state.progress + elapsed / state.duration);
-      else state.progress = Math.max(0, state.progress - elapsed / (state.duration * .65));
+      const end = state.visible ? state.duration : revealStart;
+      if (state.visible) state.position = Math.min(end, state.position + elapsed);
+      else state.position = Math.max(end, state.position - elapsed / .65);
       renderBinaryText(state, changedWords);
-      if (state.progress === Number(state.visible)) active.delete(state);
+      if (state.position === end) active.delete(state);
     }
     alignDigits(changedWords);
     frame = active.size ? requestAnimationFrame(animateTexts) : null;
@@ -104,7 +114,7 @@ function enableBinaryReveal() {
     for (const { target, isIntersecting } of entries) {
       const state = texts.get(target);
       state.visible = isIntersecting;
-      if (staticText.matches || state.progress === Number(isIntersecting)) continue;
+      if (staticText.matches || state.position === (isIntersecting ? state.duration : revealStart)) continue;
       prepare(target, changedWords);
       active.add(state);
     }
@@ -132,7 +142,7 @@ function enableBinaryReveal() {
       active.delete(state);
       state.letters = null;
       state.decoded = 0;
-      state.progress = Number(state.visible);
+      state.position = state.visible ? state.duration : revealStart;
     }
   });
 
@@ -150,7 +160,7 @@ function enableBinaryReveal() {
         let duration = 280;
         if (element.matches('h1, h2, h3, h4')) duration = 480;
         else if (element.matches('a, button, label, output')) duration = 160;
-        texts.set(element, { duration, letters: null, progress: 0, decoded: 0, visible: false });
+        texts.set(element, { element, duration, letters: null, position: revealStart, decoded: 0, visible: false });
         const observer = element.closest('.site-header, .site-footer, .skip-link') ? viewportObserver : pageObserver;
         observer.observe(element);
         nearbyObserver.observe(element);
@@ -161,7 +171,7 @@ function enableBinaryReveal() {
     }
     const changedWords = new Set();
     for (const state of texts.values()) {
-      state.progress = Number(state.visible);
+      state.position = state.visible ? state.duration : revealStart;
       renderBinaryText(state, changedWords);
     }
     alignDigits(changedWords);
