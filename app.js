@@ -119,7 +119,7 @@ function initNavigation() {
 function initHeroTyping() {
   const mark = document.querySelector('.hero-mark');
   const output = mark.querySelector('.hero-code-text');
-  const messages = [output.textContent, 'shader.set("glow", 1)', 'vfx.play("impact")'];
+  const messages = ['player.jump()', 'shader.set("glow", 1)', 'vfx.play("impact")'];
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
   if (motion.matches) return;
 
@@ -128,16 +128,16 @@ function initHeroTyping() {
   let line = 0;
   let length = 0;
   mark.dataset.length = 0;
-  output.textContent = '';
 
   function typeNext() {
     if (digitCount < 2) {
       mark.dataset.length = ++digitCount;
-      timer = setTimeout(typeNext, 140);
+      timer = setTimeout(typeNext, digitCount === 2 ? 750 : 140);
       return;
     }
 
     const message = messages[line];
+    if (line === 0 && length === 0) mark.setAttribute('data-show-code', '');
     output.textContent = message.slice(0, length);
     if (length < message.length) {
       length++;
@@ -153,7 +153,7 @@ function initHeroTyping() {
     if (!motion.matches) return;
     clearTimeout(timer);
     delete mark.dataset.length;
-    output.textContent = messages[0];
+    mark.removeAttribute('data-show-code');
   });
   timer = setTimeout(typeNext, 90);
 }
