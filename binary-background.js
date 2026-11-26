@@ -37,7 +37,8 @@ function updateMotionControl() {
 
 motionToggle.addEventListener('click', () => {
   const paused = background.classList.toggle('is-paused');
-  motionToggle.textContent = paused ? 'Reanudar fondo' : 'Pausar fondo';
+  motionToggle.toggleAttribute('data-paused', paused);
+  motionToggle.textContent = paused ? 'Reanudar fondo y portada' : 'Pausar fondo y portada';
 });
 motionPreference.addEventListener('change', updateMotionControl);
 updateMotionControl();

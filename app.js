@@ -121,13 +121,21 @@ function initHeroTyping() {
   const output = mark.querySelector('.hero-message-text');
   const messages = ['Shaders y VFX a medida', 'Herramientas para tu equipo', 'De la idea a lo jugable'];
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
-  if (motion.matches) return;
+  const pauseButton = document.querySelector('#toggle-background');
 
   let timer;
+  let visible = !('IntersectionObserver' in window);
   let digitCount = 0;
   let line = 0;
   let length = 0;
-  mark.dataset.length = 0;
+
+  function resetTyping() {
+    digitCount = 0;
+    line = 0;
+    length = 0;
+    mark.removeAttribute('data-show-message');
+    mark.dataset.length = motion.matches ? 2 : 0;
+  }
 
   function typeNext() {
     if (digitCount < 2) {
@@ -146,16 +154,36 @@ function initHeroTyping() {
       line++;
       length = 0;
       timer = setTimeout(typeNext, 600);
+    } else {
+      timer = setTimeout(() => {
+        resetTyping();
+        timer = setTimeout(typeNext, 90);
+      }, 1700);
+    }
+  }
+
+  function syncTyping() {
+    clearTimeout(timer);
+    if (visible && !motion.matches && !pauseButton.hasAttribute('data-paused') && !document.hidden) {
+      timer = setTimeout(typeNext, 90);
     }
   }
 
   motion.addEventListener('change', () => {
-    if (!motion.matches) return;
-    clearTimeout(timer);
-    delete mark.dataset.length;
-    mark.removeAttribute('data-show-message');
+    resetTyping();
+    syncTyping();
   });
-  timer = setTimeout(typeNext, 90);
+  pauseButton.addEventListener('click', syncTyping);
+  document.addEventListener('visibilitychange', syncTyping);
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      syncTyping();
+    });
+    observer.observe(mark);
+  }
+  resetTyping();
+  syncTyping();
 }
 
 initServiceTabs();
