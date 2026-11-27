@@ -211,7 +211,7 @@ function initReactiveBackground() {
     if (event.pointerType === 'mouse' && !event.relatedTarget && pointer && !pointer.touch && leavingAt === undefined) fadePointer();
   }, { passive: true });
 
-  // Passive touch events let the browser scroll while keeping the effect visible under a finger.
+  // Touch feedback runs until the browser takes over a native scroll gesture.
   window.addEventListener('touchstart', event => {
     if (event.touches.length !== 1 || !canReact()) return;
     const touch = event.touches[0];
@@ -230,6 +230,13 @@ function initReactiveBackground() {
   }
   window.addEventListener('touchend', releaseTouch, { passive: true });
   window.addEventListener('touchcancel', releaseTouch, { passive: true });
+  function clearTouchWave() {
+    if (pointer?.touch) clear();
+  }
+  window.addEventListener('pointercancel', event => {
+    if (event.pointerType === 'touch') clearTouchWave();
+  }, { passive: true });
+  window.addEventListener('scroll', clearTouchWave, { passive: true });
   window.addEventListener('blur', clear);
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) clear();

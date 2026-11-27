@@ -90,6 +90,13 @@ button { cursor: pointer; }
 }
 .binary-wave { position: fixed; z-index: -1; inset: 0; overflow: hidden; pointer-events: none; color: var(--accent); }
 .binary-wave canvas { position: absolute; top: 0; left: 0; }
+@media (pointer: coarse) {
+  .binary-background, .binary-wave {
+    bottom: auto;
+    height: 100vh;
+    height: 100lvh;
+  }
+}
 
 .site-header {
   position: sticky;

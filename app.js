@@ -79,16 +79,17 @@ function initNavigation() {
   const navLinks = header.querySelectorAll('.main-nav a[href^="#"], .main-nav a[href="proyectos.html"]');
   const entries = new Map([...navLinks].map((link) => [link.hash.slice(1) || 'trabajos', link]));
   const sections = [...document.querySelectorAll('main > section')];
+  let activeLink;
   let frame = null;
   function updateNavigation() {
     frame = null;
     const boundary = header.getBoundingClientRect().bottom + 34;
     const current = sections.findLast((section) => section.getBoundingClientRect().top <= boundary);
-    const activeLink = entries.get(current?.id);
-    for (const link of navLinks) {
-      if (link === activeLink) link.setAttribute('aria-current', 'location');
-      else link.removeAttribute('aria-current');
-    }
+    const nextLink = entries.get(current?.id);
+    if (activeLink === nextLink) return;
+    activeLink?.removeAttribute('aria-current');
+    nextLink?.setAttribute('aria-current', 'location');
+    activeLink = nextLink;
   }
   function scheduleNavigation() {
     if (frame === null) frame = requestAnimationFrame(updateNavigation);

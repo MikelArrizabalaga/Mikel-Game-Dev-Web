@@ -115,6 +115,7 @@ function initHeroTyping(canAnimate) {
 function enableBinaryReveal() {
   const staticText = matchMedia('(prefers-reduced-motion: reduce), (forced-colors: active)');
   const touchScroll = matchMedia('(pointer: coarse)');
+  const hasScrollEnd = 'onscrollend' in document;
   const toggle = document.querySelector('#toggle-animation');
   const pending = CSS.highlights && typeof Highlight === 'function' ? new Highlight() : null;
   if (pending) CSS.highlights.set('binary-pending', pending);
@@ -261,6 +262,12 @@ function enableBinaryReveal() {
     focusedText.clear();
   }
 
+  function finishScroll() {
+    if (!scrolling) return;
+    scrolling = false;
+    schedule();
+  }
+
   function onScroll() {
     if (!touchScroll.matches) {
       schedule();
@@ -270,11 +277,10 @@ function enableBinaryReveal() {
       scrolling = true;
       clearEffects();
     }
-    clearTimeout(scrollEndTimer);
-    scrollEndTimer = setTimeout(() => {
-      scrolling = false;
-      schedule();
-    }, 120);
+    if (!hasScrollEnd) {
+      clearTimeout(scrollEndTimer);
+      scrollEndTimer = setTimeout(finishScroll, 120);
+    }
   }
 
   function sync() {
@@ -297,6 +303,7 @@ function enableBinaryReveal() {
       }
     });
     window.addEventListener('scroll', onScroll, { passive: true });
+    if (hasScrollEnd) document.addEventListener('scrollend', finishScroll);
     const refreshLayout = () => {
       clearEffects();
       schedule();
