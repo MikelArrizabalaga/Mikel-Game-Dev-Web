@@ -29,7 +29,7 @@ function renderPattern() {
 function initReactiveBackground() {
   if (!CSS.supports('mask-image', 'radial-gradient(transparent, black)')) return;
 
-  const motion = matchMedia('(any-hover: hover) and (any-pointer: fine) and (prefers-reduced-motion: no-preference) and (forced-colors: none)');
+  const motion = matchMedia('(prefers-reduced-motion: no-preference) and (forced-colors: none)');
   const toggle = document.querySelector('#toggle-animation');
   const hero = document.querySelector('.hero');
   const canvas = document.createElement('canvas');
@@ -150,19 +150,34 @@ function initReactiveBackground() {
 
   const canReact = () => motion.matches && !document.hidden && toggle?.getAttribute('aria-pressed') !== 'true';
 
-  window.addEventListener('pointermove', event => {
-    if (event.pointerType !== 'mouse' || !canReact()) return;
+  function followPointer(event) {
+    if (!canReact()) return;
     if (!geometry) refresh();
-    pointer = { x: event.clientX, y: event.clientY };
+    pointer = { id: event.pointerId, x: event.clientX, y: event.clientY };
     leavingAt = undefined;
     schedule();
-  }, { passive: true });
+  }
 
-  document.addEventListener('pointerout', event => {
-    if (!pointer || event.relatedTarget || leavingAt !== undefined) return;
+  function fadePointer(event) {
+    if (pointer?.id !== event.pointerId || leavingAt !== undefined) return;
     leavingAt = performance.now();
     schedule();
-  });
+  }
+
+  window.addEventListener('pointerdown', event => {
+    if (event.pointerType === 'touch' && event.isPrimary) followPointer(event);
+  }, { passive: true });
+  window.addEventListener('pointermove', event => {
+    const heldTouch = event.pointerType === 'touch' && pointer?.id === event.pointerId && leavingAt === undefined;
+    if (event.pointerType === 'mouse' || heldTouch) followPointer(event);
+  }, { passive: true });
+  window.addEventListener('pointerup', event => {
+    if (event.pointerType === 'touch') fadePointer(event);
+  }, { passive: true });
+  window.addEventListener('pointercancel', fadePointer, { passive: true });
+  document.addEventListener('pointerout', event => {
+    if (event.pointerType === 'mouse' && !event.relatedTarget) fadePointer(event);
+  }, { passive: true });
   window.addEventListener('blur', clear);
   window.addEventListener('scroll', () => { if (pointer) schedule(); }, { passive: true });
   document.addEventListener('visibilitychange', () => { if (document.hidden) clear(); });
