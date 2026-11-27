@@ -12,7 +12,7 @@ La web presenta los servicios freelance de Mikel Arrizabalaga a estudios de vide
 1. **Preparación del proyecto.** Se inicializó Git y se eligió una web estática con HTML, CSS y JavaScript. Se instalaron las skills `playwright` y `playwright-interactive` para la revisión en navegador.
 2. **Primer prototipo.** A partir de `Plan_emprendimiento_2027.md` se creó un panel local con escenarios de facturación, información de Curly Studios, vías de financiación y una hoja de ruta.
 3. **Cambio de enfoque.** Mikel pidió una web para ofrecer servicios a empresas. Se sustituyó el panel por una página comercial y se retiraron del sitio y su código las cifras, la financiación, la hoja de ruta y los detalles internos de Curly Studios. Se adoptó **Mikel Arrizabalaga** como nombre profesional.
-4. **Primera portada comercial.** Se probó un diseño oscuro con acentos violetas y una ilustración generada de un portal 3D, identificada como arte conceptual. La ilustración quedó fuera de la versión publicada.
+4. **Primera portada comercial.** Se probó un diseño oscuro con acentos violetas.
 5. **Búsqueda de referencias.** Se revisaron portfolios de freelancers, webs que usan el 3D para navegar y sitios comerciales que convierten una interacción en una muestra de sus servicios.
 6. **Demo de bajo coste.** Se preparó una vista previa interactiva con un puente levadizo que se podía abrir, girar y ver en modo técnico. Sirvió para probar la idea de mostrar una mecánica en la portada.
 7. **Identidad tipográfica.** A partir de las imágenes que compartió Mikel, se cambió la dirección visual a fondo blanco, números binarios, texto oscuro y contornos naranja rojizo. Primero se mostró una maqueta y después se aplicó el diseño a toda la web.

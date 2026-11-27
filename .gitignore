@@ -3,4 +3,3 @@ output/
 .playwright-cli/
 .env
 .env.*
-/assets/portal-technical-art.png
