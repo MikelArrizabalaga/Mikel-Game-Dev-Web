@@ -1,13 +1,12 @@
-import { randomUUID } from 'node:crypto';
-import { mkdtemp, readFile, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { readFile } from 'node:fs/promises';
 import { createServer } from 'node:http';
 
 const files = new Map([
   ['/', ['index.html', 'text/html; charset=utf-8']],
   ['/index.html', ['index.html', 'text/html; charset=utf-8']],
   ['/proyectos.html', ['proyectos.html', 'text/html; charset=utf-8']],
+  ['/aviso-legal.html', ['aviso-legal.html', 'text/html; charset=utf-8']],
+  ['/privacidad.html', ['privacidad.html', 'text/html; charset=utf-8']],
   ['/styles.css', ['styles.css', 'text/css; charset=utf-8']],
   ['/theme.js', ['theme.js', 'text/javascript; charset=utf-8']],
   ['/binary-background.js', ['binary-background.js', 'text/javascript; charset=utf-8']],
@@ -38,62 +37,9 @@ const files = new Map([
 ]);
 
 const port = Number(process.env.AUTONOMO_PREVIEW_PORT || 4173);
-const outbox = await mkdtemp(join(tmpdir(), 'autonomo-encargos-'));
-
-function json(response, status, data) {
-  response.writeHead(status, {
-    'Content-Type': 'application/json; charset=utf-8',
-    'Cache-Control': 'no-store',
-  }).end(JSON.stringify(data));
-}
-
-async function handleBrief(request, response) {
-  if (request.method === 'GET') return json(response, 200, { mode: 'local' });
-  if (request.method !== 'POST') return json(response, 405, { ok: false });
-  const host = request.headers.host;
-  if (!['127.0.0.1:' + port, 'localhost:' + port].includes(host) ||
-      request.headers.origin !== 'http://' + host) {
-    return json(response, 403, { ok: false });
-  }
-  if (request.headers['content-type']?.split(';')[0] !== 'application/x-www-form-urlencoded') {
-    return json(response, 415, { ok: false });
-  }
-
-  const chunks = [];
-  let size = 0;
-  for await (const chunk of request) {
-    size += chunk.length;
-    if (size > 16384) {
-      json(response, 413, { ok: false });
-      return;
-    }
-    chunks.push(chunk);
-  }
-
-  const fields = new URLSearchParams(Buffer.concat(chunks).toString('utf8'));
-  const email = (fields.get('email') || '').trim();
-  const message = (fields.get('message') || '').trim();
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254 || !message || message.length > 1200) {
-    return json(response, 400, { ok: false });
-  }
-  const service = (fields.get('service') || '').slice(0, 100);
-  const phase = (fields.get('phase') || '').slice(0, 100);
-  const submission = { receivedAt: new Date().toISOString(), email, message, service, phase };
-  await writeFile(join(outbox, randomUUID() + '.json'), JSON.stringify(submission, null, 2), { flag: 'wx', mode: 0o600 });
-  return json(response, 201, { ok: true });
-}
 
 createServer(async (request, response) => {
   const pathname = new URL(request.url, 'http://127.0.0.1').pathname;
-  if (pathname === '/api/encargos') {
-    try {
-      await handleBrief(request, response);
-    } catch (error) {
-      console.error(error.message);
-      if (!response.headersSent) json(response, 500, { ok: false });
-    }
-    return;
-  }
   const asset = files.get(pathname);
 
   if (!asset) {
@@ -114,5 +60,4 @@ createServer(async (request, response) => {
   }
 }).listen(port, '127.0.0.1', () => {
   console.log('Vista local: http://127.0.0.1:' + port);
-  console.log('Encargos de prueba: ' + outbox);
 });

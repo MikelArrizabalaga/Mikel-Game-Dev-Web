@@ -48,113 +48,6 @@ function initServiceTabs() {
   selectService(0);
 }
 
-async function initProjectBrief(form) {
-  const { email, service, phase, description } = form.elements;
-  const summary = document.querySelector('#project-summary');
-  const feedback = document.querySelector('#brief-status');
-  const copyFeedback = document.querySelector('#copy-status');
-  const copyButton = document.querySelector('#copy-brief');
-  const sendButton = form.querySelector('button[type="submit"]');
-  const localPreview = ['127.0.0.1', 'localhost'].includes(location.hostname);
-
-  let endpoint = localPreview ? null : form.dataset.endpoint;
-  if (localPreview) {
-    try {
-      const response = await fetch('api/encargos', { signal: AbortSignal.timeout(3000) });
-      if (response.ok && (await response.json()).mode === 'local') endpoint = 'api/encargos';
-    } catch {
-      // The static site can still show the direct email on a different local server.
-    }
-  }
-  if (!endpoint) return;
-  const isLocalSubmission = endpoint === 'api/encargos';
-
-  function updateSummary() {
-    const lines = [];
-    if (email.value.trim()) lines.push('Correo: ' + email.value.trim());
-    if (service.value) lines.push('Servicio: ' + service.selectedOptions[0].textContent);
-    if (phase.value) lines.push('Fase: ' + phase.value);
-    if (description.value.trim()) lines.push('', description.value.trim());
-    summary.textContent = lines.join('\n').trim() || 'El resumen aparecerá al completar los campos.';
-    copyButton.disabled = !lines.length;
-  }
-
-  form.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    if (sendButton.disabled) return;
-    const message = description.value.trim();
-    if (!message) {
-      feedback.textContent = 'Describe qué necesitas.';
-      description.focus();
-      return;
-    }
-
-    const body = new URLSearchParams({ email: email.value.trim(), message });
-    if (service.value) body.set('service', service.selectedOptions[0].textContent);
-    if (phase.value) body.set('phase', phase.value);
-    if (!isLocalSubmission) body.set('_subject', 'Nuevo encargo desde la web');
-    sendButton.disabled = true;
-    feedback.textContent = 'Enviando…';
-    const controls = [email, service, phase, description];
-    for (const control of controls) control.disabled = true;
-    try {
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { Accept: 'application/json' },
-        body,
-        signal: AbortSignal.timeout(12000),
-      });
-      const result = await response.json();
-      const accepted = result?.success ?? result?.ok;
-      if (!response.ok || (accepted !== true && accepted !== 'true')) throw new Error('Submission failed');
-      form.reset();
-      updateSummary();
-      feedback.textContent = isLocalSubmission ? 'Envío de prueba guardado en este equipo.' : 'Encargo enviado.';
-    } catch {
-      feedback.textContent = 'No se pudo enviar. Inténtalo de nuevo o usa el correo de la sección Contacto.';
-    } finally {
-      for (const control of controls) control.disabled = false;
-      sendButton.disabled = false;
-    }
-  });
-
-  form.addEventListener('input', () => {
-    if (!sendButton.disabled) feedback.textContent = '';
-    copyFeedback.textContent = '';
-    updateSummary();
-  });
-
-  for (const link of document.querySelectorAll('[data-needs-brief]')) {
-    link.hidden = false;
-    link.addEventListener('click', (event) => {
-      if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey || sendButton.disabled) return;
-      service.value = link.dataset.briefService;
-      feedback.textContent = '';
-      updateSummary();
-    });
-  }
-
-  copyButton.addEventListener('click', async () => {
-    try {
-      await navigator.clipboard.writeText(summary.textContent);
-      copyFeedback.textContent = 'Resumen copiado.';
-    } catch {
-      const selection = window.getSelection();
-      const range = document.createRange();
-      range.selectNodeContents(summary);
-      selection.removeAllRanges();
-      selection.addRange(range);
-      copyFeedback.textContent = 'Resumen seleccionado. Usa la opción Copiar de tu dispositivo.';
-    }
-  });
-
-  document.querySelector('#brief-fallback').hidden = true;
-  document.querySelector('.local-note').hidden = !isLocalSubmission;
-  form.querySelector('.form-provider').hidden = isLocalSubmission;
-  form.closest('.project-layout').hidden = false;
-  updateSummary();
-}
-
 function initNavigation() {
   const navContact = document.querySelector('.nav-contact');
   const contactLink = navContact.firstElementChild;
@@ -207,7 +100,5 @@ function initNavigation() {
 }
 
 if (document.querySelector('.service-options')) initServiceTabs();
-const briefForm = document.querySelector('#project-form');
-if (briefForm) initProjectBrief(briefForm);
 initNavigation();
 document.querySelectorAll('[data-needs-js]').forEach((element) => { element.hidden = false; });

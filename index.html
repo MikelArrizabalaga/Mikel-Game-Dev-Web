@@ -114,7 +114,7 @@
               <div><dt>Ejemplo de encargo</dt><dd>Programar el movimiento, el salto y las colisiones de un personaje.</dd></div>
               <div><dt>Posible entrega</dt><dd>Una mecánica jugable y el código preparado para integrarlo en tu proyecto.</dd></div>
             </dl>
-            <a class="service-link" href="#proyecto" data-brief-service="videojuegos" data-needs-brief hidden>Preparar este encargo</a>
+            <a class="service-link" href="#proyecto">Preparar este encargo</a>
           </article>
 
           <article class="service-panel" id="service-technical-art">
@@ -124,7 +124,7 @@
               <div><dt>Ejemplo de encargo</dt><dd>Preparar un flujo para importar y configurar recursos de arte en el motor de juego.</dd></div>
               <div><dt>Posible entrega</dt><dd>Recursos integrados y una guía para que el equipo pueda repetir el proceso.</dd></div>
             </dl>
-            <a class="service-link" href="#proyecto" data-brief-service="technical-art" data-needs-brief hidden>Preparar este encargo</a>
+            <a class="service-link" href="#proyecto">Preparar este encargo</a>
           </article>
 
           <article class="service-panel" id="service-shaders">
@@ -134,7 +134,7 @@
               <div><dt>Ejemplo de encargo</dt><dd>Crear un material de agua con controles de color, movimiento y transparencia.</dd></div>
               <div><dt>Posible entrega</dt><dd>El shader integrado, un material de ejemplo y una explicación de sus parámetros.</dd></div>
             </dl>
-            <a class="service-link" href="#proyecto" data-brief-service="shaders" data-needs-brief hidden>Preparar este encargo</a>
+            <a class="service-link" href="#proyecto">Preparar este encargo</a>
           </article>
 
           <article class="service-panel" id="service-vfx">
@@ -144,7 +144,7 @@
               <div><dt>Ejemplo de encargo</dt><dd>Crear un efecto de impacto que indique al jugador que un golpe ha acertado.</dd></div>
               <div><dt>Posible entrega</dt><dd>El efecto preparado para reutilizarlo en el juego y ajustarlo desde el motor.</dd></div>
             </dl>
-            <a class="service-link" href="#proyecto" data-brief-service="vfx" data-needs-brief hidden>Preparar este encargo</a>
+            <a class="service-link" href="#proyecto">Preparar este encargo</a>
           </article>
 
           <article class="service-panel" id="service-herramientas">
@@ -154,7 +154,7 @@
               <div><dt>Ejemplo de encargo</dt><dd>Crear una herramienta de editor para revisar recursos antes de importarlos.</dd></div>
               <div><dt>Posible entrega</dt><dd>Una herramienta integrada y una guía breve de instalación y uso.</dd></div>
             </dl>
-            <a class="service-link" href="#proyecto" data-brief-service="herramientas" data-needs-brief hidden>Preparar este encargo</a>
+            <a class="service-link" href="#proyecto">Preparar este encargo</a>
           </article>
         </div>
       </div>
@@ -182,68 +182,17 @@
     </section>
 
     <section id="contacto" class="shell section contact-section" aria-labelledby="contact-title">
-      <div class="contact-panel">
+      <div class="contact-panel" id="proyecto">
         <div>
           <h2 id="contact-title">Contacto</h2>
-          <p>Para consultas, colaboraciones o para conocer mi trabajo.</p>
+          <p>Cuéntame por correo qué quieres crear o mejorar, para qué plataforma y en qué plazo.</p>
+          <p data-binary-static><a class="email-link" href="privacidad.html">Cómo trato tus datos de contacto</a></p>
         </div>
-        <ul class="contact-links">
-          <li><a href="mailto:arrizamikel@gmail.com"><span aria-hidden="true">@</span> arrizamikel@gmail.com</a></li>
+        <ul class="contact-links" data-binary-static>
+          <li><a class="button button-primary" href="mailto:arrizamikel@gmail.com?subject=Consulta%20sobre%20un%20encargo">Escríbeme por correo</a></li>
+          <li class="contact-address">arrizamikel@gmail.com</li>
           <li><a href="https://es.linkedin.com/in/mikel-arrizabalaga-munduate"><span aria-hidden="true">in</span> LinkedIn</a></li>
         </ul>
-      </div>
-    </section>
-
-    <section id="proyecto" class="shell section project-section" aria-labelledby="project-title">
-      <div class="section-heading">
-        <h2 id="project-title">Propón un encargo</h2>
-        <p>Cuéntame qué necesitas y deja tu correo para que pueda responderte.</p>
-      </div>
-      <p id="brief-fallback">Para proponer un encargo, <a class="email-link" href="mailto:arrizamikel@gmail.com">escríbeme por correo</a>.</p>
-      <div class="project-layout" hidden>
-        <form id="project-form" method="post" data-endpoint="https://formsubmit.co/ajax/arrizamikel@gmail.com">
-          <label>Tu correo electrónico
-            <input type="email" name="email" autocomplete="email" maxlength="254" required>
-          </label>
-          <div class="form-selects">
-            <label>Servicio
-              <select name="service">
-                <option value="">Por definir</option>
-                <option value="videojuegos">Videojuegos y programación</option>
-                <option value="technical-art">Technical Art</option>
-                <option value="shaders">Shaders</option>
-                <option value="vfx">VFX</option>
-                <option value="herramientas">Software y herramientas</option>
-              </select>
-            </label>
-            <label>Fase del proyecto
-              <select name="phase">
-                <option value="">Por definir</option>
-                <option>Idea</option>
-                <option>Prototipo</option>
-                <option>En producción</option>
-                <option>Ya publicado</option>
-              </select>
-            </label>
-          </div>
-          <label>¿Qué necesitas?
-            <textarea name="description" rows="4" maxlength="1200" required placeholder="Qué quieres crear o mejorar, para qué plataforma y en qué plazo."></textarea>
-          </label>
-          <div class="form-submit">
-            <p class="form-provider" hidden>FormSubmit procesa tu correo y el contenido del encargo para entregármelo.</p>
-            <button class="button button-primary" type="submit">Enviar encargo</button>
-            <p class="form-status" id="brief-status" role="status"></p>
-          </div>
-        </form>
-        <div class="summary-card">
-          <h3>Resumen del encargo</h3>
-          <pre id="project-summary"></pre>
-          <div class="summary-actions">
-            <button class="button button-outline" type="button" id="copy-brief" disabled>Copiar resumen</button>
-          </div>
-          <p class="form-status" id="copy-status" role="status"></p>
-          <p class="local-note" hidden>Vista local. El envío de prueba se guarda en este equipo.</p>
-        </div>
       </div>
     </section>
   </main>
@@ -252,6 +201,8 @@
     <div class="shell footer-inner">
       <span>Mikel Arrizabalaga</span>
       <div class="footer-actions">
+        <a href="aviso-legal.html">Aviso legal</a>
+        <a href="privacidad.html">Privacidad</a>
         <button class="motion-toggle" type="button" id="toggle-animation" aria-pressed="false" hidden>Pausar animación</button>
         <a href="#inicio">Volver arriba</a>
       </div>

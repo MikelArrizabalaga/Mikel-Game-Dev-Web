@@ -6,10 +6,8 @@ Web estática en español para presentar servicios freelance de programación de
 
 Abre `index.html` directamente o ejecuta `node dev-server.mjs` desde la carpeta del proyecto y visita [la vista local](http://127.0.0.1:4173). El servidor escucha únicamente en este equipo.
 
-`index.html` reúne la portada, los servicios y el contacto. `proyectos.html` contiene el catálogo. `styles.css` define el diseño adaptable. `binary-background.js` dibuja el fondo y `binary-reveal.js` descifra el texto en la zona central visible, muestra binario en los márgenes y anima el 01 de la portada. `app.js` controla la navegación, los servicios y el formulario. `shader-preview.js` dibuja la muestra interactiva del polígono con WebGL.
+`index.html` reúne la portada, los servicios y el contacto. `proyectos.html` contiene el catálogo. `styles.css` define el diseño adaptable. `binary-background.js` dibuja el fondo y `binary-reveal.js` descifra el texto en la zona central visible, muestra binario en los márgenes y anima el 01 de la portada. `app.js` controla la navegación y las pestañas de servicios. `shader-preview.js` dibuja la muestra interactiva del polígono con WebGL.
 
-El formulario de encargos guarda cada envío de prueba como un JSON en la carpeta temporal que imprime `node dev-server.mjs`. La vista local no envía correos.
-
-En GitHub Pages, el formulario usa [FormSubmit](https://formsubmit.co/documentation) para enviar los encargos a `arrizamikel@gmail.com`. FormSubmit exige activar la dirección con un enlace que envía al buzón al recibir el primer encargo. El endpoint público se configura en `data-endpoint` de `#project-form` en `index.html` y la página conserva el correo directo como alternativa.
+El contacto abre un borrador en la aplicación de correo del visitante mediante un enlace `mailto:`. El pie enlaza el [aviso legal](aviso-legal.html) y la [política de privacidad](privacidad.html).
 
 La [imagen para compartir](assets/social-preview.png) mide 1200 × 630 píxeles y usa la URL pública en los metadatos de la página. El [historial](HISTORIAL_WEB.md) y los [pendientes](PENDIENTES_WEB.md) documentan la evolución y el estado de publicación.

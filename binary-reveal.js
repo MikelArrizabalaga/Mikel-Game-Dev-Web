@@ -1,6 +1,6 @@
 const binaryTextSelector = [
   'h1', 'h2', 'h3', 'h4', 'p', 'a', 'button', 'dt', 'dd', 'label', 'output',
-  '#project-summary', '.category-label',
+  '.category-label',
 ].join(', ');
 
 const graphemes = typeof Intl.Segmenter === 'function' ? new Intl.Segmenter('es') : null;
@@ -288,7 +288,7 @@ function enableBinaryReveal() {
       for (const { target } of entries) discard(target);
       schedule();
     });
-    for (const element of document.querySelectorAll('#project-summary, output')) {
+    for (const element of document.querySelectorAll('output')) {
       dynamicText.observe(element, { childList: true });
     }
     document.addEventListener('visibilitychange', schedule);
