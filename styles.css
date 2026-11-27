@@ -184,38 +184,35 @@ button { cursor: pointer; }
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
-  width: min(100%, 320px);
-  min-height: 52px;
-  gap: 13px;
-  padding-top: 13px;
-  border-top: 1px solid var(--line);
+  width: min(100%, 16.5rem);
+  min-height: 44px;
+  color: var(--ink);
   text-align: left;
   user-select: none;
 }
 .hero-digits {
   display: flex;
-  justify-content: center;
+  align-items: center;
   gap: .035em;
+  padding-inline-end: 13px;
+  border-inline-end: 1px solid var(--line);
   color: var(--accent);
-  font: 700 clamp(1.65rem, 2.8vw, 2.15rem)/.95 var(--font-bits);
+  font: 700 1.6rem/.95 var(--font-bits);
   letter-spacing: -.08em;
 }
 .hero-digits span:first-child { color: var(--action); }
-.hero-mark[data-length="0"] .hero-digits span,
-.hero-mark[data-length="1"] .hero-digits span:last-child { visibility: hidden; }
 .hero-message {
-  visibility: hidden;
-  color: var(--muted);
-  font: 650 clamp(.875rem, 1.3vw, 1rem)/1.25 "Space Grotesk", var(--font-text);
+  display: grid;
+  align-items: center;
+  min-height: 2.5em;
+  padding-inline-start: 13px;
+  font: 650 .95rem/1.25 "Space Grotesk", var(--font-text);
 }
-.hero-mark[data-show-message] .hero-message { visibility: visible; }
-.hero-message-text::after {
-  content: '';
-  display: inline-block;
-  width: .5ch;
-  height: .85em;
-  margin-left: .25ch;
-  background: var(--accent);
+.hero-message-text { transition: opacity 200ms ease, color 150ms ease; }
+.hero-mark[data-phase="binary"] .hero-message-text { color: var(--action); }
+.hero-mark[data-phase="leaving"] .hero-message-text { opacity: 0; }
+@media (prefers-reduced-motion: reduce), (forced-colors: active) {
+  .hero-message-text { transition: none; }
 }
 .hero-surname { color: var(--action); }
 @supports (-webkit-text-stroke: 1px currentColor) {
@@ -424,7 +421,6 @@ h3 { font-size: clamp(1.25rem, 2.25vw, 1.75rem); line-height: 1.2; letter-spacin
 }
 @media (max-width: 640px) {
   .hero { gap: 30px; padding-block: 44px 34px; }
-  .hero-mark { width: min(100%, 242px); }
   .hero h1 { font-size: clamp(2.65rem, 11.5vw, 4.15rem); }
   .hero-description { margin-top: 15px; }
   .hero-actions { margin-top: 18px; }

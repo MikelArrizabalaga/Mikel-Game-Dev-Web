@@ -49,68 +49,63 @@ function measureBinaryText(element) {
   return { letters, lines };
 }
 
-function initHeroTyping(canAnimate, staticText) {
+function initHeroTyping(canAnimate) {
   const mark = document.querySelector('.hero-mark');
   if (!mark) return () => {};
   const output = mark.querySelector('.hero-message-text');
-  const messages = ['En programar videojuegos', 'En shaders y VFX', 'En el trato cercano'];
-
+  const messages = [output.textContent, 'En shaders y VFX', 'En el trato cercano'];
   let timer;
   let visible = false;
-  let digitCount = 0;
-  let line = 0;
-  let length = 0;
+  let running = false;
+  let index = 0;
 
-  function resetTyping() {
-    digitCount = 0;
-    line = 0;
-    length = 0;
-    mark.removeAttribute('data-show-message');
-    mark.dataset.length = staticText.matches ? 2 : 0;
-  }
+  function revealMessage() {
+    const message = messages[index];
+    const bits = Array.from(message, (character, position) => {
+      return character === ' ' ? ' ' : (character.codePointAt(0) + position) % 2;
+    }).join('');
+    let length = 0;
+    mark.dataset.phase = 'binary';
+    output.textContent = bits;
 
-  function typeNext() {
-    if (digitCount < 2) {
-      mark.dataset.length = ++digitCount;
-      timer = setTimeout(typeNext, digitCount === 2 ? 750 : 140);
-      return;
-    }
-
-    const message = messages[line];
-    if (line === 0 && length === 0) mark.setAttribute('data-show-message', '');
-    output.textContent = message.slice(0, length);
-    if (length < message.length) {
+    function decode() {
       length++;
-      timer = setTimeout(typeNext, 39);
-    } else if (line < messages.length - 1) {
-      line++;
-      length = 0;
-      timer = setTimeout(typeNext, 600);
-    } else {
+      output.textContent = message.slice(0, length) + bits.slice(length);
+      if (length < message.length) {
+        timer = setTimeout(decode, 22);
+        return;
+      }
+      mark.dataset.phase = 'resolved';
       timer = setTimeout(() => {
-        line = 0;
-        length = 0;
-        typeNext();
-      }, 1700);
+        mark.dataset.phase = 'leaving';
+        timer = setTimeout(() => {
+          index = (index + 1) % messages.length;
+          revealMessage();
+        }, 220);
+      }, 2300);
     }
+    timer = setTimeout(decode, 115);
   }
 
-  function syncTyping() {
+  function sync() {
+    const active = visible && !document.hidden && canAnimate();
+    if (active === running) return;
+    running = active;
     clearTimeout(timer);
-    if (visible && canAnimate() && !document.hidden) {
-      timer = setTimeout(typeNext, 90);
+    if (running) revealMessage();
+    else {
+      output.textContent = messages[index];
+      mark.dataset.phase = 'resolved';
     }
   }
 
-  document.addEventListener('visibilitychange', syncTyping);
   const observer = new IntersectionObserver(([entry]) => {
-    visible = entry.isIntersecting;
-    syncTyping();
-  });
+    visible = entry.isIntersecting && entry.intersectionRatio >= .35;
+    sync();
+  }, { threshold: .35 });
   observer.observe(mark);
-  staticText.addEventListener('change', resetTyping);
-  resetTyping();
-  return syncTyping;
+  document.addEventListener('visibilitychange', sync);
+  return sync;
 }
 
 function enableBinaryReveal() {
@@ -118,13 +113,14 @@ function enableBinaryReveal() {
   const toggle = document.querySelector('#toggle-animation');
   const pending = CSS.highlights && typeof Highlight === 'function' ? new Highlight() : null;
   if (pending) CSS.highlights.set('binary-pending', pending);
+  const header = document.querySelector('.site-header');
   const visible = new Set();
   const focusedText = new Set();
   const effects = new Map();
   let paused = false;
   let frame = null;
   const canAnimate = () => !paused && !staticText.matches;
-  const syncHeroTyping = initHeroTyping(canAnimate, staticText);
+  const syncHeroTyping = initHeroTyping(canAnimate);
 
   function discard(element) {
     const effect = effects.get(element);
@@ -158,7 +154,7 @@ function enableBinaryReveal() {
     frame = null;
     if (!pending || !canAnimate()) return;
     const height = document.documentElement.clientHeight;
-    const headerBottom = document.querySelector('.site-header').getBoundingClientRect().bottom;
+    const headerBottom = header.getBoundingClientRect().bottom;
     const inset = Math.max(0, height - headerBottom) * .15;
     const focusTop = headerBottom + inset;
     const focusBottom = height - inset;
@@ -173,11 +169,12 @@ function enableBinaryReveal() {
         (rect.height > focusBottom - focusTop && rect.bottom > focusTop && rect.top < focusBottom);
       const previous = effects.get(element);
       const measured = !previous && inView && !focused ? measureBinaryText(element) : null;
-      changes.push({ element, inView, engaged, focused, previous, measured });
+      const edgeFade = Math.min(1, Math.max(0, Math.min(rect.bottom - headerBottom, height - rect.top) / 44));
+      changes.push({ element, inView, engaged, focused, previous, measured, edgeFade });
     }
 
     let moving = false;
-    for (const { element, inView, engaged, focused, previous, measured } of changes) {
+    for (const { element, inView, engaged, focused, previous, measured, edgeFade } of changes) {
       const wasFocused = focusedText.has(element);
       if (inView && (engaged || focused)) focusedText.add(element);
       else focusedText.delete(element);
@@ -197,6 +194,7 @@ function enableBinaryReveal() {
           overlay.style.top = line.top - bodyBox.top + line.height / 2 + 'px';
           overlay.style.setProperty('--binary-width', line.right - line.left + 'px');
           overlay.style.fontSize = line.fontSize * .83 + 'px';
+          overlay.style.opacity = edgeFade;
           fragment.append(overlay);
           line.overlay = overlay;
         }
@@ -208,6 +206,7 @@ function enableBinaryReveal() {
         continue;
       }
 
+      for (const { overlay } of previous.lines) overlay.style.opacity = edgeFade;
       const elapsed = Math.min(now - previous.time, 60);
       previous.time = now;
       const duration = element.matches('h1, h2, h3, h4') ? 220 : 150;
