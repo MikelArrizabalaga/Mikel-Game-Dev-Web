@@ -14,7 +14,7 @@ const files = new Map([
   ['/binary-reveal.js', ['binary-reveal.js', 'text/javascript; charset=utf-8']],
   ['/app.js', ['app.js', 'text/javascript; charset=utf-8']],
   ['/shader-preview.js', ['shader-preview.js', 'text/javascript; charset=utf-8']],
-  ['/assets/favicon.png', ['assets/favicon.png', 'image/png']],
+  ['/assets/favicon-ma.png', ['assets/favicon-ma.png', 'image/png']],
   ['/assets/social-preview.png', ['assets/social-preview.png', 'image/png']],
   ['/assets/the-next-stop.jpg', ['assets/the-next-stop.jpg', 'image/jpeg']],
   ['/assets/the-next-stop.webp', ['assets/the-next-stop.webp', 'image/webp']],
