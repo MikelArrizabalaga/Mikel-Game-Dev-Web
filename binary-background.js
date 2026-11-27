@@ -27,6 +27,8 @@ function renderPattern() {
 }
 
 function initReactiveBackground() {
+  if (!matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   const forcedColors = matchMedia('(forced-colors: active)');
   const toggle = document.querySelector('#toggle-animation');
@@ -46,10 +48,6 @@ function initReactiveBackground() {
   const cos = Math.cos(rotation);
   let geometry;
   let pointer;
-  let position;
-  let previousFrame;
-  let touchId = null;
-  let releaseTimer;
   let leavingAt;
   let frame = null;
 
@@ -100,53 +98,30 @@ function initReactiveBackground() {
 
   function clear() {
     cancelAnimationFrame(frame);
-    clearTimeout(releaseTimer);
     frame = null;
     pointer = undefined;
-    position = undefined;
-    previousFrame = undefined;
-    touchId = null;
     leavingAt = undefined;
     canvas.hidden = true;
   }
 
   function paint(now) {
     frame = null;
-    const fadeTime = pointer.touch ? 360 : 190;
     const elapsed = leavingAt === undefined ? 0 : Math.max(0, now - leavingAt);
-    const progress = Math.min(1, elapsed / fadeTime);
-    const strength = pointer.touch ? 1 - progress * progress * (3 - 2 * progress) : 1 - progress;
+    const strength = Math.max(0, 1 - elapsed / 190);
     if (!strength) {
       clear();
       return;
     }
 
-    let moving = false;
-    if (!position || !pointer.touch || reducedMotion.matches) {
-      position = { x: pointer.x, y: pointer.y };
-    } else {
-      const step = Math.min(40, Math.max(1, now - previousFrame));
-      const follow = 1 - Math.exp(-step / 25);
-      position.x += (pointer.x - position.x) * follow;
-      position.y += (pointer.y - position.y) * follow;
-      moving = Math.hypot(pointer.x - position.x, pointer.y - position.y) > .5;
-      if (!moving) {
-        position.x = pointer.x;
-        position.y = pointer.y;
-      }
-    }
-    previousFrame = now;
-
     const { centerX, centerY, originX, originY, advance, lineHeight, glyphWidth, glyphHeight, radius, size, scale } = geometry;
-    const cursorX = position.x - centerX;
-    const cursorY = position.y - centerY;
+    const cursorX = pointer.x - centerX;
+    const cursorY = pointer.y - centerY;
     const localX = cursorX * cos - cursorY * sin;
     const localY = cursorX * sin + cursorY * cos;
-    const canvasX = Math.round(position.x - size / 2);
-    const canvasY = Math.round(position.y - size / 2);
+    const canvasX = Math.round(pointer.x - size / 2);
+    const canvasY = Math.round(pointer.y - size / 2);
     const radiusSquared = radius * radius;
-    const lift = reducedMotion.matches ? 0 : pointer.touch ? 36 : 30;
-    const peakOpacity = pointer.touch ? .88 : .64;
+    const lift = reducedMotion.matches ? 0 : 30;
 
     canvas.hidden = false;
     canvas.style.transform = `translate3d(${canvasX}px, ${canvasY}px, 0)`;
@@ -172,12 +147,12 @@ function initReactiveBackground() {
         if (falloff <= 0) continue;
         const influence = falloff * Math.sqrt(falloff) * strength;
         const rise = lift * influence;
-        context.globalAlpha = peakOpacity * influence;
+        context.globalAlpha = .64 * influence;
         context.drawImage(glyphs, digit === '1' ? glyphWidth : 0, 0, glyphWidth, glyphHeight,
           x + sin * rise - 1, y - cos * rise - glyphHeight / scale / 2, glyphWidth / scale, glyphHeight / scale);
       }
     }
-    if (moving || leavingAt !== undefined) schedule();
+    if (leavingAt !== undefined) schedule();
   }
 
   function schedule() {
@@ -186,11 +161,10 @@ function initReactiveBackground() {
 
   const canReact = () => !forcedColors.matches && !document.hidden && toggle?.getAttribute('aria-pressed') !== 'true';
 
-  function followPointer({ clientX, clientY }, touch) {
+  function followPointer({ clientX, clientY }) {
     if (!canReact()) return;
     if (!geometry) refresh();
-    clearTimeout(releaseTimer);
-    pointer = { x: clientX, y: clientY, touch };
+    pointer = { x: clientX, y: clientY };
     leavingAt = undefined;
     schedule();
   }
@@ -205,38 +179,12 @@ function initReactiveBackground() {
   }
 
   window.addEventListener('pointermove', event => {
-    if (event.pointerType === 'mouse' && touchId === null) followPointer(event, false);
+    if (event.pointerType === 'mouse') followPointer(event);
   }, { passive: true });
   document.addEventListener('pointerout', event => {
-    if (event.pointerType === 'mouse' && !event.relatedTarget && pointer && !pointer.touch && leavingAt === undefined) fadePointer();
+    if (event.pointerType === 'mouse' && !event.relatedTarget && pointer && leavingAt === undefined) fadePointer();
   }, { passive: true });
 
-  // Touch feedback runs until the browser takes over a native scroll gesture.
-  window.addEventListener('touchstart', event => {
-    if (event.touches.length !== 1 || !canReact()) return;
-    const touch = event.touches[0];
-    touchId = touch.identifier;
-    followPointer(touch, true);
-  }, { passive: true });
-  window.addEventListener('touchmove', event => {
-    const touch = event.touches[0];
-    if (event.touches.length === 1 && touch.identifier === touchId) followPointer(touch, true);
-  }, { passive: true });
-  function releaseTouch(event) {
-    if (!Array.from(event.changedTouches).some(touch => touch.identifier === touchId)) return;
-    touchId = null;
-    // Give quick taps enough time to show the orange digits after the finger lifts.
-    releaseTimer = setTimeout(fadePointer, reducedMotion.matches ? 430 : 280);
-  }
-  window.addEventListener('touchend', releaseTouch, { passive: true });
-  window.addEventListener('touchcancel', releaseTouch, { passive: true });
-  function clearTouchWave() {
-    if (pointer?.touch) clear();
-  }
-  window.addEventListener('pointercancel', event => {
-    if (event.pointerType === 'touch') clearTouchWave();
-  }, { passive: true });
-  window.addEventListener('scroll', clearTouchWave, { passive: true });
   window.addEventListener('blur', clear);
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) clear();
