@@ -243,7 +243,7 @@ function enableBinaryReveal() {
   if (pending) {
     document.fonts.ready.then(() => {
       for (const element of document.querySelectorAll(binaryTextSelector)) {
-        if (!element.closest('.site-header, .skip-link, [aria-hidden="true"], [role="status"]')) observer.observe(element);
+        if (!element.closest('[data-binary-static], .site-header, .skip-link, [aria-hidden="true"], [role="status"]')) observer.observe(element);
       }
     });
     window.addEventListener('scroll', schedule, { passive: true });
