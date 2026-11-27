@@ -1,6 +1,6 @@
 const binaryTextSelector = [
   'h1', 'h2', 'h3', 'h4', 'p', 'a', 'button', 'dt', 'dd', 'label', 'output',
-  '#project-summary', '.footer-inner > span', '.category-label',
+  '#project-summary', '.category-label',
 ].join(', ');
 
 const graphemes = typeof Intl.Segmenter === 'function' ? new Intl.Segmenter('es') : null;
@@ -265,7 +265,7 @@ function enableBinaryReveal() {
   if (pending) {
     document.fonts.ready.then(() => {
       for (const element of document.querySelectorAll(binaryTextSelector)) {
-        if (!element.closest('[data-binary-static], .site-header, .skip-link, [aria-hidden="true"], [role="status"]')) observer.observe(element);
+        if (!element.closest('[data-binary-static], .site-header, .site-footer, .skip-link, [aria-hidden="true"], [role="status"]')) observer.observe(element);
       }
     });
     window.addEventListener('scroll', schedule, { passive: true });
