@@ -34,7 +34,7 @@ function enablePolygonPreview(preview) {
       vec3 surface = mix(vec3(1.0), vec3(0.10), darkTheme);
       vec3 gridColor = mix(vec3(0.92, 0.87, 0.84), vec3(0.25), darkTheme);
       vec3 polygon = mix(vec3(1.0, 0.79, 0.69), vec3(0.22), darkTheme);
-      vec3 edge = mix(vec3(0.66, 0.20, 0.09), vec3(0.81), darkTheme);
+      vec3 edge = mix(vec3(0.66, 0.20, 0.09), vec3(1.0, 0.51, 0.31), darkTheme);
       vec3 paper = mix(surface, gridColor, grid);
       vec3 shape = mix(polygon, edge, outline);
       gl_FragColor = vec4(mix(paper, shape, fill), 1.0);
