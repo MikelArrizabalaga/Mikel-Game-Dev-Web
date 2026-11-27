@@ -22,6 +22,7 @@ function measureBinaryText(element) {
   while (walker.nextNode()) {
     const node = walker.currentNode;
     const fontSize = parseFloat(getComputedStyle(node.parentElement).fontSize);
+    const outlined = !!node.parentElement.closest('.hero-surname');
     const characters = graphemes ? Array.from(graphemes.segment(node.data), ({ segment }) => segment) : [...node.data];
     let end = 0;
     for (const character of characters) {
@@ -33,7 +34,7 @@ function measureBinaryText(element) {
       range.setEnd(node, end);
       const rect = range.getBoundingClientRect();
       if (rect.width && rect.height) {
-        letters.push({ range, rect, fontSize, bit: character.codePointAt(0) % 2 });
+        letters.push({ range, rect, fontSize, outlined, bit: character.codePointAt(0) % 2 });
       }
     }
   }
@@ -43,7 +44,7 @@ function measureBinaryText(element) {
 function initHeroTyping(canAnimate) {
   const mark = document.querySelector('.hero-mark');
   if (!mark) return () => {};
-  const output = mark.querySelector('.hero-message');
+  const output = mark.querySelector('.hero-message > span');
   const messages = [output.textContent, 'En shaders y VFX', 'En el trato cercano'];
   let timer;
   let visible = false;
@@ -54,19 +55,23 @@ function initHeroTyping(canAnimate) {
     const message = messages[line];
     if (length === message.length) {
       line = (line + 1) % messages.length;
+      mark.dataset.message = line;
       length = 0;
     }
     const current = messages[line];
     output.textContent = current.slice(0, ++length);
-    timer = setTimeout(nextCharacter, length === current.length ? 1350 : 34);
+    const writing = length < current.length;
+    mark.toggleAttribute('data-writing', writing);
+    timer = setTimeout(nextCharacter, writing ? 34 : 1900);
   }
 
   function sync() {
     clearTimeout(timer);
     const running = canAnimate() && visible && !document.hidden;
     mark.toggleAttribute('data-typing', running);
+    mark.toggleAttribute('data-writing', running && length < messages[line].length);
     if (running) {
-      timer = setTimeout(nextCharacter, length === messages[line].length ? 1350 : 34);
+      timer = setTimeout(nextCharacter, length === messages[line].length ? 1900 : 34);
     } else {
       output.textContent = messages[line];
       length = messages[line].length;
@@ -74,9 +79,17 @@ function initHeroTyping(canAnimate) {
   }
 
   const observer = new IntersectionObserver(([entry]) => {
-    visible = entry.isIntersecting;
+    const onScreen = entry.isIntersecting && entry.intersectionRatio >= .25;
+    if (visible === onScreen) return;
+    visible = onScreen;
+    if (visible && canAnimate()) {
+      line = 0;
+      length = 0;
+      mark.dataset.message = line;
+      output.textContent = '';
+    }
     sync();
-  });
+  }, { threshold: .25 });
   observer.observe(mark);
   document.addEventListener('visibilitychange', sync);
   return sync;
@@ -87,15 +100,40 @@ function enableBinaryReveal() {
   const toggle = document.querySelector('#toggle-animation');
   const animations = new Map();
   const pending = CSS.highlights && typeof Highlight === 'function' ? new Highlight() : null;
-  if (pending) CSS.highlights.set('binary-pending', pending);
+  const queued = pending ? new Highlight() : null;
+  if (pending) {
+    CSS.highlights.set('binary-queued', queued);
+    CSS.highlights.set('binary-pending', pending);
+  }
   let paused = false;
   let frame = null;
   const canAnimate = () => !paused && !staticText.matches;
   const syncHeroTyping = initHeroTyping(canAnimate);
 
+  function showDigit(letter, animation) {
+    const { range, rect, fontSize, bit } = letter;
+    const { box, host, inverse } = animation;
+    const digit = document.createElement('span');
+    digit.className = 'binary-digit ' + (bit ? 'bit-one' : 'bit-zero');
+    if (inverse) digit.classList.add('binary-digit-inverse');
+    digit.setAttribute('aria-hidden', 'true');
+    const height = fontSize * .57;
+    const width = Math.min(height * .68, rect.width * .92);
+    digit.style.left = rect.left - box.left + rect.width / 2 + 'px';
+    digit.style.top = rect.top - box.top + rect.height / 2 + 'px';
+    digit.style.width = width + 'px';
+    digit.style.height = height + 'px';
+    digit.style.setProperty('--bit-stroke', Math.min(height * .12, width * .25) + 'px');
+    queued.delete(range);
+    pending.add(range);
+    host.append(digit);
+    letter.digit = digit;
+  }
+
   function reveal(letter) {
+    queued.delete(letter.range);
     pending.delete(letter.range);
-    letter.digit.remove();
+    letter.digit?.remove();
   }
 
   function finish(element) {
@@ -108,10 +146,20 @@ function enableBinaryReveal() {
   function tick(now) {
     frame = null;
     for (const [element, animation] of animations) {
-      animation.start ??= now;
-      const elapsed = now - animation.start - 75;
-      while (animation.revealed < animation.letters.length && elapsed >= animation.revealed * animation.step) {
+      animation.start ??= now + animation.delay;
+      const elapsed = now - animation.start;
+      if (elapsed < 0) continue;
+      if (animation.staged === 0) {
+        for (const { range, outlined } of animation.letters) {
+          if (!outlined) queued.add(range);
+        }
+      }
+      while (animation.revealed < animation.letters.length && elapsed >= 88 + animation.revealed * animation.step) {
         reveal(animation.letters[animation.revealed++]);
+      }
+      animation.staged = Math.max(animation.staged, animation.revealed);
+      while (animation.staged < animation.letters.length && elapsed >= animation.staged * animation.step) {
+        showDigit(animation.letters[animation.staged++], animation);
       }
       if (animation.revealed === animation.letters.length) animations.delete(element);
     }
@@ -120,14 +168,15 @@ function enableBinaryReveal() {
 
   const observer = new IntersectionObserver((entries) => {
     if (!pending || !canAnimate()) return;
-    // Read every text rectangle before adding the decorative layer to the page.
+    // Measure the real text once. Decorative digits never participate in text layout.
     const starts = [];
-    for (const { target, isIntersecting } of entries) {
+    for (const { target, isIntersecting, boundingClientRect } of entries) {
       if (!isIntersecting) {
         finish(target);
         continue;
       }
-      if (animations.has(target) || target.matches(':focus-within, .skip-link')) continue;
+      if (animations.has(target) || target.matches(':focus-within, .skip-link') ||
+          getComputedStyle(target).visibility !== 'visible') continue;
       const letters = measureBinaryText(target);
       if (!letters.length) continue;
 
@@ -135,32 +184,15 @@ function enableBinaryReveal() {
       starts.push({
         target, letters, host, box: host.getBoundingClientRect(),
         inverse: !!target.closest('.button-primary'),
+        delay: Math.min(104, Math.max(0, boundingClientRect.top) * .12),
       });
     }
 
-    for (const { target, letters, host, box, inverse } of starts) {
-      const maxDelay = target.matches('h1, h2') ? 420 : 600;
-      const step = Math.min(44, maxDelay / Math.max(1, letters.length - 1));
-      const layer = document.createDocumentFragment();
-      for (const letter of letters) {
-        const { range, rect, fontSize, bit } = letter;
-        const digit = document.createElement('span');
-        digit.className = 'binary-digit ' + (bit ? 'bit-one' : 'bit-zero');
-        if (inverse) digit.classList.add('binary-digit-inverse');
-        digit.setAttribute('aria-hidden', 'true');
-        const height = fontSize * .48;
-        const width = Math.min(height * .62, rect.width * .86);
-        digit.style.left = rect.left - box.left + rect.width / 2 + 'px';
-        digit.style.top = rect.top - box.top + rect.height / 2 + 'px';
-        digit.style.width = width + 'px';
-        digit.style.height = height + 'px';
-        digit.style.setProperty('--bit-stroke', Math.min(height * .095, width * .23) + 'px');
-        layer.append(digit);
-        letter.digit = digit;
-        pending.add(range);
-      }
-      host.append(layer);
-      animations.set(target, { letters, revealed: 0, step, start: null });
+    for (const { target, ...animation } of starts) {
+      const { letters } = animation;
+      const maxDelay = target.matches('h1, h2') ? 515 : 740;
+      const step = Math.min(43, maxDelay / Math.max(1, letters.length - 1));
+      animations.set(target, { ...animation, revealed: 0, staged: 0, step, start: null });
     }
     if (animations.size && frame === null) frame = requestAnimationFrame(tick);
   }, { rootMargin: '0px 0px -24px' });
