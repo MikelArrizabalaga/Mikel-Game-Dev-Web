@@ -23,6 +23,7 @@ const files = new Map([
   ['/assets/bio-tutorial.webp', ['assets/bio-tutorial.webp', 'image/webp']],
   ['/assets/vuela-liz.webp', ['assets/vuela-liz.webp', 'image/webp']],
   ['/assets/hur.webp', ['assets/hur.webp', 'image/webp']],
+  ['/assets/fonts/chakrapetch-digits.woff2', ['assets/fonts/chakrapetch-digits.woff2', 'font/woff2']],
   ['/assets/fonts/geist.woff2', ['assets/fonts/geist.woff2', 'font/woff2']],
   ['/assets/fonts/spacegrotesk.woff2', ['assets/fonts/spacegrotesk.woff2', 'font/woff2']],
 ]);
