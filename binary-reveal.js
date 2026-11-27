@@ -1,4 +1,4 @@
-const binaryTextSelector = 'h1, h2, h3, h4, p, a, button, dt, dd, label, output, #project-summary, .footer-inner > span';
+const binaryTextSelector = '[data-binary-reveal]';
 const graphemes = typeof Intl.Segmenter === 'function' ? new Intl.Segmenter('es') : null;
 
 function prepareBinaryText(element) {
@@ -89,116 +89,80 @@ function alignDigits(changedWords) {
   }
 }
 
-const typingStart = -400;
-const typingDuration = 340;
-const revealStart = typingStart - 90;
+const typingStart = -260;
+const typingDuration = 220;
+const revealStart = typingStart - 30;
 
 function enableBinaryReveal() {
   const staticText = matchMedia('(prefers-reduced-motion: reduce), (forced-colors: active)');
-  const texts = new Map();
-  const active = new Set();
+  const toggle = document.querySelector('#toggle-animation');
+  const active = new Map();
+  const spent = new WeakSet();
   let frame = null;
   let previousTime = null;
+  let paused = false;
 
-  function prepare(element, changedWords) {
-    const state = texts.get(element);
-    if (state.letters) return;
-    const { letters, words } = prepareBinaryText(element);
-    state.letters = letters;
-    state.words = words;
-    state.bitProgress = 0;
-    state.typingWord = 0;
-    state.decoded = 0;
-    renderBinaryText(state, changedWords);
-  }
-
-  function animateTexts(time) {
+  function animate(time) {
     const elapsed = previousTime === null ? 0 : time - previousTime;
     previousTime = time;
     const changedWords = new Set();
-    for (const state of active) {
-      const end = state.visible ? state.duration : revealStart;
-      if (state.visible) state.position = Math.min(end, state.position + elapsed);
-      else state.position = Math.max(end, state.position - elapsed / .65);
+    for (const [heading, state] of active) {
+      state.position = Math.min(state.duration, state.position + elapsed);
       renderBinaryText(state, changedWords);
-      if (state.position === end) active.delete(state);
+      if (state.position === state.duration) active.delete(heading);
     }
     alignDigits(changedWords);
-    frame = active.size ? requestAnimationFrame(animateTexts) : null;
+    frame = active.size ? requestAnimationFrame(animate) : null;
     if (frame === null) previousTime = null;
   }
 
-  function updateVisibility(entries) {
-    const changedWords = new Set();
+  const observer = new IntersectionObserver((entries) => {
+    if (staticText.matches || paused) return;
     for (const { target, isIntersecting } of entries) {
-      const state = texts.get(target);
-      state.visible = isIntersecting;
-      if (staticText.matches || state.position === (isIntersecting ? state.duration : revealStart)) continue;
-      prepare(target, changedWords);
-      active.add(state);
+      if (!isIntersecting || spent.has(target)) continue;
+      observer.unobserve(target);
+      spent.add(target);
+      if (!target.hasAttribute('aria-label')) target.setAttribute('aria-label', target.textContent.trim());
+      const { letters, words } = prepareBinaryText(target);
+      active.set(target, { letters, words, position: revealStart, duration: 350, decoded: 0, bitProgress: 0, typingWord: 0 });
     }
-    alignDigits(changedWords);
-    if (active.size && frame === null) frame = requestAnimationFrame(animateTexts);
-  }
+    if (active.size && frame === null) frame = requestAnimationFrame(animate);
+  }, { threshold: .8 });
 
-  const pageObserver = new IntersectionObserver(updateVisibility, { rootMargin: '-90px 0px -64px 0px' });
-  const viewportObserver = new IntersectionObserver(updateVisibility);
-  const nearbyObserver = new IntersectionObserver(entries => {
-    const changedWords = new Set();
-    for (const { target, isIntersecting } of entries) {
-      if (!isIntersecting || staticText.matches) continue;
-      prepare(target, changedWords);
-      nearbyObserver.unobserve(target);
-    }
-    alignDigits(changedWords);
-  }, { rootMargin: '100px 0px' });
-
-  const dynamicObserver = new MutationObserver(changes => {
-    for (const { target } of changes) {
-      if (target.firstElementChild?.classList.contains('binary-text-run')) continue;
-      // The control supplied fresh text. Animate it on its next visibility change.
-      const state = texts.get(target);
-      active.delete(state);
-      state.letters = null;
-      state.words = null;
-      state.decoded = 0;
-      state.position = state.visible ? state.duration : revealStart;
-    }
-  });
-
-  function syncMotionPreference() {
-    if (staticText.matches) {
-      if (frame !== null) cancelAnimationFrame(frame);
-      frame = null;
-      previousTime = null;
+  function syncObserver() {
+    observer.disconnect();
+    if (frame !== null) cancelAnimationFrame(frame);
+    frame = null;
+    previousTime = null;
+    if (staticText.matches || paused) {
+      // Keep headings legible when the animation is stopped mid-reveal.
+      const changedWords = new Set();
+      for (const state of active.values()) {
+        state.position = state.duration;
+        renderBinaryText(state, changedWords);
+      }
+      alignDigits(changedWords);
       active.clear();
       return;
     }
 
-    if (!texts.size) {
-      for (const element of document.querySelectorAll(binaryTextSelector)) {
-        let duration = 280;
-        if (element.matches('h1, h2, h3, h4')) duration = 480;
-        else if (element.matches('a, button, label, output')) duration = 160;
-        texts.set(element, { duration, letters: null, position: revealStart, decoded: 0, visible: false });
-        const observer = element.closest('.site-header, .site-footer, .skip-link') ? viewportObserver : pageObserver;
-        observer.observe(element);
-        nearbyObserver.observe(element);
-        if (element.matches('#project-summary, #brief-status, #toggle-background, output')) {
-          dynamicObserver.observe(element, { childList: true });
-        }
-      }
+    for (const heading of document.querySelectorAll(binaryTextSelector)) {
+      if (!spent.has(heading)) observer.observe(heading);
     }
-    const changedWords = new Set();
-    for (const state of texts.values()) {
-      state.position = state.visible ? state.duration : revealStart;
-      renderBinaryText(state, changedWords);
-    }
-    alignDigits(changedWords);
   }
 
-  staticText.addEventListener('change', syncMotionPreference);
-  syncMotionPreference();
+  function syncPreference() {
+    toggle.hidden = staticText.matches;
+    syncObserver();
+  }
+
+  toggle.addEventListener('click', () => {
+    paused = !paused;
+    toggle.setAttribute('aria-pressed', String(paused));
+    syncObserver();
+  });
+  staticText.addEventListener('change', syncPreference);
+  syncPreference();
 }
 
 if ('IntersectionObserver' in window) enableBinaryReveal();

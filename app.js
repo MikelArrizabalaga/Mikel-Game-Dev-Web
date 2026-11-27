@@ -48,43 +48,84 @@ function initServiceTabs() {
   selectService(0);
 }
 
-function initProjectBrief() {
-  const form = document.querySelector('#project-form');
-  const { service, phase, description } = form.elements;
+async function initProjectBrief(form) {
+  const { email, service, phase, description } = form.elements;
   const summary = document.querySelector('#project-summary');
-  const emailLink = document.querySelector('#email-brief');
-  const recipient = emailLink.getAttribute('href');
   const feedback = document.querySelector('#brief-status');
+  const copyFeedback = document.querySelector('#copy-status');
   const copyButton = document.querySelector('#copy-brief');
+  const sendButton = form.querySelector('button[type="submit"]');
+  const localPreview = ['127.0.0.1', 'localhost'].includes(location.hostname);
+
+  let endpoint = localPreview ? null : form.dataset.endpoint;
+  if (localPreview) {
+    try {
+      const response = await fetch('api/encargos', { signal: AbortSignal.timeout(3000) });
+      if (response.ok && (await response.json()).mode === 'local') endpoint = 'api/encargos';
+    } catch {
+      // The static site can still show the direct email on a different local server.
+    }
+  }
+  if (!endpoint) return;
 
   function updateSummary() {
-    const serviceName = service.selectedOptions[0].textContent;
-    const phaseName = phase.selectedOptions[0].textContent;
-    const details = description.value.trim();
     const lines = [];
-    if (service.value) lines.push('Servicio: ' + serviceName);
-    if (phase.value) lines.push('Fase: ' + phaseName);
-    if (details) {
-      if (lines.length) lines.push('');
-      lines.push('Qué necesito', details);
-    }
-    summary.textContent = lines.join('\n') || 'El resumen aparecerá al completar los campos.';
+    if (email.value.trim()) lines.push('Correo: ' + email.value.trim());
+    if (service.value) lines.push('Servicio: ' + service.selectedOptions[0].textContent);
+    if (phase.value) lines.push('Fase: ' + phase.value);
+    if (description.value.trim()) lines.push('', description.value.trim());
+    summary.textContent = lines.join('\n').trim() || 'El resumen aparecerá al completar los campos.';
     copyButton.disabled = !lines.length;
-    const emailBody = ['Hola Mikel,', '', ...lines].join('\n').replaceAll('\n', '\r\n');
-    emailLink.href = recipient + '?subject=' + encodeURIComponent('Consulta sobre un proyecto') +
-      '&body=' + encodeURIComponent(emailBody);
-    feedback.textContent = '';
   }
 
-  form.addEventListener('submit', (event) => event.preventDefault());
-  form.addEventListener('input', updateSummary);
-  form.addEventListener('change', updateSummary);
-  updateSummary();
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (sendButton.disabled) return;
+    const message = description.value.trim();
+    if (!message) {
+      feedback.textContent = 'Describe qué necesitas.';
+      description.focus();
+      return;
+    }
 
-  for (const link of document.querySelectorAll('[data-brief-service]')) {
+    const body = new URLSearchParams({ email: email.value.trim(), message });
+    if (service.value) body.set('service', service.selectedOptions[0].textContent);
+    if (phase.value) body.set('phase', phase.value);
+    sendButton.disabled = true;
+    feedback.textContent = 'Enviando…';
+    const controls = [email, service, phase, description];
+    for (const control of controls) control.disabled = true;
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { Accept: 'application/json' },
+        body,
+        signal: AbortSignal.timeout(12000),
+      });
+      if (!response.ok) throw new Error('Submission failed');
+      form.reset();
+      updateSummary();
+      feedback.textContent = endpoint === 'api/encargos' ? 'Envío de prueba guardado en este equipo.' : 'Encargo enviado.';
+    } catch {
+      feedback.textContent = 'No se pudo enviar. Inténtalo de nuevo o usa el correo de la sección Contacto.';
+    } finally {
+      for (const control of controls) control.disabled = false;
+      sendButton.disabled = false;
+    }
+  });
+
+  form.addEventListener('input', () => {
+    if (!sendButton.disabled) feedback.textContent = '';
+    copyFeedback.textContent = '';
+    updateSummary();
+  });
+
+  for (const link of document.querySelectorAll('[data-needs-brief]')) {
+    link.hidden = false;
     link.addEventListener('click', (event) => {
-      if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+      if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey || sendButton.disabled) return;
       service.value = link.dataset.briefService;
+      feedback.textContent = '';
       updateSummary();
     });
   }
@@ -92,105 +133,76 @@ function initProjectBrief() {
   copyButton.addEventListener('click', async () => {
     try {
       await navigator.clipboard.writeText(summary.textContent);
-      feedback.textContent = 'Resumen copiado.';
+      copyFeedback.textContent = 'Resumen copiado.';
     } catch {
       const selection = window.getSelection();
       const range = document.createRange();
       range.selectNodeContents(summary);
       selection.removeAllRanges();
       selection.addRange(range);
-      feedback.textContent = 'Resumen seleccionado. Usa la opción Copiar de tu dispositivo.';
+      copyFeedback.textContent = 'Resumen seleccionado. Usa la opción Copiar de tu dispositivo.';
     }
   });
+
+  document.querySelector('#brief-fallback').hidden = true;
+  document.querySelector('.local-note').hidden = endpoint !== 'api/encargos';
+  form.closest('.project-layout').hidden = false;
+  updateSummary();
 }
 
 function initNavigation() {
-  const navLinks = document.querySelectorAll('.site-header nav a');
+  const navContact = document.querySelector('.nav-contact');
+  const contactLink = navContact.firstElementChild;
+  navContact.addEventListener('pointerleave', () => navContact.removeAttribute('data-dismissed'));
+  navContact.addEventListener('focusout', (event) => {
+    if (!navContact.contains(event.relatedTarget)) navContact.removeAttribute('data-dismissed');
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape' || !navContact.matches(':hover, :focus-within')) return;
+    if (navContact.contains(document.activeElement)) contactLink.focus();
+    navContact.setAttribute('data-dismissed', '');
+  });
+  contactLink.addEventListener('click', () => navContact.setAttribute('data-dismissed', ''));
+
+  if (!document.getElementById('trabajos')) return;
+  const oldProjectLinks = new Set([
+    'next-stop-title', 'dont-anger-title', 'shader-work-title', 'realidad-virtual', 'vr-title',
+    'res-vr-title', 'previr-ctx-title', 'nutri-score-title', 'bio-tutorial-title',
+    'juegos-y-aplicaciones', 'games-apps-title', 'vuela-liz-title', 'hur-title',
+    'sopa-de-letras-title', 'pintxo-survivor-title', 'runner-didactico-title',
+  ]);
+  function forwardOldProjectLink() {
+    if (oldProjectLinks.has(location.hash.slice(1))) location.replace('proyectos.html' + location.hash);
+  }
+  forwardOldProjectLink();
+  window.addEventListener('hashchange', forwardOldProjectLink);
+
+  const header = document.querySelector('.site-header');
+  const navLinks = header.querySelectorAll('.main-nav a[href^="#"], .main-nav a[href="proyectos.html"]');
+  const entries = new Map([...navLinks].map((link) => [link.hash.slice(1) || 'trabajos', link]));
+  const sections = [...document.querySelectorAll('main > section')];
+  let frame = null;
   function updateNavigation() {
-    const target = document.getElementById(location.hash.slice(1));
-    const section = target?.closest('main > section');
+    frame = null;
+    const boundary = header.getBoundingClientRect().bottom + 34;
+    const current = sections.findLast((section) => section.getBoundingClientRect().top <= boundary);
+    const activeLink = entries.get(current?.id);
     for (const link of navLinks) {
-      if (link.hash.slice(1) === section?.id) link.setAttribute('aria-current', 'location');
+      if (link === activeLink) link.setAttribute('aria-current', 'location');
       else link.removeAttribute('aria-current');
     }
   }
-  window.addEventListener('hashchange', updateNavigation);
+  function scheduleNavigation() {
+    if (frame === null) frame = requestAnimationFrame(updateNavigation);
+  }
+  window.addEventListener('scroll', scheduleNavigation, { passive: true });
+  window.addEventListener('resize', scheduleNavigation);
+  window.addEventListener('pageshow', scheduleNavigation);
   updateNavigation();
 }
 
-function initHeroTyping() {
-  const mark = document.querySelector('.hero-mark');
-  const output = mark.querySelector('.hero-message-text');
-  const messages = ['En programar videojuegos', 'En shaders y VFX', 'En el trato cercano'];
-  const motion = matchMedia('(prefers-reduced-motion: reduce)');
-  const pauseButton = document.querySelector('#toggle-background');
-
-  let timer;
-  let visible = !('IntersectionObserver' in window);
-  let digitCount = 0;
-  let line = 0;
-  let length = 0;
-
-  function resetTyping() {
-    digitCount = 0;
-    line = 0;
-    length = 0;
-    mark.removeAttribute('data-show-message');
-    mark.dataset.length = motion.matches ? 2 : 0;
-  }
-
-  function typeNext() {
-    if (digitCount < 2) {
-      mark.dataset.length = ++digitCount;
-      timer = setTimeout(typeNext, digitCount === 2 ? 750 : 140);
-      return;
-    }
-
-    const message = messages[line];
-    if (line === 0 && length === 0) mark.setAttribute('data-show-message', '');
-    output.textContent = message.slice(0, length);
-    if (length < message.length) {
-      length++;
-      timer = setTimeout(typeNext, 39);
-    } else if (line < messages.length - 1) {
-      line++;
-      length = 0;
-      timer = setTimeout(typeNext, 600);
-    } else {
-      timer = setTimeout(() => {
-        line = 0;
-        length = 0;
-        typeNext();
-      }, 1700);
-    }
-  }
-
-  function syncTyping() {
-    clearTimeout(timer);
-    if (visible && !motion.matches && !pauseButton.hasAttribute('data-paused') && !document.hidden) {
-      timer = setTimeout(typeNext, 90);
-    }
-  }
-
-  motion.addEventListener('change', () => {
-    resetTyping();
-    syncTyping();
-  });
-  pauseButton.addEventListener('click', syncTyping);
-  document.addEventListener('visibilitychange', syncTyping);
-  if ('IntersectionObserver' in window) {
-    const observer = new IntersectionObserver(([entry]) => {
-      visible = entry.isIntersecting;
-      syncTyping();
-    });
-    observer.observe(mark);
-  }
-  resetTyping();
-  syncTyping();
-}
-
-initServiceTabs();
-initProjectBrief();
+if (document.querySelector('.service-options')) initServiceTabs();
+const briefForm = document.querySelector('#project-form');
+if (briefForm) initProjectBrief(briefForm);
 initNavigation();
-initHeroTyping();
 document.querySelectorAll('[data-needs-js]').forEach((element) => { element.hidden = false; });

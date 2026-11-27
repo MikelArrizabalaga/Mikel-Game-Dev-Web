@@ -24,7 +24,6 @@
   <link rel="preload" href="assets/fonts/spacegrotesk.woff2" as="font" type="font/woff2" crossorigin>
   <script src="binary-background.js" defer></script>
   <script src="app.js" defer></script>
-  <script src="shader-preview.js" defer></script>
   <script src="binary-reveal.js" defer></script>
 </head>
 <body>
@@ -32,12 +31,19 @@
   <a class="skip-link" href="#contenido">Ir al contenido</a>
   <header class="site-header">
     <div class="shell header-inner">
-      <a class="brand" href="#inicio"><span class="brand-mark" aria-hidden="true">01</span> Mikel Arrizabalaga</a>
-      <nav aria-label="Navegación principal">
+      <a class="brand" href="index.html#inicio"><span class="brand-mark" aria-hidden="true"></span><span>Mikel Arrizabalaga</span></a>
+      <nav class="main-nav" aria-label="Navegación principal">
+        <a href="proyectos.html">Proyectos</a>
         <a href="#servicios">Servicios</a>
-        <a href="#trabajos">Trabajos</a>
         <a href="#colaboracion">Cómo trabajo</a>
-        <a class="nav-brief" href="#proyecto">Contacto</a>
+        <div class="nav-contact">
+          <a href="#contacto">Contacto</a>
+          <div class="nav-contact-links">
+            <a href="mailto:arrizamikel@gmail.com">Correo</a>
+            <a href="https://es.linkedin.com/in/mikel-arrizabalaga-munduate">LinkedIn</a>
+            <a href="https://github.com/MikelArrizabalaga">GitHub</a>
+          </div>
+        </div>
       </nav>
     </div>
   </header>
@@ -45,24 +51,49 @@
   <main id="contenido" tabindex="-1">
     <section id="inicio" class="shell hero" aria-labelledby="hero-title">
       <div class="hero-copy">
-        <p class="eyebrow">Desarrollo freelance para estudios y empresas</p>
-        <h1 id="hero-title" aria-label="Videojuegos y Technical Art."><span>Videojuegos y</span> <em>Technical Art<span class="hero-period">.</span></em></h1>
-        <p class="hero-description">Ayudo a estudios y empresas a convertir ideas en prototipos jugables y a integrar mecánicas, shaders, VFX y herramientas en proyectos en marcha.</p>
+        <p class="eyebrow">Videojuegos y Technical Art freelance</p>
+        <h1 id="hero-title"><span>Mikel</span> <span>Arrizabalaga</span></h1>
+        <p class="hero-description">Programo mecánicas, shaders y herramientas para estudios de videojuegos. Puedo ayudarte a crear un prototipo jugable o integrarme en tu producción.</p>
         <div class="hero-actions">
-          <a class="button button-primary" href="#proyecto">Cuéntame tu proyecto</a>
-          <a class="button button-text" href="#trabajos">Ver trabajos</a>
+          <a class="button button-primary" href="#trabajos">Ver proyectos</a>
+          <a class="button button-text" href="#proyecto">Proponer un encargo</a>
         </div>
       </div>
-      <div class="hero-mark" aria-hidden="true">
-        <div class="hero-digits"><span>0</span><span>1</span></div>
-        <div class="hero-message"><span class="hero-message-text"></span></div>
+      <a class="hero-feature" href="proyectos.html#dont-anger-title">
+        <img src="assets/dont-anger-the-boss.webp" width="960" height="540" fetchpriority="high" alt="">
+        <div class="hero-caption">
+          <span class="hero-feature-mark" aria-hidden="true"></span>
+          <div><strong>Don’t Anger the Boss</strong><span>Plataformas 2.5D en desarrollo</span></div>
+          <span class="hero-feature-link">Ver ficha</span>
+        </div>
+      </a>
+    </section>
+
+    <section id="trabajos" class="shell section home-projects" aria-labelledby="featured-title">
+      <div class="section-heading">
+        <h2 id="featured-title" data-binary-reveal>Proyectos</h2>
+        <a class="button button-outline" href="proyectos.html">Ver catálogo completo</a>
+      </div>
+      <div class="featured-grid">
+        <a class="featured-project" href="proyectos.html#next-stop-title">
+          <img src="assets/the-next-stop.jpg" width="616" height="353" decoding="async" alt="">
+          <div><span class="category-label category-games">Videojuegos</span><h3>The Next Stop</h3><p>Interacciones e interfaz de diálogo en una aventura de misterio.</p></div>
+        </a>
+        <a class="featured-project" href="proyectos.html#previr-ctx-title">
+          <img src="assets/previr-ctx.webp" width="960" height="678" loading="lazy" decoding="async" alt="">
+          <div><span class="category-label category-vr">Realidad virtual</span><h3>PREVIR-CTX</h3><p>Programación y arte técnico para un simulador de planificación quirúrgica.</p></div>
+        </a>
+        <a class="featured-project" href="proyectos.html#vuela-liz-title">
+          <img class="app-cover" src="assets/vuela-liz.webp" width="160" height="160" loading="lazy" decoding="async" alt="">
+          <div><span class="category-label category-apps">Juegos y aplicaciones</span><h3>Vuela, Liz</h3><p>Programación y arte técnico para un juego arcade de móviles.</p></div>
+        </a>
       </div>
     </section>
 
     <section id="servicios" class="shell section service-section" aria-labelledby="services-title">
       <div class="section-heading">
-        <h2 id="services-title">Servicios</h2>
-        <p>Desde un prototipo jugable hasta una tarea concreta en una producción en marcha.</p>
+        <h2 id="services-title" data-binary-reveal>Servicios</h2>
+        <p>En qué puedo ayudarte y qué puedes esperar de cada servicio.</p>
       </div>
 
       <div class="service-layout">
@@ -83,8 +114,8 @@
               <div><dt>Posible entrega</dt><dd>Una mecánica jugable y el código preparado para integrarlo en tu proyecto.</dd></div>
             </dl>
             <div class="service-actions">
-              <a class="service-link" href="#proyecto" data-brief-service="videojuegos" data-needs-js hidden>Preparar este encargo</a>
-              <a class="service-link" href="#next-stop-title">Ver mi aportación en The Next Stop</a>
+              <a class="service-link" href="#proyecto" data-brief-service="videojuegos" data-needs-brief hidden>Preparar este encargo</a>
+              <a class="service-link" href="proyectos.html#next-stop-title">Ver mi aportación en The Next Stop</a>
             </div>
           </article>
 
@@ -95,7 +126,7 @@
               <div><dt>Ejemplo de encargo</dt><dd>Preparar un flujo para importar y configurar recursos de arte en el motor de juego.</dd></div>
               <div><dt>Posible entrega</dt><dd>Recursos integrados y una guía para que el equipo pueda repetir el proceso.</dd></div>
             </dl>
-            <a class="service-link" href="#proyecto" data-brief-service="technical-art" data-needs-js hidden>Preparar este encargo</a>
+            <a class="service-link" href="#proyecto" data-brief-service="technical-art" data-needs-brief hidden>Preparar este encargo</a>
           </article>
 
           <article class="service-panel" id="service-shaders">
@@ -106,8 +137,8 @@
               <div><dt>Posible entrega</dt><dd>El shader integrado, un material de ejemplo y una explicación de sus parámetros.</dd></div>
             </dl>
             <div class="service-actions">
-              <a class="service-link" href="#proyecto" data-brief-service="shaders" data-needs-js hidden>Preparar este encargo</a>
-              <a class="service-link" href="#shader-work-title">Ver la muestra de shaders</a>
+              <a class="service-link" href="#proyecto" data-brief-service="shaders" data-needs-brief hidden>Preparar este encargo</a>
+              <a class="service-link" href="proyectos.html#shader-work-title">Ver la muestra de shaders</a>
             </div>
           </article>
 
@@ -118,7 +149,7 @@
               <div><dt>Ejemplo de encargo</dt><dd>Crear un efecto de impacto que indique al jugador que un golpe ha acertado.</dd></div>
               <div><dt>Posible entrega</dt><dd>El efecto preparado para reutilizarlo en el juego y ajustarlo desde el motor.</dd></div>
             </dl>
-            <a class="service-link" href="#proyecto" data-brief-service="vfx" data-needs-js hidden>Preparar este encargo</a>
+            <a class="service-link" href="#proyecto" data-brief-service="vfx" data-needs-brief hidden>Preparar este encargo</a>
           </article>
 
           <article class="service-panel" id="service-herramientas">
@@ -128,134 +159,15 @@
               <div><dt>Ejemplo de encargo</dt><dd>Crear una herramienta de editor para revisar recursos antes de importarlos.</dd></div>
               <div><dt>Posible entrega</dt><dd>Una herramienta integrada y una guía breve de instalación y uso.</dd></div>
             </dl>
-            <a class="service-link" href="#proyecto" data-brief-service="herramientas" data-needs-js hidden>Preparar este encargo</a>
+            <a class="service-link" href="#proyecto" data-brief-service="herramientas" data-needs-brief hidden>Preparar este encargo</a>
           </article>
         </div>
       </div>
-    </section>
-
-    <section id="trabajos" class="shell section" aria-labelledby="work-title">
-      <div class="section-heading">
-        <h2 id="work-title">Trabajos</h2>
-        <div class="work-jump">
-          <a href="#realidad-virtual">Realidad virtual</a>
-          <a href="#juegos-y-aplicaciones">Juegos y aplicaciones</a>
-        </div>
-      </div>
-      <div class="work-list">
-        <article class="work-entry" aria-labelledby="next-stop-title">
-          <div>
-            <p class="work-context">Colaboración con Paranoid Delusion</p>
-            <h3 id="next-stop-title">The Next Stop</h3>
-            <p>Colaboré en programación y arte técnico, con ajustes en las interacciones y la interfaz de diálogo. Es una aventura de misterio en un metro atrapado en un bucle temporal.</p>
-            <p class="work-tech">Unity · C#</p>
-            <a class="service-link" href="https://store.steampowered.com/app/3795470/The_Next_Stop/">Ver The Next Stop en Steam</a>
-          </div>
-          <img class="work-cover" src="assets/the-next-stop.jpg" width="616" height="353" loading="lazy" decoding="async" alt="Portada de The Next Stop, con un pasajero sentado en un andén junto al tren">
-        </article>
-        <article class="work-entry" aria-labelledby="dont-anger-title">
-          <div>
-            <p class="work-context">Proyecto personal en desarrollo</p>
-            <h3 id="dont-anger-title">Don’t Anger the Boss</h3>
-            <p>Trabajo en el desarrollo de este plataformas 2.5D desde el inicio. Mi aportación se centra en programar las mecánicas y conectar arte y código en Unity. También he modelado parte de los recursos 3D del juego.</p>
-            <p class="work-tech">Unity · C# · Modelado 3D</p>
-            <p class="work-release">Lanzamiento previsto para 2027.</p>
-          </div>
-          <img class="work-cover" src="assets/dont-anger-the-boss.webp" width="960" height="540" loading="lazy" decoding="async" alt="Logotipo de Don’t Anger the Boss en naranja y amarillo sobre un fondo claro">
-        </article>
-        <article class="work-entry" aria-labelledby="shader-work-title">
-          <div>
-            <p class="work-context">Proyecto propio de shaders</p>
-            <h3 id="shader-work-title">Shader Graph Master Sample</h3>
-            <p>Para reutilizar formas en distintos materiales de Unity, preparé un paquete con subgrafos y programé una estrella y un polígono procedural con controles de giro y suavizado de bordes.</p>
-            <p class="work-tech">Unity 6 · URP · Shader Graph · HLSL</p>
-            <a class="service-link" href="https://github.com/MikelArrizabalaga/Shader-Graph-Master-Sample">Ver el paquete en GitHub</a>
-          </div>
-          <div class="shader-preview" hidden>
-            <h4>Prueba el polígono</h4>
-            <canvas id="polygon-preview" width="640" height="260" role="img" aria-label="Polígono procedural dibujado en WebGL">Vista del polígono procedural.</canvas>
-            <div class="shader-controls">
-              <label for="polygon-sides"><span>Lados <output for="polygon-sides" id="sides-value" aria-hidden="true">5</output></span><input id="polygon-sides" type="range" min="3" max="12" value="5"></label>
-              <label for="polygon-rotation"><span>Giro <output for="polygon-rotation" id="rotation-value" aria-hidden="true">0°</output></span><input id="polygon-rotation" type="range" min="0" max="360" value="0"></label>
-            </div>
-            <p>Versión de la forma para el navegador en WebGL.</p>
-          </div>
-        </article>
-      </div>
-      <section class="work-group" id="realidad-virtual" aria-labelledby="vr-title">
-        <div class="work-group-heading">
-          <h3 id="vr-title">Realidad virtual</h3>
-          <p>Proyectos para BIO-CRUCES</p>
-        </div>
-        <div class="work-grid">
-          <article class="work-card" aria-labelledby="res-vr-title">
-            <img class="work-card-image" src="assets/res-vr.webp" width="960" height="566" loading="lazy" decoding="async" alt="Sala de reanimación de RES-VR con una paciente simulada y un selector de rol">
-            <h4 id="res-vr-title">RES-VR</h4>
-            <p class="work-tech">Programación</p>
-            <p>Trabajé en la programación de una sala de reanimación en realidad virtual. El personal médico y de enfermería puede practicar su respuesta en simulaciones basadas en casos reales.</p>
-          </article>
-          <article class="work-card" aria-labelledby="previr-ctx-title">
-            <img class="work-card-image" src="assets/previr-ctx.webp" width="960" height="678" loading="lazy" decoding="async" alt="Modelo anatómico 3D y panel de control de PREVIR-CTX">
-            <h4 id="previr-ctx-title">PREVIR-CTX</h4>
-            <p class="work-tech">Programación y arte técnico</p>
-            <p>Colaboré en el desarrollo de un entorno virtual que permite importar modelos 3D de órganos con afecciones, como tumores. El equipo quirúrgico puede explorar la anatomía y ensayar posibles abordajes antes de operar. Virtualware adquirió posteriormente el proyecto.</p>
-          </article>
-          <article class="work-card" aria-labelledby="nutri-score-title">
-            <img class="work-card-image" src="assets/eli-k-on.webp" width="960" height="540" loading="lazy" decoding="async" alt="Portada de Eli-K-On con los personajes del concurso de cocina">
-            <h4 id="nutri-score-title">Eli-K-On (NUTRI-SCORE)</h4>
-            <p class="work-tech">Programación y arte técnico</p>
-            <p>Trabajé en un videojuego educativo para jóvenes de 8 a 16 años. El reto consiste en elegir ingredientes y cocinarlos para conseguir la mayor puntuación de salud posible.</p>
-          </article>
-          <article class="work-card" aria-labelledby="bio-tutorial-title">
-            <img class="work-card-image" src="assets/bio-tutorial.webp" width="960" height="494" loading="lazy" decoding="async" alt="Robot guía de BIO-Tutorial en un entorno de realidad virtual">
-            <h4 id="bio-tutorial-title">BIO-Tutorial</h4>
-            <p class="work-tech">Programación y arte técnico</p>
-            <p>Colaboré en una experiencia de iniciación a los controles de realidad virtual. Incluye tres en raya contra la máquina, baloncesto y otros minijuegos para familiarizarse con el entorno.</p>
-          </article>
-        </div>
-      </section>
-      <section class="work-group" id="juegos-y-aplicaciones" aria-labelledby="games-apps-title">
-        <div class="work-group-heading">
-          <h3 id="games-apps-title">Juegos y aplicaciones</h3>
-          <p>Proyectos para Baleuko S. L.</p>
-        </div>
-        <div class="work-grid">
-          <article class="work-card" aria-labelledby="vuela-liz-title">
-            <img class="work-card-icon" src="assets/vuela-liz.webp" width="160" height="160" loading="lazy" decoding="async" alt="Liz con gorro de aviadora">
-            <h4 id="vuela-liz-title">Vuela, Liz</h4>
-            <p class="work-tech">Programación y arte técnico</p>
-            <p>Colaboré en un juego arcade para móviles en el que guías a Liz entre obstáculos. Los jugadores pueden competir con sus familiares y comparar sus puntuaciones en la clasificación.</p>
-            <a class="service-link" href="https://play.google.com/store/apps/details?id=com.Gookapi.VuelaLiz">Ver Vuela, Liz en Google Play</a>
-          </article>
-          <article class="work-card" aria-labelledby="hur-title">
-            <img class="work-card-icon" src="assets/hur.webp" width="96" height="96" loading="lazy" decoding="async" alt="Retrato de Hur">
-            <h4 id="hur-title">Hur: Aprende</h4>
-            <p class="work-tech">Control de calidad (QA) y programación</p>
-            <p>Realicé pruebas y corregí errores en una aplicación educativa con minijuegos, acertijos y retos basados en la serie de Hur.</p>
-            <a class="service-link" href="https://play.google.com/store/apps/details?id=com.gookapi.hur">Ver Hur: Aprende en Google Play</a>
-          </article>
-          <article class="work-card" aria-labelledby="sopa-de-letras-title">
-            <h4 id="sopa-de-letras-title">Sopa de Letras</h4>
-            <p class="work-tech">Desarrollo de la aplicación</p>
-            <p>Me encargué del desarrollo completo de la aplicación, un juego de búsqueda de palabras ocultas en una cuadrícula.</p>
-          </article>
-          <article class="work-card" aria-labelledby="pintxo-survivor-title">
-            <h4 id="pintxo-survivor-title">Pintxo Survivor</h4>
-            <p class="work-tech">Desarrollo de videojuegos</p>
-            <p>Trabajé en un roguelike de supervivencia con vista cenital. Pintxo se enfrenta a enemigos que representan la contaminación y mejora sus estadísticas a medida que sube de nivel y aumenta la dificultad.</p>
-          </article>
-          <article class="work-card" aria-labelledby="runner-didactico-title">
-            <h4 id="runner-didactico-title">Runner didáctico</h4>
-            <p class="work-tech">Desarrollo de videojuegos</p>
-            <p>Trabajé en un juego de carrera que combina recogida de monedas y preguntas de matemáticas, reciclaje y vocabulario. Para responder, el jugador elige el carril izquierdo o derecho según la opción que considere correcta.</p>
-          </article>
-        </div>
-      </section>
     </section>
 
     <section id="colaboracion" class="shell section collaboration" aria-labelledby="collaboration-title">
       <div class="section-heading">
-        <h2 id="collaboration-title">Cómo trabajo</h2>
+        <h2 id="collaboration-title" data-binary-reveal>Cómo trabajo</h2>
         <p>Tendrás una primera versión para probar antes de cerrar la entrega.</p>
       </div>
       <div class="process">
@@ -274,16 +186,31 @@
       </div>
     </section>
 
+    <section id="contacto" class="shell section contact-section" aria-labelledby="contact-title">
+      <div class="contact-panel">
+        <div>
+          <h2 id="contact-title" data-binary-reveal>Contacto</h2>
+          <p>Para consultas, colaboraciones o para conocer mi trabajo.</p>
+        </div>
+        <ul class="contact-links">
+          <li><a href="mailto:arrizamikel@gmail.com"><span aria-hidden="true">@</span> arrizamikel@gmail.com</a></li>
+          <li><a href="https://es.linkedin.com/in/mikel-arrizabalaga-munduate"><span aria-hidden="true">in</span> LinkedIn</a></li>
+          <li><a href="https://github.com/MikelArrizabalaga"><span aria-hidden="true">&lt;/&gt;</span> GitHub</a></li>
+        </ul>
+      </div>
+    </section>
+
     <section id="proyecto" class="shell section project-section" aria-labelledby="project-title">
       <div class="section-heading">
-        <h2 id="project-title">Hablemos de tu proyecto</h2>
-        <div>
-          <p>Cuéntame en qué estás trabajando. Puedes escribirme directamente o preparar un borrador con el formulario.</p>
-          <a class="email-link" href="mailto:arrizamikel@gmail.com">arrizamikel@gmail.com</a>
-        </div>
+        <h2 id="project-title" data-binary-reveal>Propón un encargo</h2>
+        <p>Cuéntame qué necesitas y deja tu correo para que pueda responderte.</p>
       </div>
-      <div class="project-layout" data-needs-js hidden>
-        <form id="project-form">
+      <p id="brief-fallback">Para proponer un encargo, <a class="email-link" href="mailto:arrizamikel@gmail.com">escríbeme por correo</a>.</p>
+      <div class="project-layout" hidden>
+        <form id="project-form" method="post" data-endpoint="">
+          <label>Tu correo electrónico
+            <input type="email" name="email" autocomplete="email" maxlength="254" required>
+          </label>
           <div class="form-selects">
             <label>Servicio
               <select name="service">
@@ -306,17 +233,21 @@
             </label>
           </div>
           <label>¿Qué necesitas?
-            <textarea name="description" rows="4" maxlength="1200" placeholder="Qué quieres crear o mejorar, para qué plataforma y en qué plazo."></textarea>
+            <textarea name="description" rows="4" maxlength="1200" required placeholder="Qué quieres crear o mejorar, para qué plataforma y en qué plazo."></textarea>
           </label>
+          <div class="form-submit">
+            <button class="button button-primary" type="submit">Enviar encargo</button>
+            <p class="form-status" id="brief-status" role="status"></p>
+          </div>
         </form>
         <div class="summary-card">
           <h3>Resumen del encargo</h3>
           <pre id="project-summary"></pre>
           <div class="summary-actions">
-            <a class="button button-primary" id="email-brief" href="mailto:arrizamikel@gmail.com">Abrir borrador de correo</a>
             <button class="button button-outline" type="button" id="copy-brief" disabled>Copiar resumen</button>
           </div>
-          <p class="form-status" id="brief-status" role="status"></p>
+          <p class="form-status" id="copy-status" role="status"></p>
+          <p class="local-note" hidden>Vista local. El envío de prueba se guarda en este equipo.</p>
         </div>
       </div>
     </section>
@@ -326,7 +257,7 @@
     <div class="shell footer-inner">
       <span>Mikel Arrizabalaga</span>
       <div class="footer-actions">
-        <button class="motion-toggle" type="button" id="toggle-background" hidden>Pausar fondo y portada</button>
+        <button class="motion-toggle" type="button" id="toggle-animation" aria-pressed="false" hidden>Pausar animación</button>
         <a href="#inicio">Volver arriba</a>
       </div>
     </div>
