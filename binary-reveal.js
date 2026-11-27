@@ -1,6 +1,6 @@
 const binaryTextSelector = [
   'h1', 'h2', 'h3', 'h4', 'p', 'a', 'button', 'dt', 'dd', 'label', 'output',
-  '.category-label', '.contact-address', '.hero-message-decoded',
+  '.category-label',
 ].join(', ');
 
 const graphemes = typeof Intl.Segmenter === 'function' ? new Intl.Segmenter(document.documentElement.lang) : null;
@@ -8,13 +8,12 @@ const graphemes = typeof Intl.Segmenter === 'function' ? new Intl.Segmenter(docu
 function measureBinaryText(element) {
   const letters = [];
   const lines = [];
-  const decorative = element.matches('.hero-message-decoded');
   const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, {
     acceptNode(node) {
       const parent = node.parentElement;
       const nestedText = parent.closest(binaryTextSelector);
-      if (!node.data.trim() || nestedText !== element ||
-          (!decorative && parent.closest('[aria-hidden="true"]'))) {
+      if (!node.data.trim() || parent.closest('[aria-hidden="true"], input, select, textarea') ||
+          (nestedText !== element && element.contains(nestedText))) {
         return NodeFilter.FILTER_REJECT;
       }
       return NodeFilter.FILTER_ACCEPT;
@@ -50,49 +49,88 @@ function measureBinaryText(element) {
   return { letters, lines };
 }
 
-function initHeroMessages(canAnimate) {
-  const message = document.querySelector('.hero-message-decoded');
-  if (!message) return () => {};
-  const messages = [message.textContent, message.dataset.heroEffects, message.dataset.heroCollaboration];
-  let index = 0;
-  let visible = false;
+function initHeroTyping(canAnimate) {
+  const mark = document.querySelector('.hero-mark');
+  if (!mark) return () => {};
+  const decoded = mark.querySelector('.hero-message-decoded');
+  const encoded = mark.querySelector('.hero-message-bits');
+  const messages = [decoded.textContent, decoded.dataset.heroEffects, decoded.dataset.heroCollaboration];
   let timer;
+  let visible = false;
+  let running = false;
+  let index = 0;
+
+  function holdMessage() {
+    decoded.textContent = messages[index];
+    encoded.textContent = '';
+    mark.dataset.phase = 'resolved';
+    if (running) timer = setTimeout(fadeMessage, 2300);
+  }
+
+  function fadeMessage() {
+    mark.dataset.phase = 'leaving';
+    timer = setTimeout(() => {
+      index = (index + 1) % messages.length;
+      revealMessage();
+    }, 220);
+  }
+
+  function revealMessage() {
+    const message = messages[index];
+    const bits = Array.from(message, (character, position) => {
+      return character === ' ' ? ' ' : (character.codePointAt(0) + position) % 2;
+    }).join('');
+    let length = 0;
+    decoded.textContent = '';
+    encoded.textContent = bits;
+    mark.dataset.phase = 'binary';
+
+    function decode() {
+      length++;
+      decoded.textContent = message.slice(0, length);
+      encoded.textContent = bits.slice(length);
+      if (length < message.length) timer = setTimeout(decode, 22);
+      else holdMessage();
+    }
+    timer = setTimeout(decode, 115);
+  }
 
   function sync() {
-    clearInterval(timer);
-    if (!visible || document.hidden || !canAnimate()) return;
-    timer = setInterval(() => {
-      index = (index + 1) % messages.length;
-      message.textContent = messages[index];
-    }, 2300);
+    const active = visible && !document.hidden && canAnimate();
+    if (active === running) return;
+    running = active;
+    clearTimeout(timer);
+    holdMessage();
   }
 
   const observer = new IntersectionObserver(([entry]) => {
-    visible = entry.isIntersecting;
+    visible = entry.isIntersecting && entry.intersectionRatio >= .35;
     sync();
-  });
-  observer.observe(message);
+  }, { threshold: .35 });
+  observer.observe(mark);
   document.addEventListener('visibilitychange', sync);
   return sync;
 }
 
 function enableBinaryReveal() {
   const staticText = matchMedia('(prefers-reduced-motion: reduce), (forced-colors: active)');
+  const touchScroll = matchMedia('(pointer: coarse)');
+  const hasScrollEnd = 'onscrollend' in document;
   const toggle = document.querySelector('#toggle-animation');
-  const header = document.querySelector('.site-header');
-  const main = document.querySelector('main');
   const pending = CSS.highlights && typeof Highlight === 'function' ? new Highlight() : null;
+  if (pending) CSS.highlights.set('binary-pending', pending);
+  const header = document.querySelector('.site-header');
   const visible = new Set();
+  const focusedText = new Set();
   const effects = new Map();
   let paused = false;
+  let scrolling = false;
+  let scrollEndTimer;
   let frame = null;
-  let observer;
-  let headerHeight;
-  let viewportWidth = document.documentElement.clientWidth;
   const canAnimate = () => !paused && !staticText.matches;
-  const syncHero = initHeroMessages(canAnimate);
+  const syncHeroTyping = initHeroTyping(canAnimate);
 
-  function finish(element) {
+  function discard(element) {
     const effect = effects.get(element);
     if (!effect) return;
     for (const { range } of effect.letters) pending.delete(range);
@@ -100,78 +138,156 @@ function enableBinaryReveal() {
     effects.delete(element);
   }
 
-  function clearEffects() {
-    for (const element of effects.keys()) finish(element);
-    if (frame !== null) cancelAnimationFrame(frame);
-    frame = null;
+  function render(effect, count) {
+    if (count === effect.decoded) return;
+    const { letters, lines } = effect;
+    const before = effect.decoded < 0 ? letters.length : effect.decoded;
+    for (let i = Math.min(count, before); i < Math.max(count, before); i++) {
+      if (i < count) pending.delete(letters[i].range);
+      else pending.add(letters[i].range);
+    }
+    for (const line of lines) {
+      const { start, end, left, overlay } = line;
+      const hidden = count >= end;
+      if (overlay.hidden !== hidden) overlay.hidden = hidden;
+      const cut = count > start && count < end ? Math.max(0, letters[count].left - left) : 0;
+      if (line.cut !== cut) {
+        line.cut = cut;
+        overlay.style.setProperty('--binary-cut', cut + 'px');
+      }
+    }
+    effect.decoded = count;
+  }
+
+  function schedule() {
+    if (frame === null && !scrolling && !document.hidden && canAnimate()) frame = requestAnimationFrame(update);
   }
 
   function update(now) {
     frame = null;
-    const blankDuration = 45;
-    const writingDuration = 185;
-    for (const [element, effect] of effects) {
-      const elapsed = now - effect.started;
-      const written = Math.max(0, Math.min(1, (elapsed - blankDuration) / writingDuration));
-      const decoding = Math.max(0, (elapsed - blankDuration - writingDuration) / 240);
-      if (decoding >= 1) {
-        finish(element);
+    if (!pending || scrolling || document.hidden || !canAnimate()) return;
+    const height = document.documentElement.clientHeight;
+    const headerBottom = header.getBoundingClientRect().bottom;
+    const inset = Math.max(0, height - headerBottom) * .15;
+    const focusTop = headerBottom + inset;
+    const focusBottom = height - inset;
+    const bodyBox = document.body.getBoundingClientRect();
+    const changes = [];
+    for (const element of visible) {
+      const rect = element.getBoundingClientRect();
+      const inView = rect.bottom > headerBottom && rect.top < height && getComputedStyle(element).visibility === 'visible';
+      const engaged = element.matches(':focus-within') || !!element.closest('a:hover, button:hover, label:focus-within');
+      const center = (rect.top + rect.bottom) / 2;
+      // Keep the text decoded through small movements around a focus boundary.
+      const buffer = focusedText.has(element) ? 12 : 0;
+      const focused = (center >= focusTop - buffer && center <= focusBottom + buffer) ||
+        (rect.height > focusBottom - focusTop && rect.bottom > focusTop && rect.top < focusBottom);
+      const previous = effects.get(element);
+      const measured = !previous && inView && !focused && !engaged ? measureBinaryText(element) : null;
+      changes.push({ element, inView, engaged, focused, previous, measured });
+    }
+
+    function fadeLine(line) {
+      const top = line.pageTop + bodyBox.top;
+      const distance = Math.min(top + line.height - headerBottom, height - top);
+      const opacity = Math.max(0, Math.min(1, distance / 44));
+      if (line.opacity !== opacity) {
+        line.opacity = opacity;
+        line.overlay.style.opacity = opacity;
+      }
+    }
+
+    let moving = false;
+    for (const { element, inView, engaged, focused, previous, measured } of changes) {
+      const wasFocused = focusedText.has(element);
+      if (inView && (engaged || focused)) focusedText.add(element);
+      else focusedText.delete(element);
+      if (!inView || engaged) {
+        discard(element);
+        continue;
+      }
+      if (!previous) {
+        if (!measured?.letters.length) continue;
+        const fragment = document.createDocumentFragment();
+        for (const line of measured.lines) {
+          const overlay = document.createElement('span');
+          overlay.className = element.closest('.button-primary') ? 'binary-line binary-line-inverse' : 'binary-line';
+          overlay.setAttribute('aria-hidden', 'true');
+          overlay.textContent = line.bits;
+          overlay.style.left = line.left - bodyBox.left + 'px';
+          line.pageTop = line.top - bodyBox.top;
+          overlay.style.top = line.pageTop + line.height / 2 + 'px';
+          overlay.style.setProperty('--binary-width', line.right - line.left + 'px');
+          overlay.style.fontSize = line.fontSize * .83 + 'px';
+          line.overlay = overlay;
+          fadeLine(line);
+          fragment.append(overlay);
+        }
+        document.body.append(fragment);
+        const effect = { ...measured, decoded: -1, progress: wasFocused ? 1 : 0, time: now, focused };
+        effects.set(element, effect);
+        render(effect, wasFocused ? measured.letters.length : 0);
+        if (wasFocused) moving = true;
         continue;
       }
 
-      const decoded = Math.floor(decoding * effect.letters.length);
-      for (let i = effect.decoded; i < decoded; i++) pending.delete(effect.letters[i].range);
-      for (const { left, end, start, overlay } of effect.lines) {
-        if (decoded >= end && effect.decoded < end) overlay.hidden = true;
-        if (written !== effect.written) overlay.style.setProperty('--binary-written', written * 100 + '%');
-        if (decoded !== effect.decoded && decoded > start && decoded < end) {
-          overlay.style.setProperty('--binary-cut', Math.max(0, effect.letters[decoded].left - left) + 'px');
-        }
-      }
-      effect.decoded = decoded;
-      effect.written = written;
+      for (const line of previous.lines) fadeLine(line);
+      const elapsed = previous.focused === focused ? now - previous.time : 0;
+      previous.time = now;
+      previous.focused = focused;
+      const duration = element.matches('h1, h2, h3, h4') ? 220 : 150;
+      const direction = focused ? 1 : -1;
+      previous.progress = Math.max(0, Math.min(1, previous.progress + direction * elapsed / duration));
+      render(previous, Math.floor(previous.progress * previous.letters.length));
+      if (focused && previous.progress === 1) discard(element);
+      else if (previous.progress > 0 || focused) moving = true;
     }
-    if (effects.size) frame = requestAnimationFrame(update);
+    if (moving) schedule();
   }
 
-  function enter(elements) {
-    const measurements = new Map();
-    for (const element of elements) {
-      if (visible.has(element)) continue;
-      visible.add(element);
-      if (!canAnimate() || document.hidden || element.matches(':focus-within')) continue;
-      const measured = measureBinaryText(element);
-      if (measured.letters.length) measurements.set(element, measured);
-    }
-    if (!measurements.size) return;
-
-    const bodyBox = document.body.getBoundingClientRect();
-    const fragment = document.createDocumentFragment();
-    for (const [element, measured] of measurements) {
-      const inverse = element.closest('.button-primary');
-      for (const line of measured.lines) {
-        const overlay = document.createElement('span');
-        overlay.className = inverse ? 'binary-line binary-line-inverse' : 'binary-line';
-        overlay.setAttribute('aria-hidden', 'true');
-        overlay.textContent = line.bits;
-        overlay.style.left = line.left - bodyBox.left + 'px';
-        overlay.style.top = line.top - bodyBox.top + line.height / 2 + 'px';
-        overlay.style.setProperty('--binary-width', line.right - line.left + 'px');
-        overlay.style.fontSize = line.fontSize * .83 + 'px';
-        line.overlay = overlay;
-        fragment.append(overlay);
+  const observer = new IntersectionObserver(entries => {
+    for (const { target, isIntersecting } of entries) {
+      if (isIntersecting) visible.add(target);
+      else {
+        visible.delete(target);
+        focusedText.delete(target);
+        discard(target);
       }
-      for (const { range } of measured.letters) pending.add(range);
-      effects.set(element, { ...measured, started: performance.now(), decoded: 0, written: 0 });
     }
-    document.body.append(fragment);
-    if (frame === null) frame = requestAnimationFrame(update);
+    schedule();
+  });
+
+  function clearEffects() {
+    for (const element of effects.keys()) discard(element);
+    focusedText.clear();
+  }
+
+  function finishScroll() {
+    if (!scrolling) return;
+    scrolling = false;
+    schedule();
+  }
+
+  function onScroll() {
+    if (!touchScroll.matches) {
+      schedule();
+      return;
+    }
+    if (!scrolling) {
+      scrolling = true;
+      clearEffects();
+    }
+    if (!hasScrollEnd) {
+      clearTimeout(scrollEndTimer);
+      scrollEndTimer = setTimeout(finishScroll, 120);
+    }
   }
 
   function sync() {
     toggle.hidden = staticText.matches;
-    if (!canAnimate()) clearEffects();
-    syncHero();
+    if (canAnimate()) schedule();
+    else clearEffects();
+    syncHeroTyping();
   }
 
   toggle.addEventListener('click', () => {
@@ -181,55 +297,30 @@ function enableBinaryReveal() {
   });
   staticText.addEventListener('change', sync);
   if (pending) {
-    CSS.highlights.set('binary-pending', pending);
-    const elements = [...main.querySelectorAll(binaryTextSelector)].filter(element =>
-      element.matches('.hero-message-decoded') || !element.closest('[aria-hidden="true"], [role="status"]')
-    );
-
-    function observeViewport() {
-      const height = getComputedStyle(header).position === 'sticky' ? header.offsetHeight : 0;
-      if (height === headerHeight) return;
-      headerHeight = height;
-      observer?.disconnect();
-      observer = new IntersectionObserver(entries => {
-        const entering = [];
-        for (const { target, isIntersecting } of entries) {
-          if (isIntersecting) entering.push(target);
-          else {
-            visible.delete(target);
-            finish(target);
-          }
-        }
-        enter(entering);
-      }, { rootMargin: '-' + height + 'px 0px 0px' });
-      for (const element of elements) observer.observe(element);
+    document.fonts.ready.then(() => {
+      for (const element of document.querySelectorAll(binaryTextSelector)) {
+        if (!element.closest('[data-binary-static], .site-header, .site-footer, .skip-link, [aria-hidden="true"], [role="status"]')) observer.observe(element);
+      }
+    });
+    window.addEventListener('scroll', onScroll, { passive: true });
+    if (hasScrollEnd) document.addEventListener('scrollend', finishScroll);
+    const refreshLayout = () => {
+      clearEffects();
+      schedule();
+    };
+    window.addEventListener('resize', refreshLayout, { passive: true });
+    new ResizeObserver(refreshLayout).observe(document.querySelector('main'));
+    const dynamicText = new MutationObserver(entries => {
+      for (const { target } of entries) discard(target);
+      schedule();
+    });
+    for (const element of document.querySelectorAll('output')) {
+      dynamicText.observe(element, { childList: true });
     }
-
-    // Prepare texts already on screen before the observer delivers its first entries.
-    const viewportHeight = document.documentElement.clientHeight;
-    observeViewport();
-    enter(elements.filter(element => {
-      const rect = element.getBoundingClientRect();
-      return rect.width && rect.bottom > headerHeight && rect.top < viewportHeight;
-    }));
-
-    window.addEventListener('resize', () => {
-      const width = document.documentElement.clientWidth;
-      if (width !== viewportWidth) {
-        viewportWidth = width;
-        clearEffects();
-      }
-      observeViewport();
-    }, { passive: true });
-    new ResizeObserver(observeViewport).observe(header);
-    document.addEventListener('visibilitychange', () => {
-      if (document.hidden) clearEffects();
-    });
-    document.addEventListener('focusin', () => {
-      for (const element of effects.keys()) {
-        if (element.matches(':focus-within')) finish(element);
-      }
-    });
+    document.addEventListener('visibilitychange', schedule);
+    for (const event of ['focusin', 'focusout', 'pointerover', 'pointerout', 'change']) {
+      document.addEventListener(event, schedule);
+    }
   }
   sync();
 }
