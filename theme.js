@@ -21,7 +21,7 @@
     if (picker) picker.value = preference;
     if (root.dataset.theme === theme) return;
     root.dataset.theme = theme;
-    themeColor.content = theme === 'dark' ? '#181412' : '#ffffff';
+    themeColor.content = theme === 'dark' ? '#141414' : '#ffffff';
     window.dispatchEvent(new Event('themechange'));
   }
 

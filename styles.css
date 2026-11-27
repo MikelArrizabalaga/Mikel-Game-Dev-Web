@@ -44,20 +44,20 @@
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --paper: #181412;
-  --surface: #231c18;
-  --ink: #f8eee8;
-  --muted: #d3bdb1;
-  --line: #594238;
-  --accent: #ff845b;
-  --action: #ff9b76;
-  --pale: #34231b;
-  --on-action: #26130b;
-  --action-hover: #ffb295;
-  --text-hover: #ffb295;
-  --stroke: #ff926a;
-  --input-line: #997462;
-  --hero-glow: #181412c9;
+  --paper: #141414;
+  --surface: #1e1e1e;
+  --ink: #f2f2f2;
+  --muted: #bdbdbd;
+  --line: #474747;
+  --accent: #c7c7c7;
+  --action: #e2e2e2;
+  --pale: #282828;
+  --on-action: #171717;
+  --action-hover: #fff;
+  --text-hover: #fff;
+  --stroke: #c7c7c7;
+  --input-line: #808080;
+  --hero-glow: #141414c9;
   --shadow: #0005;
 }
 
