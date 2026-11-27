@@ -154,54 +154,18 @@ button { cursor: pointer; }
   .nav-contact:not([data-dismissed]):hover .nav-contact-links { visibility: visible; }
 }
 
-.site-intro {
-  position: fixed;
-  z-index: 3;
-  inset: 0;
-  display: grid;
-  place-content: center;
-  justify-items: center;
-  gap: clamp(12px, 3vw, 24px);
-  padding: 18px;
-  background: var(--paper);
-  text-align: center;
-  pointer-events: none;
-  animation: intro-out 1100ms ease both;
-}
-.site-intro-digits {
-  padding: 7px 11px;
-  border: 1px solid var(--line);
-  border-radius: 5px;
-  color: var(--action);
-  font: 700 clamp(1.15rem, 3vw, 1.6rem)/1 var(--font-bits);
-  animation: intro-marker 360ms ease-out both;
-}
-.site-intro-name {
-  padding: .12em .07em;
-  font: 700 clamp(2.3rem, 9vw, 6.3rem)/1 "Space Grotesk", var(--font-text);
-  letter-spacing: -.072em;
-  animation: intro-name 420ms cubic-bezier(.24, .75, .25, 1) 115ms both;
-}
-.site-intro-bits {
-  color: var(--action);
-  font: 600 clamp(.6rem, 2.4vw, .86rem)/1.4 var(--font-bits);
-  letter-spacing: .12em;
-  animation: intro-marker 260ms ease-out 330ms both;
-}
-@keyframes intro-marker {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-@keyframes intro-name {
-  from { clip-path: inset(0 100% 0 0); transform: translateY(6px); }
-  to { clip-path: inset(0); transform: translateY(0); }
-}
-@keyframes intro-out {
-  0%, 68% { opacity: 1; }
-  100% { opacity: 0; }
-}
-@media (prefers-reduced-motion: reduce), (forced-colors: active) {
-  .site-intro { display: none; }
+@media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
+  .hero[data-intro] .eyebrow { animation: intro-rise 360ms ease-out both; }
+  .hero[data-intro] h1 { animation: intro-title 780ms cubic-bezier(.24, .75, .25, 1) 80ms both; }
+  .hero[data-intro] .hero-mark { animation: intro-rise 520ms ease-out 260ms both; }
+  @keyframes intro-rise {
+    from { opacity: 0; transform: translateY(7px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes intro-title {
+    from { opacity: 0; clip-path: inset(-.15em 100% -.2em -.1em); transform: translateY(7px); }
+    to { opacity: 1; clip-path: inset(-.15em -.1em -.2em -.1em); transform: translateY(0); }
+  }
 }
 
 .hero {

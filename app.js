@@ -1,6 +1,6 @@
 function initIntro() {
-  const intro = document.querySelector('.site-intro');
-  if (!intro || (location.hash && location.hash !== '#inicio') || window.scrollY > 0 || document.hidden) return;
+  const hero = document.querySelector('.hero');
+  if (!hero || (location.hash && location.hash !== '#inicio') || window.scrollY > 0 || document.hidden) return;
   const staticText = matchMedia('(prefers-reduced-motion: reduce), (forced-colors: active)');
   if (staticText.matches) return;
   try {
@@ -16,19 +16,19 @@ function initIntro() {
   const timeout = setTimeout(finish, 1500);
 
   function finish() {
-    intro.hidden = true;
+    hero.removeAttribute('data-intro');
     clearTimeout(timeout);
     listeners.abort();
   }
 
-  intro.addEventListener('animationend', event => {
-    if (event.target === intro) finish();
+  hero.addEventListener('animationend', event => {
+    if (event.animationName === 'intro-title') finish();
   }, { signal });
   for (const type of ['pointerdown', 'keydown', 'focusin', 'scroll', 'pagehide']) {
     window.addEventListener(type, finish, { passive: true, signal });
   }
   staticText.addEventListener('change', finish, { signal });
-  intro.hidden = false;
+  hero.setAttribute('data-intro', '');
 }
 
 function initServiceTabs() {
