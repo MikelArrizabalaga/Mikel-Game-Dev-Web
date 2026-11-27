@@ -7,6 +7,7 @@ const graphemes = typeof Intl.Segmenter === 'function' ? new Intl.Segmenter('es'
 
 function measureBinaryText(element) {
   const letters = [];
+  const lines = [];
   const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, {
     acceptNode(node) {
       const parent = node.parentElement;
@@ -22,23 +23,30 @@ function measureBinaryText(element) {
   while (walker.nextNode()) {
     const node = walker.currentNode;
     const fontSize = parseFloat(getComputedStyle(node.parentElement).fontSize);
-    const outlined = !!node.parentElement.closest('.hero-surname');
     const characters = graphemes ? Array.from(graphemes.segment(node.data), ({ segment }) => segment) : [...node.data];
-    let end = 0;
+    let offset = 0;
+    let line;
     for (const character of characters) {
-      const start = end;
-      end += character.length;
+      const start = offset;
+      offset += character.length;
       if (!character.trim()) continue;
+
       const range = new Range();
       range.setStart(node, start);
-      range.setEnd(node, end);
+      range.setEnd(node, offset);
       const rect = range.getBoundingClientRect();
-      if (rect.width && rect.height) {
-        letters.push({ range, rect, fontSize, outlined, bit: character.codePointAt(0) % 2 });
+      if (!rect.width || !rect.height) continue;
+      if (!line || line.top !== rect.top) {
+        line = { top: rect.top, left: rect.left, right: rect.right, height: rect.height, fontSize, start: letters.length, bits: '' };
+        lines.push(line);
       }
+      line.right = Math.max(line.right, rect.right);
+      line.bits += Array.from(character, char => char.codePointAt(0).toString(2).padStart(8, '0')).join('');
+      line.end = letters.length + 1;
+      letters.push({ range, left: rect.left });
     }
   }
-  return letters;
+  return { letters, lines };
 }
 
 function initHeroTyping(canAnimate) {
@@ -98,119 +106,131 @@ function initHeroTyping(canAnimate) {
 function enableBinaryReveal() {
   const staticText = matchMedia('(prefers-reduced-motion: reduce), (forced-colors: active)');
   const toggle = document.querySelector('#toggle-animation');
-  const animations = new Map();
   const pending = CSS.highlights && typeof Highlight === 'function' ? new Highlight() : null;
-  const queued = pending ? new Highlight() : null;
-  if (pending) {
-    CSS.highlights.set('binary-queued', queued);
-    CSS.highlights.set('binary-pending', pending);
-  }
+  if (pending) CSS.highlights.set('binary-pending', pending);
+  const visible = new Set();
+  const focusedText = new Set();
+  const effects = new Map();
   let paused = false;
   let frame = null;
   const canAnimate = () => !paused && !staticText.matches;
   const syncHeroTyping = initHeroTyping(canAnimate);
 
-  function showDigit(letter, animation) {
-    const { range, rect, fontSize, bit } = letter;
-    const { box, host, inverse } = animation;
-    const digit = document.createElement('span');
-    digit.className = 'binary-digit ' + (bit ? 'bit-one' : 'bit-zero');
-    if (inverse) digit.classList.add('binary-digit-inverse');
-    digit.setAttribute('aria-hidden', 'true');
-    const height = fontSize * .57;
-    const width = Math.min(height * .68, rect.width * .92);
-    digit.style.left = rect.left - box.left + rect.width / 2 + 'px';
-    digit.style.top = rect.top - box.top + rect.height / 2 + 'px';
-    digit.style.width = width + 'px';
-    digit.style.height = height + 'px';
-    digit.style.setProperty('--bit-stroke', Math.min(height * .12, width * .25) + 'px');
-    queued.delete(range);
-    pending.add(range);
-    host.append(digit);
-    letter.digit = digit;
+  function discard(element) {
+    const effect = effects.get(element);
+    if (!effect) return;
+    for (const { range } of effect.letters) pending.delete(range);
+    for (const { overlay } of effect.lines) overlay.remove();
+    effects.delete(element);
   }
 
-  function reveal(letter) {
-    queued.delete(letter.range);
-    pending.delete(letter.range);
-    letter.digit?.remove();
-  }
-
-  function finish(element) {
-    const animation = animations.get(element);
-    if (!animation) return;
-    for (let i = animation.revealed; i < animation.letters.length; i++) reveal(animation.letters[i]);
-    animations.delete(element);
-  }
-
-  function tick(now) {
-    frame = null;
-    for (const [element, animation] of animations) {
-      animation.start ??= now + animation.delay;
-      const elapsed = now - animation.start;
-      if (elapsed < 0) continue;
-      if (animation.staged === 0) {
-        for (const { range, outlined } of animation.letters) {
-          if (!outlined) queued.add(range);
-        }
-      }
-      while (animation.revealed < animation.letters.length && elapsed >= 88 + animation.revealed * animation.step) {
-        reveal(animation.letters[animation.revealed++]);
-      }
-      animation.staged = Math.max(animation.staged, animation.revealed);
-      while (animation.staged < animation.letters.length && elapsed >= animation.staged * animation.step) {
-        showDigit(animation.letters[animation.staged++], animation);
-      }
-      if (animation.revealed === animation.letters.length) animations.delete(element);
+  function render(effect, count) {
+    if (count === effect.decoded) return;
+    const { letters, lines } = effect;
+    const before = effect.decoded < 0 ? letters.length : effect.decoded;
+    for (let i = Math.min(count, before); i < Math.max(count, before); i++) {
+      if (i < count) pending.delete(letters[i].range);
+      else pending.add(letters[i].range);
     }
-    if (animations.size) frame = requestAnimationFrame(tick);
+    for (const { start, end, left, overlay } of lines) {
+      overlay.hidden = count >= end;
+      const cut = count > start && count < end ? letters[count].left - left : 0;
+      overlay.style.setProperty('--binary-cut', Math.max(0, cut) + 'px');
+    }
+    effect.decoded = count;
   }
 
-  const observer = new IntersectionObserver((entries) => {
+  function schedule() {
+    if (frame === null) frame = requestAnimationFrame(update);
+  }
+
+  function update(now) {
+    frame = null;
     if (!pending || !canAnimate()) return;
-    // Measure the real text once. Decorative digits never participate in text layout.
-    const starts = [];
-    for (const { target, isIntersecting, boundingClientRect } of entries) {
-      if (!isIntersecting) {
-        finish(target);
+    const height = document.documentElement.clientHeight;
+    const headerBottom = document.querySelector('.site-header').getBoundingClientRect().bottom;
+    const inset = Math.max(0, height - headerBottom) * .15;
+    const focusTop = headerBottom + inset;
+    const focusBottom = height - inset;
+    const bodyBox = document.body.getBoundingClientRect();
+    const changes = [];
+    for (const element of visible) {
+      const rect = element.getBoundingClientRect();
+      const inView = rect.bottom > headerBottom && rect.top < height && getComputedStyle(element).visibility === 'visible';
+      const engaged = element.matches(':focus-within, a:hover, button:hover');
+      const center = (rect.top + rect.bottom) / 2;
+      const focused = (center >= focusTop && center <= focusBottom) ||
+        (rect.height > focusBottom - focusTop && rect.bottom > focusTop && rect.top < focusBottom);
+      const previous = effects.get(element);
+      const measured = !previous && inView && !focused ? measureBinaryText(element) : null;
+      changes.push({ element, inView, engaged, focused, previous, measured });
+    }
+
+    let moving = false;
+    for (const { element, inView, engaged, focused, previous, measured } of changes) {
+      const wasFocused = focusedText.has(element);
+      if (inView && (engaged || focused)) focusedText.add(element);
+      else focusedText.delete(element);
+      if (!inView || engaged) {
+        discard(element);
         continue;
       }
-      if (animations.has(target) || target.matches(':focus-within, .skip-link') ||
-          getComputedStyle(target).visibility !== 'visible') continue;
-      const letters = measureBinaryText(target);
-      if (!letters.length) continue;
+      if (!previous) {
+        if (!measured?.letters.length) continue;
+        const fragment = document.createDocumentFragment();
+        for (const line of measured.lines) {
+          const overlay = document.createElement('span');
+          overlay.className = element.closest('.button-primary') ? 'binary-line binary-line-inverse' : 'binary-line';
+          overlay.setAttribute('aria-hidden', 'true');
+          overlay.textContent = line.bits;
+          overlay.style.left = line.left - bodyBox.left + 'px';
+          overlay.style.top = line.top - bodyBox.top + line.height / 2 + 'px';
+          overlay.style.setProperty('--binary-width', line.right - line.left + 'px');
+          overlay.style.fontSize = line.fontSize * .83 + 'px';
+          fragment.append(overlay);
+          line.overlay = overlay;
+        }
+        document.body.append(fragment);
+        const effect = { ...measured, decoded: -1, progress: wasFocused ? 1 : 0, time: now };
+        effects.set(element, effect);
+        render(effect, wasFocused ? measured.letters.length : 0);
+        if (wasFocused) moving = true;
+        continue;
+      }
 
-      const host = target.closest('.site-header') || document.body;
-      starts.push({
-        target, letters, host, box: host.getBoundingClientRect(),
-        inverse: !!target.closest('.button-primary'),
-        delay: Math.min(104, Math.max(0, boundingClientRect.top) * .12),
-      });
+      const elapsed = Math.min(now - previous.time, 60);
+      previous.time = now;
+      const duration = element.matches('h1, h2, h3, h4') ? 380 : 260;
+      const direction = focused ? 1 : -1;
+      previous.progress = Math.max(0, Math.min(1, previous.progress + direction * elapsed / duration));
+      render(previous, Math.floor(previous.progress * previous.letters.length));
+      if (focused && previous.progress === 1) discard(element);
+      else if (previous.progress > 0 || focused) moving = true;
     }
+    if (moving) schedule();
+  }
 
-    for (const { target, ...animation } of starts) {
-      const { letters } = animation;
-      const maxDelay = target.matches('h1, h2') ? 515 : 740;
-      const step = Math.min(43, maxDelay / Math.max(1, letters.length - 1));
-      animations.set(target, { ...animation, revealed: 0, staged: 0, step, start: null });
+  const observer = new IntersectionObserver(entries => {
+    for (const { target, isIntersecting } of entries) {
+      if (isIntersecting) visible.add(target);
+      else {
+        visible.delete(target);
+        focusedText.delete(target);
+        discard(target);
+      }
     }
-    if (animations.size && frame === null) frame = requestAnimationFrame(tick);
-  }, { rootMargin: '0px 0px -24px' });
-
-  window.addEventListener('resize', () => {
-    for (const element of animations.keys()) finish(element);
-  }, { passive: true });
-  document.addEventListener('focusin', (event) => {
-    for (const element of animations.keys()) {
-      if (element.contains(event.target) || event.target.contains(element)) finish(element);
-    }
+    schedule();
   });
+
+  function clearEffects() {
+    for (const element of effects.keys()) discard(element);
+    focusedText.clear();
+  }
 
   function sync() {
     toggle.hidden = staticText.matches;
-    if (!canAnimate()) {
-      for (const element of animations.keys()) finish(element);
-    }
+    if (canAnimate()) schedule();
+    else clearEffects();
     syncHeroTyping();
   }
 
@@ -223,9 +243,26 @@ function enableBinaryReveal() {
   if (pending) {
     document.fonts.ready.then(() => {
       for (const element of document.querySelectorAll(binaryTextSelector)) {
-        if (!element.closest('[aria-hidden="true"], [role="status"]')) observer.observe(element);
+        if (!element.closest('.site-header, .skip-link, [aria-hidden="true"], [role="status"]')) observer.observe(element);
       }
     });
+    window.addEventListener('scroll', schedule, { passive: true });
+    const refreshLayout = () => {
+      clearEffects();
+      schedule();
+    };
+    window.addEventListener('resize', refreshLayout, { passive: true });
+    new ResizeObserver(refreshLayout).observe(document.querySelector('main'));
+    const dynamicText = new MutationObserver(entries => {
+      for (const { target } of entries) discard(target);
+      schedule();
+    });
+    for (const element of document.querySelectorAll('#project-summary, output')) {
+      dynamicText.observe(element, { childList: true });
+    }
+    for (const event of ['focusin', 'focusout', 'pointerover', 'pointerout', 'change']) {
+      document.addEventListener(event, schedule);
+    }
   }
   sync();
 }

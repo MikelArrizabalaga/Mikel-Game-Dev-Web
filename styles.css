@@ -373,24 +373,30 @@ h3 { font-size: clamp(1.25rem, 2.25vw, 1.75rem); line-height: 1.2; letter-spacin
   .service-panel dl, .form-selects { grid-template-columns: minmax(0, 1fr); }
 }
 @media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
-  ::highlight(binary-queued) { color: #856d65b3; }
-  .button-primary::highlight(binary-queued) { color: #ffffffb8; }
   ::highlight(binary-pending) {
     color: transparent;
     -webkit-text-fill-color: transparent;
     -webkit-text-stroke-color: transparent;
     stroke-color: transparent;
   }
-  .binary-digit {
+  .binary-line {
     position: absolute;
-    transform: translate(-50%, -50%);
+    transform: translateY(-50%);
     z-index: 1;
+    overflow: hidden;
+    width: var(--binary-width);
+    width: round(down, var(--binary-width), calc(1ch + .035em));
+    clip-path: inset(0 0 0 var(--binary-cut, 0px));
+    clip-path: inset(0 0 0 round(up, var(--binary-cut, 0px), calc(1ch + .035em)));
     color: var(--action);
-    opacity: .88;
+    font: 600 1em/1.1 "Segoe UI", system-ui, sans-serif;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: .035em;
+    white-space: nowrap;
     pointer-events: none;
     user-select: none;
   }
-  .binary-digit-inverse { color: var(--paper); }
+  .binary-line-inverse { color: var(--paper); }
   .hero-mark[data-typing] .hero-digits > span { animation: hero-bit-in 420ms cubic-bezier(.2, .72, .25, 1) both; }
   .hero-mark[data-typing] .hero-digits > .bit-one { animation-delay: 62ms; }
   @keyframes hero-bit-in {
