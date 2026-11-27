@@ -10,4 +10,8 @@ Abre `index.html` directamente o ejecuta `node dev-server.mjs` desde la carpeta 
 
 El contacto abre un borrador en la aplicación de correo del visitante mediante un enlace `mailto:`. El pie enlaza el [aviso legal](aviso-legal.html) y la [política de privacidad](privacidad.html).
 
-La [imagen para compartir](assets/social-preview.png) mide 1200 × 630 píxeles y usa la URL pública en los metadatos de la página. El [historial](HISTORIAL_WEB.md) y los [pendientes](PENDIENTES_WEB.md) documentan la evolución y el estado de publicación.
+La [imagen para compartir](assets/social-preview.png) mide 1200 × 630 píxeles y usa la URL pública en los metadatos de la página.
+
+## Créditos
+
+La traducción inicial de la web al euskera y al inglés y parte del código del sitio se prepararon con asistencia de IA. Mikel revisó los textos y aportó correcciones. Las fichas del portfolio describen su participación en cada proyecto y enlazan a las muestras públicas disponibles.
