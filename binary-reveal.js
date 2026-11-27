@@ -142,21 +142,26 @@ function enableBinaryReveal() {
       if (i < count) pending.delete(letters[i].range);
       else pending.add(letters[i].range);
     }
-    for (const { start, end, left, overlay } of lines) {
-      overlay.hidden = count >= end;
-      const cut = count > start && count < end ? letters[count].left - left : 0;
-      overlay.style.setProperty('--binary-cut', Math.max(0, cut) + 'px');
+    for (const line of lines) {
+      const { start, end, left, overlay } = line;
+      const hidden = count >= end;
+      if (overlay.hidden !== hidden) overlay.hidden = hidden;
+      const cut = count > start && count < end ? Math.max(0, letters[count].left - left) : 0;
+      if (line.cut !== cut) {
+        line.cut = cut;
+        overlay.style.setProperty('--binary-cut', cut + 'px');
+      }
     }
     effect.decoded = count;
   }
 
   function schedule() {
-    if (frame === null) frame = requestAnimationFrame(update);
+    if (frame === null && !document.hidden && canAnimate()) frame = requestAnimationFrame(update);
   }
 
   function update(now) {
     frame = null;
-    if (!pending || !canAnimate()) return;
+    if (!pending || document.hidden || !canAnimate()) return;
     const height = document.documentElement.clientHeight;
     const headerBottom = header.getBoundingClientRect().bottom;
     const inset = Math.max(0, height - headerBottom) * .15;
@@ -181,7 +186,11 @@ function enableBinaryReveal() {
     function fadeLine(line) {
       const top = line.pageTop + bodyBox.top;
       const distance = Math.min(top + line.height - headerBottom, height - top);
-      line.overlay.style.opacity = Math.max(0, Math.min(1, distance / 44));
+      const opacity = Math.max(0, Math.min(1, distance / 44));
+      if (line.opacity !== opacity) {
+        line.opacity = opacity;
+        line.overlay.style.opacity = opacity;
+      }
     }
 
     let moving = false;
@@ -282,6 +291,7 @@ function enableBinaryReveal() {
     for (const element of document.querySelectorAll('#project-summary, output')) {
       dynamicText.observe(element, { childList: true });
     }
+    document.addEventListener('visibilitychange', schedule);
     for (const event of ['focusin', 'focusout', 'pointerover', 'pointerout', 'change']) {
       document.addEventListener(event, schedule);
     }

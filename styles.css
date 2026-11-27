@@ -184,8 +184,9 @@ button { cursor: pointer; }
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
-  width: min(100%, 16.5rem);
-  min-height: 44px;
+  width: min(100%, 36rem);
+  padding-block: clamp(10px, 1.6vw, 20px);
+  border-block-start: 1px solid var(--line);
   color: var(--ink);
   text-align: left;
   user-select: none;
@@ -194,10 +195,10 @@ button { cursor: pointer; }
   display: flex;
   align-items: center;
   gap: .035em;
-  padding-inline-end: 13px;
+  padding-inline-end: clamp(16px, 2.5vw, 32px);
   border-inline-end: 1px solid var(--line);
   color: var(--accent);
-  font: 700 1.6rem/.95 var(--font-bits);
+  font: 700 clamp(3.5rem, 6.8vw, 5.75rem)/.95 var(--font-bits);
   letter-spacing: -.08em;
 }
 .hero-digits span:first-child { color: var(--action); }
@@ -205,10 +206,10 @@ button { cursor: pointer; }
   display: grid;
   align-items: center;
   min-height: 2.5em;
-  padding-inline-start: 13px;
-  font: 650 .95rem/1.25 "Space Grotesk", var(--font-text);
+  padding-inline-start: clamp(16px, 2.5vw, 32px);
+  font: 650 clamp(1.15rem, 2.25vw, 1.875rem)/1.25 "Space Grotesk", var(--font-text);
 }
-.hero-message-text { white-space: pre-wrap; transition: opacity 200ms ease; }
+.hero-message-text { white-space: pre-wrap; overflow-wrap: anywhere; transition: opacity 200ms ease; }
 .hero-message-bits { color: var(--action); font-variant-numeric: tabular-nums; }
 .hero-mark[data-phase="leaving"] .hero-message-text { opacity: 0; }
 @media (prefers-reduced-motion: reduce), (forced-colors: active) {
@@ -220,7 +221,7 @@ button { cursor: pointer; }
     -webkit-text-fill-color: transparent;
     -webkit-text-stroke: clamp(1.45px, .177vw, 2.5px) var(--stroke);
   }
-  .hero-digits span:first-child { -webkit-text-stroke-width: 1.1px; }
+  .hero-digits span:first-child { -webkit-text-stroke-width: clamp(1.5px, .19vw, 2.5px); }
 }
 
 @media (min-width: 831px) and (min-height: 680px) {
@@ -442,6 +443,9 @@ h3 { font-size: clamp(1.25rem, 2.25vw, 1.75rem); line-height: 1.2; letter-spacin
   .header-inner > .main-nav { justify-content: space-between; column-gap: 4px; }
   .main-nav a { font-size: .875rem; }
   .service-panel dl, .form-selects { grid-template-columns: minmax(0, 1fr); }
+  .hero-mark { grid-template-columns: minmax(0, 1fr); justify-items: center; gap: 7px; padding-block: 16px 4px; text-align: center; }
+  .hero-digits { padding-inline-end: 0; border-inline-end: 0; }
+  .hero-message { width: 100%; padding-inline-start: 0; }
 }
 @media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
   ::highlight(binary-pending) {
