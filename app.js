@@ -88,7 +88,7 @@ function initNavigation() {
   let frame = null;
   function updateNavigation() {
     frame = null;
-    const boundary = header.getBoundingClientRect().bottom + 34;
+    const boundary = Math.max(0, header.getBoundingClientRect().bottom) + 34;
     const current = sections.findLast((section) => section.getBoundingClientRect().top <= boundary);
     const nextLink = entries.get(current?.id);
     if (activeLink === nextLink) return;

@@ -214,12 +214,7 @@ button { cursor: pointer; }
   padding-inline-start: clamp(16px, 2.5vw, 32px);
   font: 650 clamp(1.15rem, 2.25vw, 1.875rem)/1.25 "Space Grotesk", var(--font-text);
 }
-.hero-message-text { white-space: pre-wrap; overflow-wrap: anywhere; transition: opacity 200ms ease; }
-.hero-message-bits { color: var(--action); font-variant-numeric: tabular-nums; }
-.hero-mark[data-phase="leaving"] .hero-message-text { opacity: 0; }
-@media (prefers-reduced-motion: reduce), (forced-colors: active) {
-  .hero-message-text { transition: none; }
-}
+.hero-message-text { white-space: pre-wrap; overflow-wrap: anywhere; }
 .hero-surname { color: var(--action); }
 @supports (-webkit-text-stroke: 1px currentColor) {
   .hero-surname, .hero-digits span:first-child {
@@ -463,10 +458,20 @@ h3 { font-size: clamp(1.25rem, 2.25vw, 1.75rem); line-height: 1.2; letter-spacin
 @media (max-width: 400px) {
   .header-inner > .main-nav { justify-content: space-between; column-gap: 4px; }
   .main-nav a { font-size: .875rem; }
+  .featured-project { display: block; }
+  .featured-project > img { height: auto; aspect-ratio: 16 / 9; border-right: 0; border-bottom: 1px solid var(--line); }
   .service-panel dl { grid-template-columns: minmax(0, 1fr); }
   .hero-mark { grid-template-columns: minmax(0, 1fr); justify-items: center; gap: 7px; padding-block: 16px 4px; text-align: center; }
   .hero-digits { padding-inline-end: 0; border-inline-end: 0; }
   .hero-message { width: 100%; padding-inline-start: 0; }
+}
+@media (pointer: coarse) {
+  .main-nav a, .work-jump a, .theme-select, .shader-controls input { min-height: 44px; }
+  .contact-panel .email-link { display: inline-flex; align-items: center; min-height: 44px; }
+}
+@media (pointer: coarse) and (orientation: landscape) and (max-height: 430px) {
+  .site-header { position: relative; }
+  [id] { scroll-margin-block-start: 12px; }
 }
 @media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
   ::highlight(binary-pending) {
@@ -482,10 +487,10 @@ h3 { font-size: clamp(1.25rem, 2.25vw, 1.75rem); line-height: 1.2; letter-spacin
     overflow: hidden;
     width: var(--binary-width);
     width: round(down, var(--binary-width), calc(1ch + .035em));
-    clip-path: inset(0 0 0 var(--binary-cut, 0px));
-    clip-path: inset(0 0 0 round(up, var(--binary-cut, 0px), calc(1ch + .035em)));
+    clip-path: inset(0 calc(100% - var(--binary-written, 0%)) 0 var(--binary-cut, 0px));
+    clip-path: inset(0 calc(100% - round(down, var(--binary-written, 0%), calc(1ch + .035em))) 0 round(up, var(--binary-cut, 0px), calc(1ch + .035em)));
     color: var(--action);
-    font: 600 1em/1.1 "Segoe UI", system-ui, sans-serif;
+    font: 600 1em/1.1 var(--font-bits);
     font-variant-numeric: tabular-nums;
     letter-spacing: .035em;
     white-space: nowrap;

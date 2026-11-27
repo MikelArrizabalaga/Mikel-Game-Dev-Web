@@ -6,7 +6,7 @@ Web estática en euskera, castellano e inglés para presentar servicios freelanc
 
 Abre `index.html` directamente o ejecuta `node dev-server.mjs` desde la carpeta del proyecto y visita [la vista local](http://127.0.0.1:4173). El servidor escucha únicamente en este equipo.
 
-`index.html` reúne la portada, los servicios y el contacto. `proyectos.html` contiene el catálogo. `styles.css` define el diseño adaptable. `binary-background.js` dibuja el fondo y `binary-reveal.js` descifra el texto en la zona central visible, muestra binario en los márgenes y anima el 01 de la portada. `app.js` controla la navegación y las pestañas de servicios. `shader-preview.js` dibuja la muestra interactiva del polígono con WebGL.
+`index.html` reúne la portada, los servicios y el contacto. `proyectos.html` contiene el catálogo. `styles.css` define el diseño adaptable. `binary-background.js` dibuja el fondo. `binary-reveal.js` escribe bits al entrar el texto en pantalla y los descifra. El texto sigue legible mientras permanece a la vista. `app.js` controla la navegación y las pestañas de servicios. `shader-preview.js` dibuja la muestra interactiva del polígono con WebGL.
 
 El contacto abre un borrador en la aplicación de correo del visitante mediante un enlace `mailto:`. El pie enlaza el [aviso legal](aviso-legal.html) y la [política de privacidad](privacidad.html).
 
