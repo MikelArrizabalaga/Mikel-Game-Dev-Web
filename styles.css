@@ -130,15 +130,22 @@ button { cursor: pointer; }
 }
 .hero-digits {
   display: flex;
-  gap: .06em;
+  align-items: end;
+  gap: .095em;
   color: var(--accent);
-  font: 700 clamp(5.5rem, 12vw, 10rem)/.9 "Space Grotesk", var(--font-text);
-  font-variant-numeric: lining-nums proportional-nums;
-  letter-spacing: -.04em;
+  font-size: clamp(5.5rem, 12vw, 10rem);
+  --bit-stroke: .026em;
 }
-.hero-surname, .hero-digits span:first-child { color: var(--action); }
+.hero-digits > span { display: block; width: .54em; height: .76em; }
+.hero-digits > .bit-one { width: .44em; }
+.bit-zero { border: var(--bit-stroke, 1px) solid currentColor; border-radius: 47%; }
+.bit-one {
+  background: currentColor;
+  clip-path: polygon(9% 18%, 45% 0, 66% 0, 66% 84%, 100% 84%, 100% 100%, 0 100%, 0 84%, 39% 84%, 39% 29%, 9% 44%);
+}
+.hero-surname { color: var(--action); }
 @supports (-webkit-text-stroke: 1px currentColor) {
-  .hero-surname, .hero-digits span:first-child {
+  .hero-surname {
     -webkit-text-fill-color: transparent;
     -webkit-text-stroke: clamp(1.4px, .18vw, 2.6px) #cc3918;
   }
@@ -319,7 +326,7 @@ h3 { font-size: clamp(1.25rem, 2.25vw, 1.75rem); line-height: 1.2; letter-spacin
   .hero h1 { font-size: clamp(2.8rem, 12vw, 4.6rem); }
   .hero-mark { justify-items: start; text-align: left; }
   .hero-digits { font-size: clamp(4.8rem, 16vw, 6rem); }
-  .hero-message { width: auto; min-height: 1.15em; }
+  .hero-message { width: auto; }
   .hero-description { margin-top: 15px; }
   .hero-actions { margin-top: 18px; }
   .section-heading, .collaboration, .project-layout, .service-layout, .work-entry, .work-grid, .contact-panel { grid-template-columns: minmax(0, 1fr); }
@@ -339,45 +346,27 @@ h3 { font-size: clamp(1.25rem, 2.25vw, 1.75rem); line-height: 1.2; letter-spacin
   .service-panel dl, .form-selects { grid-template-columns: minmax(0, 1fr); }
 }
 @media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
-  .binary-original {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
-    user-select: none;
+  ::highlight(binary-pending) {
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    -webkit-text-stroke-color: transparent;
+    stroke-color: transparent;
   }
-  .binary-letter { position: relative; }
-  .binary-glyph { animation: binary-glyph-in 60ms var(--letter-delay) ease-out both; }
-  .binary-letter::after {
-    content: attr(data-bit);
+  .binary-digit {
     position: absolute;
-    inset: 50% auto auto 50%;
     transform: translate(-50%, -50%);
-    color: var(--reveal-color, var(--action));
-    -webkit-text-fill-color: currentColor;
-    -webkit-text-stroke: 0;
-    font: 650 .55em/1 var(--font-text);
-    font-variant-numeric: lining-nums tabular-nums;
+    z-index: 1;
+    color: var(--action);
+    opacity: .72;
     pointer-events: none;
     user-select: none;
-    animation: binary-bit-out 60ms var(--letter-delay) ease-out both;
   }
-  .button-primary { --reveal-color: var(--paper); }
-  :focus-visible .binary-glyph, label:focus-within .binary-glyph { animation: none; }
-  :focus-visible .binary-letter::after, label:focus-within .binary-letter::after { visibility: hidden; }
-  @keyframes binary-glyph-in {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-  @keyframes binary-bit-out {
-    from { opacity: .78; }
-    to { opacity: 0; }
-  }
+  .binary-digit-inverse { color: var(--paper); }
 }
 @media (forced-colors: active) {
   .brand-mark { border: 1px solid ButtonText; }
-  .hero-surname, .hero-digits span:first-child { -webkit-text-fill-color: currentColor; -webkit-text-stroke: 0; }
+  .hero-surname { -webkit-text-fill-color: currentColor; -webkit-text-stroke: 0; }
+  .hero-digits { color: CanvasText; }
+  .hero-digits > .bit-one { forced-color-adjust: none; }
   .service-options button[aria-selected="true"] { border: 2px solid Highlight; }
 }
