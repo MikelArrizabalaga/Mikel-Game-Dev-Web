@@ -10,6 +10,7 @@ const files = new Map([
   ['/sitemap.xml', ['sitemap.xml', 'application/xml; charset=utf-8']],
   ['/styles.css', ['styles.css', 'text/css; charset=utf-8']],
   ['/theme.js', ['theme.js', 'text/javascript; charset=utf-8']],
+  ['/i18n.js', ['i18n.js', 'text/javascript; charset=utf-8']],
   ['/binary-background.js', ['binary-background.js', 'text/javascript; charset=utf-8']],
   ['/binary-reveal.js', ['binary-reveal.js', 'text/javascript; charset=utf-8']],
   ['/app.js', ['app.js', 'text/javascript; charset=utf-8']],

@@ -1,6 +1,6 @@
 # Web de desarrollo freelance
 
-Web estática en español para presentar servicios freelance de programación de videojuegos, Technical Art, shaders, VFX y herramientas a medida, con una selección de proyectos.
+Web estática en euskera, castellano e inglés para presentar servicios freelance de programación de videojuegos, Technical Art, shaders, VFX y herramientas a medida, con una selección de proyectos. `i18n.js` aplica el primer idioma compatible de las preferencias del navegador. El HTML está en castellano y se usa también cuando no hay coincidencia.
 
 [Ver la web en GitHub Pages](https://mikelarrizabalaga.github.io/Mikel-Game-Dev-Web/)
 

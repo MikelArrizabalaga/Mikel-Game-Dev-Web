@@ -70,7 +70,7 @@ h1, h2, h3, h4 { font-family: "Space Grotesk", var(--font-text); }
 button, select, textarea { font: inherit; }
 button { cursor: pointer; }
 .shell { width: min(calc(100% - var(--gutter) * 2), 1190px); margin-inline: auto; }
-[id] { scroll-margin-block-start: 90px; }
+[id] { scroll-margin-block-start: max(90px, calc(var(--header-height, 0px) + 12px)); }
 #contenido:focus { outline: none; }
 .skip-link { position: fixed; z-index: 4; top: 10px; left: 10px; transform: translateY(calc(-100% - 18px)); padding: 10px 16px; background: var(--paper); border: 1px solid var(--action); }
 .skip-link:focus { transform: none; }
@@ -436,7 +436,7 @@ h3 { font-size: clamp(1.25rem, 2.25vw, 1.75rem); line-height: 1.2; letter-spacin
 .motion-toggle { padding: 0; border: 0; background: transparent; }
 
 @media (max-width: 760px) {
-  [id] { scroll-margin-block-start: 120px; }
+  [id] { scroll-margin-block-start: max(120px, calc(var(--header-height, 0px) + 12px)); }
   .header-inner { grid-template-columns: minmax(0, 1fr) auto; padding-block: 8px; row-gap: 2px; }
   .header-inner > .main-nav { grid-column: 1 / -1; grid-row: 2; justify-content: flex-start; }
   .theme-select { grid-column: 2; grid-row: 1; justify-self: end; }

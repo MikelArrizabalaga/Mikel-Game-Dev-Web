@@ -3,7 +3,7 @@ const binaryTextSelector = [
   '.category-label',
 ].join(', ');
 
-const graphemes = typeof Intl.Segmenter === 'function' ? new Intl.Segmenter('es') : null;
+const graphemes = typeof Intl.Segmenter === 'function' ? new Intl.Segmenter(document.documentElement.lang) : null;
 
 function measureBinaryText(element) {
   const letters = [];
@@ -54,7 +54,7 @@ function initHeroTyping(canAnimate) {
   if (!mark) return () => {};
   const decoded = mark.querySelector('.hero-message-decoded');
   const encoded = mark.querySelector('.hero-message-bits');
-  const messages = [decoded.textContent, 'En shaders y VFX', 'En el trato cercano'];
+  const messages = [decoded.textContent, decoded.dataset.heroEffects, decoded.dataset.heroCollaboration];
   let timer;
   let visible = false;
   let running = false;

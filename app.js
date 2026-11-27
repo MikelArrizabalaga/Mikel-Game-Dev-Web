@@ -18,7 +18,6 @@ function initServiceTabs() {
   }
 
   serviceOptions.setAttribute('role', 'tablist');
-  serviceOptions.setAttribute('aria-label', 'Servicios disponibles');
   setTabOrientation();
   compactTabs.addEventListener('change', setTabOrientation);
 
@@ -49,6 +48,13 @@ function initServiceTabs() {
 }
 
 function initNavigation() {
+  const header = document.querySelector('.site-header');
+  function updateHeaderHeight() {
+    document.documentElement.style.setProperty('--header-height', header.offsetHeight + 'px');
+  }
+  updateHeaderHeight();
+  new ResizeObserver(updateHeaderHeight).observe(header);
+
   const navContact = document.querySelector('.nav-contact');
   const contactLink = navContact.firstElementChild;
   navContact.addEventListener('pointerleave', () => navContact.removeAttribute('data-dismissed'));
@@ -75,7 +81,6 @@ function initNavigation() {
   forwardOldProjectLink();
   window.addEventListener('hashchange', forwardOldProjectLink);
 
-  const header = document.querySelector('.site-header');
   const navLinks = header.querySelectorAll('.main-nav a[href^="#"], .main-nav a[href="proyectos.html"]');
   const entries = new Map([...navLinks].map((link) => [link.hash.slice(1) || 'trabajos', link]));
   const sections = [...document.querySelectorAll('main > section')];

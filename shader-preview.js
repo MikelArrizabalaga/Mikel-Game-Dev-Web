@@ -73,8 +73,8 @@ function enablePolygonPreview(preview) {
   function renderPolygon() {
     sidesValue.value = sides.value;
     rotationValue.value = rotation.value + '°';
-    const unit = rotation.valueAsNumber === 1 ? ' grado' : ' grados';
-    rotation.setAttribute('aria-valuetext', rotation.value + unit);
+    const unit = rotation.valueAsNumber === 1 ? rotation.dataset.degree : rotation.dataset.degrees;
+    rotation.setAttribute('aria-valuetext', rotation.value + ' ' + unit);
     gl.uniform1f(sidesUniform, sides.valueAsNumber);
     gl.uniform1f(rotationUniform, rotation.valueAsNumber * Math.PI / 180);
     gl.uniform1f(themeUniform, document.documentElement.dataset.theme === 'dark' ? 1 : 0);
