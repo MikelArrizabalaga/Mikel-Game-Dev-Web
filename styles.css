@@ -191,6 +191,9 @@ button { cursor: pointer; }
 .hero-mark[data-message="0"] .hero-sequence > span:first-child,
 .hero-mark[data-message="1"] .hero-sequence > span:nth-child(2),
 .hero-mark[data-message="2"] .hero-sequence > span:nth-child(3) { background: var(--accent); }
+@media (min-width: 831px) and (min-height: 680px) {
+  .hero { min-height: min(52rem, calc(79svh - 66px)); }
+}
 @media (min-width: 641px) and (max-width: 830px) {
   .hero { grid-template-columns: minmax(0, 1.25fr) minmax(0, .75fr); }
 }
