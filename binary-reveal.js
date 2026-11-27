@@ -50,7 +50,7 @@ function initHeroTyping(canAnimate) {
     }
     const current = messages[line];
     output.textContent = current.slice(0, ++length);
-    timer = setTimeout(nextCharacter, length === current.length ? 1350 : 23);
+    timer = setTimeout(nextCharacter, length === current.length ? 1350 : 34);
   }
 
   function sync() {
@@ -58,7 +58,7 @@ function initHeroTyping(canAnimate) {
     const running = canAnimate() && visible && !document.hidden;
     mark.toggleAttribute('data-typing', running);
     if (running) {
-      timer = setTimeout(nextCharacter, length === messages[line].length ? 1350 : 23);
+      timer = setTimeout(nextCharacter, length === messages[line].length ? 1350 : 34);
     } else {
       output.textContent = messages[line];
       length = messages[line].length;
@@ -103,7 +103,7 @@ function enableBinaryReveal() {
 
       const runs = prepareBinaryText(target);
       if (!runs.length) continue;
-      animations.set(target, { runs, timeout: setTimeout(() => finish(target), 330) });
+      animations.set(target, { runs, timeout: setTimeout(() => finish(target), 600) });
       runs[0].copy.addEventListener('animationend', () => finish(target), { once: true });
     }
   }, { rootMargin: '0px 0px -24px' });

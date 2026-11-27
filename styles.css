@@ -339,7 +339,7 @@ h3 { font-size: clamp(1.25rem, 2.25vw, 1.75rem); line-height: 1.2; letter-spacin
 }
 @media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
   .binary-run { position: relative; }
-  .binary-copy { animation: binary-copy-in var(--reveal-time, 200ms) ease-out both; }
+  .binary-copy { animation: binary-copy-in var(--reveal-time, 380ms) ease-out both; }
   .binary-bits {
     position: absolute;
     inset-block-start: .12em;
@@ -353,19 +353,19 @@ h3 { font-size: clamp(1.25rem, 2.25vw, 1.75rem); line-height: 1.2; letter-spacin
     white-space: nowrap;
     pointer-events: none;
     user-select: none;
-    animation: binary-bits-out var(--reveal-time, 200ms) ease-out both;
+    animation: binary-bits-out var(--reveal-time, 380ms) ease-out both;
   }
-  :is(h1, h2) { --reveal-time: 270ms; }
+  :is(h1, h2) { --reveal-time: 480ms; }
   .button-primary { --reveal-color: var(--paper); }
   :focus-visible .binary-copy, label:focus-within .binary-copy { opacity: 1 !important; }
   :focus-visible .binary-bits, label:focus-within .binary-bits { visibility: hidden; }
   @keyframes binary-copy-in {
-    0%, 32% { opacity: 0; }
+    0%, 38% { opacity: 0; }
     100% { opacity: 1; }
   }
   @keyframes binary-bits-out {
-    0%, 20% { opacity: .9; clip-path: inset(0 0 0 0); }
-    48%, 100% { opacity: 0; clip-path: inset(0 0 0 100%); }
+    0%, 26% { opacity: .9; clip-path: inset(0 0 0 0); }
+    55%, 100% { opacity: 0; clip-path: inset(0 0 0 100%); }
   }
 }
 @media (forced-colors: active) {
