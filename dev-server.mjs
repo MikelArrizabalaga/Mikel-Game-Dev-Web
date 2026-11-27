@@ -23,6 +23,11 @@ const files = new Map([
   ['/assets/bio-tutorial.webp', ['assets/bio-tutorial.webp', 'image/webp']],
   ['/assets/vuela-liz.webp', ['assets/vuela-liz.webp', 'image/webp']],
   ['/assets/hur.webp', ['assets/hur.webp', 'image/webp']],
+  ['/assets/clay-shader.webp', ['assets/clay-shader.webp', 'image/webp']],
+  ['/assets/jemsa-dithering.webp', ['assets/jemsa-dithering.webp', 'image/webp']],
+  ['/assets/jemsa-visual-effect.webp', ['assets/jemsa-visual-effect.webp', 'image/webp']],
+  ['/assets/jemsa-dancing.webp', ['assets/jemsa-dancing.webp', 'image/webp']],
+  ['/assets/beam-vfx.webp', ['assets/beam-vfx.webp', 'image/webp']],
   ['/assets/fonts/geist.woff2', ['assets/fonts/geist.woff2', 'font/woff2']],
   ['/assets/fonts/spacegrotesk.woff2', ['assets/fonts/spacegrotesk.woff2', 'font/woff2']],
 ]);

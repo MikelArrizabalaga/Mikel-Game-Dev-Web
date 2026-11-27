@@ -49,58 +49,68 @@ function measureBinaryText(element) {
   return { letters, lines };
 }
 
-function initHeroTyping(canAnimate) {
+function initHeroTyping(canAnimate, staticText) {
   const mark = document.querySelector('.hero-mark');
   if (!mark) return () => {};
-  const output = mark.querySelector('.hero-message > span');
-  const messages = [output.textContent, 'En shaders y VFX', 'En el trato cercano'];
+  const output = mark.querySelector('.hero-message-text');
+  const messages = ['En programar videojuegos', 'En shaders y VFX', 'En el trato cercano'];
+
   let timer;
   let visible = false;
+  let digitCount = 0;
   let line = 0;
-  let length = messages[0].length;
+  let length = 0;
 
-  function nextCharacter() {
+  function resetTyping() {
+    digitCount = 0;
+    line = 0;
+    length = 0;
+    mark.removeAttribute('data-show-message');
+    mark.dataset.length = staticText.matches ? 2 : 0;
+  }
+
+  function typeNext() {
+    if (digitCount < 2) {
+      mark.dataset.length = ++digitCount;
+      timer = setTimeout(typeNext, digitCount === 2 ? 750 : 140);
+      return;
+    }
+
     const message = messages[line];
-    if (length === message.length) {
-      line = (line + 1) % messages.length;
-      mark.dataset.message = line;
+    if (line === 0 && length === 0) mark.setAttribute('data-show-message', '');
+    output.textContent = message.slice(0, length);
+    if (length < message.length) {
+      length++;
+      timer = setTimeout(typeNext, 39);
+    } else if (line < messages.length - 1) {
+      line++;
       length = 0;
-    }
-    const current = messages[line];
-    output.textContent = current.slice(0, ++length);
-    const writing = length < current.length;
-    mark.toggleAttribute('data-writing', writing);
-    timer = setTimeout(nextCharacter, writing ? 34 : 1900);
-  }
-
-  function sync() {
-    clearTimeout(timer);
-    const running = canAnimate() && visible && !document.hidden;
-    mark.toggleAttribute('data-typing', running);
-    mark.toggleAttribute('data-writing', running && length < messages[line].length);
-    if (running) {
-      timer = setTimeout(nextCharacter, length === messages[line].length ? 1900 : 34);
+      timer = setTimeout(typeNext, 600);
     } else {
-      output.textContent = messages[line];
-      length = messages[line].length;
+      timer = setTimeout(() => {
+        line = 0;
+        length = 0;
+        typeNext();
+      }, 1700);
     }
   }
 
-  const observer = new IntersectionObserver(([entry]) => {
-    const onScreen = entry.isIntersecting && entry.intersectionRatio >= .25;
-    if (visible === onScreen) return;
-    visible = onScreen;
-    if (visible && canAnimate()) {
-      line = 0;
-      length = 0;
-      mark.dataset.message = line;
-      output.textContent = '';
+  function syncTyping() {
+    clearTimeout(timer);
+    if (visible && canAnimate() && !document.hidden) {
+      timer = setTimeout(typeNext, 90);
     }
-    sync();
-  }, { threshold: .25 });
+  }
+
+  document.addEventListener('visibilitychange', syncTyping);
+  const observer = new IntersectionObserver(([entry]) => {
+    visible = entry.isIntersecting;
+    syncTyping();
+  });
   observer.observe(mark);
-  document.addEventListener('visibilitychange', sync);
-  return sync;
+  staticText.addEventListener('change', resetTyping);
+  resetTyping();
+  return syncTyping;
 }
 
 function enableBinaryReveal() {
@@ -114,7 +124,7 @@ function enableBinaryReveal() {
   let paused = false;
   let frame = null;
   const canAnimate = () => !paused && !staticText.matches;
-  const syncHeroTyping = initHeroTyping(canAnimate);
+  const syncHeroTyping = initHeroTyping(canAnimate, staticText);
 
   function discard(element) {
     const effect = effects.get(element);

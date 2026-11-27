@@ -127,74 +127,49 @@ button { cursor: pointer; }
 .button-text:hover { background: var(--pale); }
 
 .hero-mark {
-  --display-grid: #a8321712;
-  justify-self: end;
-  width: min(100%, 30rem);
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  overflow: hidden;
-  background: var(--paper);
-}
-.hero-display {
   display: grid;
   place-items: center;
-  aspect-ratio: 2.05;
-  background:
-    radial-gradient(ellipse at 50% 65%, #fff5ef 0%, transparent 71%),
-    linear-gradient(90deg, var(--display-grid) 1px, transparent 1px) center / 24px 24px,
-    linear-gradient(var(--display-grid) 1px, transparent 1px) center / 24px 24px,
-    var(--paper);
+  width: min(100%, 420px);
+  justify-self: center;
+  user-select: none;
 }
 .hero-digits {
   display: flex;
-  align-items: center;
-  gap: .105em;
+  justify-content: center;
+  gap: .035em;
   color: var(--accent);
-  font-size: clamp(5.3rem, 11vw, 10rem);
-  --bit-stroke: .034em;
+  font: 700 clamp(6rem, 14vw, 12rem)/.95 var(--font-bits);
+  letter-spacing: -.08em;
 }
-.hero-digits > span { display: block; width: .57em; height: .73em; }
-.hero-digits > .bit-one { width: .49em; }
-.bit-zero { border: var(--bit-stroke, 1px) solid currentColor; border-radius: 46%; }
-.bit-one {
-  background: currentColor;
-  clip-path: polygon(13% 17%, 47% 0, 65% 0, 65% 83%, 95% 83%, 95% 100%, 5% 100%, 5% 83%, 41% 83%, 41% 27%, 13% 39%);
+.hero-digits span:first-child { color: var(--action); }
+.hero-mark[data-length="0"] .hero-digits span,
+.hero-mark[data-length="1"] .hero-digits span:last-child { visibility: hidden; }
+.hero-message {
+  visibility: hidden;
+  width: min(100%, 18ch);
+  min-height: 2.2em;
+  margin-top: .35em;
+  color: var(--action);
+  font: 700 clamp(1.25rem, 2.7vw, 2.5rem)/1.1 "Space Grotesk", var(--font-text);
+  text-align: center;
+}
+.hero-mark[data-show-message] .hero-message { visibility: visible; }
+.hero-message-text::after {
+  content: '';
+  display: inline-block;
+  width: .5ch;
+  height: .85em;
+  margin-left: .25ch;
+  background: var(--accent);
 }
 .hero-surname { color: var(--action); }
 @supports (-webkit-text-stroke: 1px currentColor) {
-  .hero-surname {
+  .hero-surname, .hero-digits span:first-child {
     -webkit-text-fill-color: transparent;
-    -webkit-text-stroke: clamp(1.4px, .18vw, 2.6px) #cc3918;
+    -webkit-text-stroke: clamp(1.45px, .177vw, 2.5px) #cc3918;
   }
 }
-.hero-caption {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 4.3em;
-  gap: 10px;
-  padding: 10px clamp(13px, 2vw, 20px);
-  border-top: 1px solid var(--line);
-}
-.hero-message {
-  min-width: 0;
-  color: var(--ink);
-  font: 650 clamp(.95rem, 1.5vw, 1.125rem)/1.25 "Space Grotesk", var(--font-text);
-}
-.hero-mark[data-writing] .hero-message > span::after {
-  content: '';
-  display: inline-block;
-  width: 2px;
-  height: .82em;
-  margin-inline-start: .24em;
-  background: var(--accent);
-}
-.hero-sequence { display: flex; flex: 0 0 auto; gap: 4px; }
-.hero-sequence > span { width: 9px; height: 2px; border-radius: 2px; background: var(--line); }
-.hero-mark:not([data-message]) .hero-sequence > span:first-child,
-.hero-mark[data-message="0"] .hero-sequence > span:first-child,
-.hero-mark[data-message="1"] .hero-sequence > span:nth-child(2),
-.hero-mark[data-message="2"] .hero-sequence > span:nth-child(3) { background: var(--accent); }
+
 @media (min-width: 831px) and (min-height: 680px) {
   .hero { min-height: min(52rem, calc(79svh - 66px)); }
 }
@@ -302,6 +277,7 @@ h3 { font-size: clamp(1.25rem, 2.25vw, 1.75rem); line-height: 1.2; letter-spacin
 .work-group-heading p { margin-top: 6px; color: var(--muted); }
 .work-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--card-gap); }
 .work-card:last-child:nth-child(odd) { grid-column: 1 / -1; }
+#arte-tecnico .work-card:last-child { grid-column: auto; }
 .work-card { min-width: 0; padding: clamp(18px, 2.6vw, 32px); border: 1px solid var(--line); border-radius: 6px; background: var(--paper); }
 .work-card-image { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: contain; background: var(--pale); margin-bottom: clamp(16px, 2vw, 23px); }
 .work-card-icon { display: block; float: right; width: 80px; height: 80px; margin: 0 0 8px 12px; }
@@ -370,9 +346,7 @@ h3 { font-size: clamp(1.25rem, 2.25vw, 1.75rem); line-height: 1.2; letter-spacin
   .header-inner { flex-wrap: wrap; padding-block: 8px; }
   .hero { grid-template-columns: 1fr; gap: 20px; padding-block: 37px 31px; }
   .hero h1 { font-size: clamp(2.8rem, 12vw, 4.6rem); }
-  .hero-mark { justify-self: start; width: min(100%, 24rem); }
-  .hero-digits { font-size: clamp(4.5rem, 22vw, 6.5rem); }
-  .hero-caption { min-height: 3.65em; }
+  .hero-digits { font-size: clamp(6rem, 18vw, 8rem); }
   .hero-description { margin-top: 15px; }
   .hero-actions { margin-top: 18px; }
   .service-section { --service-columns: minmax(0, 1fr); }
@@ -417,18 +391,9 @@ h3 { font-size: clamp(1.25rem, 2.25vw, 1.75rem); line-height: 1.2; letter-spacin
     user-select: none;
   }
   .binary-line-inverse { color: var(--paper); }
-  .hero-mark[data-typing] .hero-digits > span { animation: hero-bit-in 420ms cubic-bezier(.2, .72, .25, 1) both; }
-  .hero-mark[data-typing] .hero-digits > .bit-one { animation-delay: 62ms; }
-  @keyframes hero-bit-in {
-    from { opacity: .12; transform: translateY(5px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
 }
 @media (forced-colors: active) {
   .brand-mark { border: 1px solid ButtonText; }
-  .hero-surname { -webkit-text-fill-color: currentColor; -webkit-text-stroke: 0; }
-  .hero-display { background: Canvas; }
-  .hero-digits { color: CanvasText; }
-  .hero-digits > .bit-one { forced-color-adjust: none; }
+  .hero-surname, .hero-digits span:first-child { -webkit-text-fill-color: currentColor; -webkit-text-stroke: 0; }
   .service-options button[aria-selected="true"] { border: 2px solid Highlight; }
 }
