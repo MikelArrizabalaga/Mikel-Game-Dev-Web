@@ -52,12 +52,28 @@ function measureBinaryText(element) {
 function initHeroTyping(canAnimate) {
   const mark = document.querySelector('.hero-mark');
   if (!mark) return () => {};
-  const output = mark.querySelector('.hero-message-text');
-  const messages = [output.textContent, 'En shaders y VFX', 'En el trato cercano'];
+  const decoded = mark.querySelector('.hero-message-decoded');
+  const encoded = mark.querySelector('.hero-message-bits');
+  const messages = [decoded.textContent, 'En shaders y VFX', 'En el trato cercano'];
   let timer;
   let visible = false;
   let running = false;
   let index = 0;
+
+  function holdMessage() {
+    decoded.textContent = messages[index];
+    encoded.textContent = '';
+    mark.dataset.phase = 'resolved';
+    if (running) timer = setTimeout(fadeMessage, 2300);
+  }
+
+  function fadeMessage() {
+    mark.dataset.phase = 'leaving';
+    timer = setTimeout(() => {
+      index = (index + 1) % messages.length;
+      revealMessage();
+    }, 220);
+  }
 
   function revealMessage() {
     const message = messages[index];
@@ -65,24 +81,16 @@ function initHeroTyping(canAnimate) {
       return character === ' ' ? ' ' : (character.codePointAt(0) + position) % 2;
     }).join('');
     let length = 0;
+    decoded.textContent = '';
+    encoded.textContent = bits;
     mark.dataset.phase = 'binary';
-    output.textContent = bits;
 
     function decode() {
       length++;
-      output.textContent = message.slice(0, length) + bits.slice(length);
-      if (length < message.length) {
-        timer = setTimeout(decode, 22);
-        return;
-      }
-      mark.dataset.phase = 'resolved';
-      timer = setTimeout(() => {
-        mark.dataset.phase = 'leaving';
-        timer = setTimeout(() => {
-          index = (index + 1) % messages.length;
-          revealMessage();
-        }, 220);
-      }, 2300);
+      decoded.textContent = message.slice(0, length);
+      encoded.textContent = bits.slice(length);
+      if (length < message.length) timer = setTimeout(decode, 22);
+      else holdMessage();
     }
     timer = setTimeout(decode, 115);
   }
@@ -92,11 +100,7 @@ function initHeroTyping(canAnimate) {
     if (active === running) return;
     running = active;
     clearTimeout(timer);
-    if (running) revealMessage();
-    else {
-      output.textContent = messages[index];
-      mark.dataset.phase = 'resolved';
-    }
+    holdMessage();
   }
 
   const observer = new IntersectionObserver(([entry]) => {
@@ -163,18 +167,25 @@ function enableBinaryReveal() {
     for (const element of visible) {
       const rect = element.getBoundingClientRect();
       const inView = rect.bottom > headerBottom && rect.top < height && getComputedStyle(element).visibility === 'visible';
-      const engaged = element.matches(':focus-within, a:hover, button:hover');
+      const engaged = element.matches(':focus-within') || !!element.closest('a:hover, button:hover, label:focus-within');
       const center = (rect.top + rect.bottom) / 2;
-      const focused = (center >= focusTop && center <= focusBottom) ||
+      // Keep the text decoded through small movements around a focus boundary.
+      const buffer = focusedText.has(element) ? 12 : 0;
+      const focused = (center >= focusTop - buffer && center <= focusBottom + buffer) ||
         (rect.height > focusBottom - focusTop && rect.bottom > focusTop && rect.top < focusBottom);
       const previous = effects.get(element);
-      const measured = !previous && inView && !focused ? measureBinaryText(element) : null;
-      const edgeFade = Math.min(1, Math.max(0, Math.min(rect.bottom - headerBottom, height - rect.top) / 44));
-      changes.push({ element, inView, engaged, focused, previous, measured, edgeFade });
+      const measured = !previous && inView && !focused && !engaged ? measureBinaryText(element) : null;
+      changes.push({ element, inView, engaged, focused, previous, measured });
+    }
+
+    function fadeLine(line) {
+      const top = line.pageTop + bodyBox.top;
+      const distance = Math.min(top + line.height - headerBottom, height - top);
+      line.overlay.style.opacity = Math.max(0, Math.min(1, distance / 44));
     }
 
     let moving = false;
-    for (const { element, inView, engaged, focused, previous, measured, edgeFade } of changes) {
+    for (const { element, inView, engaged, focused, previous, measured } of changes) {
       const wasFocused = focusedText.has(element);
       if (inView && (engaged || focused)) focusedText.add(element);
       else focusedText.delete(element);
@@ -191,24 +202,26 @@ function enableBinaryReveal() {
           overlay.setAttribute('aria-hidden', 'true');
           overlay.textContent = line.bits;
           overlay.style.left = line.left - bodyBox.left + 'px';
-          overlay.style.top = line.top - bodyBox.top + line.height / 2 + 'px';
+          line.pageTop = line.top - bodyBox.top;
+          overlay.style.top = line.pageTop + line.height / 2 + 'px';
           overlay.style.setProperty('--binary-width', line.right - line.left + 'px');
           overlay.style.fontSize = line.fontSize * .83 + 'px';
-          overlay.style.opacity = edgeFade;
-          fragment.append(overlay);
           line.overlay = overlay;
+          fadeLine(line);
+          fragment.append(overlay);
         }
         document.body.append(fragment);
-        const effect = { ...measured, decoded: -1, progress: wasFocused ? 1 : 0, time: now };
+        const effect = { ...measured, decoded: -1, progress: wasFocused ? 1 : 0, time: now, focused };
         effects.set(element, effect);
         render(effect, wasFocused ? measured.letters.length : 0);
         if (wasFocused) moving = true;
         continue;
       }
 
-      for (const { overlay } of previous.lines) overlay.style.opacity = edgeFade;
-      const elapsed = Math.min(now - previous.time, 60);
+      for (const line of previous.lines) fadeLine(line);
+      const elapsed = previous.focused === focused ? now - previous.time : 0;
       previous.time = now;
+      previous.focused = focused;
       const duration = element.matches('h1, h2, h3, h4') ? 220 : 150;
       const direction = focused ? 1 : -1;
       previous.progress = Math.max(0, Math.min(1, previous.progress + direction * elapsed / duration));
