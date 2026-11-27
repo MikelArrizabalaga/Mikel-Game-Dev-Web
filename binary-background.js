@@ -27,9 +27,8 @@ function renderPattern() {
 }
 
 function initReactiveBackground() {
-  if (!CSS.supports('mask-image', 'radial-gradient(transparent, black)')) return;
-
-  const motion = matchMedia('(prefers-reduced-motion: no-preference) and (forced-colors: none)');
+  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+  const forcedColors = matchMedia('(forced-colors: active)');
   const toggle = document.querySelector('#toggle-animation');
   const hero = document.querySelector('.hero');
   const canvas = document.createElement('canvas');
@@ -40,20 +39,20 @@ function initReactiveBackground() {
   background.append(canvas);
   const sin = Math.sin(rotation);
   const cos = Math.cos(rotation);
-  const lift = 30;
-  const fadeTime = 190;
   let geometry;
   let pointer;
+  let touchId = null;
+  let releaseTimer;
   let leavingAt;
   let frame = null;
 
   function refresh() {
-    if (!motion.matches) return;
+    if (forcedColors.matches) return;
     const style = getComputedStyle(pattern);
     const font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
     const { clientWidth: width, clientHeight: height } = background;
-    const radius = Math.min(205, Math.max(125, width * .16));
-    const size = Math.ceil(2 * (radius + lift + 14));
+    const radius = Math.min(205, Math.max(140, width * .16));
+    const size = Math.ceil(2 * (radius + 50));
     const scale = Math.min(window.devicePixelRatio || 1, 2);
     const pixels = Math.ceil(size * scale);
     if (canvas.width !== pixels || canvas.height !== pixels) {
@@ -81,17 +80,21 @@ function initReactiveBackground() {
 
   function clear() {
     cancelAnimationFrame(frame);
+    clearTimeout(releaseTimer);
     frame = null;
     pointer = undefined;
+    touchId = null;
     leavingAt = undefined;
     canvas.hidden = true;
-    pattern.style.removeProperty('mask-image');
+    pattern.style.removeProperty('--background-reveal-mask');
     hero?.style.removeProperty('--background-reveal-mask');
   }
 
   function paint(now) {
     frame = null;
-    const strength = leavingAt === undefined ? 1 : Math.max(0, 1 - (now - leavingAt) / fadeTime);
+    const fadeTime = pointer.touch ? 360 : 190;
+    const elapsed = leavingAt === undefined ? 0 : Math.max(0, now - leavingAt);
+    const strength = Math.max(0, 1 - elapsed / fadeTime);
     if (!strength) {
       clear();
       return;
@@ -106,14 +109,17 @@ function initReactiveBackground() {
     const canvasY = Math.round(pointer.y - size / 2);
     const radiusSquared = radius * radius;
     const heroBox = hero?.getBoundingClientRect();
+    const lift = reducedMotion.matches ? 0 : pointer.touch ? 36 : 30;
+    const peakOpacity = pointer.touch ? .88 : .64;
 
     canvas.hidden = false;
     canvas.style.transform = `translate(${canvasX}px, ${canvasY}px)`;
-    pattern.style.maskImage = `radial-gradient(circle ${radius}px at ${localX - originX}px ${localY - originY}px, rgb(0 0 0 / ${1 - strength}) 36%, #000 100%)`;
+    pattern.style.setProperty('--background-reveal-mask', `radial-gradient(circle ${radius}px at ${localX - originX}px ${localY - originY}px, rgb(0 0 0 / ${1 - strength}) 36%, #000 100%)`);
     if (heroBox && heroBox.bottom > 0) {
       const x = pointer.x - heroBox.left;
       const y = pointer.y - heroBox.top;
-      hero.style.setProperty('--background-reveal-mask', `radial-gradient(circle ${radius}px at ${x}px ${y}px, rgb(0 0 0 / ${1 - .78 * strength}), #000 100%)`);
+      const reveal = pointer.touch ? .9 : .78;
+      hero.style.setProperty('--background-reveal-mask', `radial-gradient(circle ${radius}px at ${x}px ${y}px, rgb(0 0 0 / ${1 - reveal * strength}), #000 100%)`);
     }
     context.setTransform(1, 0, 0, 1, 0, 0);
     context.clearRect(0, 0, canvas.width, canvas.height);
@@ -135,9 +141,9 @@ function initReactiveBackground() {
         const dy = y - localY;
         const falloff = 1 - (dx * dx + dy * dy) / radiusSquared;
         if (falloff <= 0) continue;
-        const influence = falloff * falloff * strength;
+        const influence = falloff * Math.sqrt(falloff) * strength;
         const rise = lift * influence;
-        context.globalAlpha = .64 * influence;
+        context.globalAlpha = peakOpacity * influence;
         context.fillText(digit, x + sin * rise, y - cos * rise);
       }
     }
@@ -148,41 +154,63 @@ function initReactiveBackground() {
     if (frame === null) frame = requestAnimationFrame(paint);
   }
 
-  const canReact = () => motion.matches && !document.hidden && toggle?.getAttribute('aria-pressed') !== 'true';
+  const canReact = () => !forcedColors.matches && !document.hidden && toggle?.getAttribute('aria-pressed') !== 'true';
 
-  function followPointer(event) {
+  function followPointer({ clientX, clientY }, touch) {
     if (!canReact()) return;
     if (!geometry) refresh();
-    pointer = { id: event.pointerId, x: event.clientX, y: event.clientY };
+    clearTimeout(releaseTimer);
+    pointer = { x: clientX, y: clientY, touch };
     leavingAt = undefined;
     schedule();
   }
 
-  function fadePointer(event) {
-    if (pointer?.id !== event.pointerId || leavingAt !== undefined) return;
+  function fadePointer() {
+    if (reducedMotion.matches) {
+      clear();
+      return;
+    }
     leavingAt = performance.now();
     schedule();
   }
 
-  window.addEventListener('pointerdown', event => {
-    if (event.pointerType === 'touch' && event.isPrimary) followPointer(event);
-  }, { passive: true });
   window.addEventListener('pointermove', event => {
-    const heldTouch = event.pointerType === 'touch' && pointer?.id === event.pointerId && leavingAt === undefined;
-    if (event.pointerType === 'mouse' || heldTouch) followPointer(event);
+    if (event.pointerType === 'mouse' && touchId === null) followPointer(event, false);
   }, { passive: true });
-  window.addEventListener('pointerup', event => {
-    if (event.pointerType === 'touch') fadePointer(event);
-  }, { passive: true });
-  window.addEventListener('pointercancel', fadePointer, { passive: true });
   document.addEventListener('pointerout', event => {
-    if (event.pointerType === 'mouse' && !event.relatedTarget) fadePointer(event);
+    if (event.pointerType === 'mouse' && !event.relatedTarget && pointer && !pointer.touch && leavingAt === undefined) fadePointer();
   }, { passive: true });
+
+  // Passive touch events let the browser scroll while keeping the effect visible under a finger.
+  window.addEventListener('touchstart', event => {
+    if (event.touches.length !== 1 || !canReact()) return;
+    const touch = event.touches[0];
+    touchId = touch.identifier;
+    followPointer(touch, true);
+  }, { passive: true });
+  window.addEventListener('touchmove', event => {
+    const touch = event.touches[0];
+    if (event.touches.length === 1 && touch.identifier === touchId) followPointer(touch, true);
+  }, { passive: true });
+  function releaseTouch(event) {
+    if (!Array.from(event.changedTouches).some(touch => touch.identifier === touchId)) return;
+    touchId = null;
+    // Give quick taps enough time to show the orange digits after the finger lifts.
+    releaseTimer = setTimeout(fadePointer, reducedMotion.matches ? 430 : 280);
+  }
+  window.addEventListener('touchend', releaseTouch, { passive: true });
+  window.addEventListener('touchcancel', releaseTouch, { passive: true });
   window.addEventListener('blur', clear);
   window.addEventListener('scroll', () => { if (pointer) schedule(); }, { passive: true });
-  document.addEventListener('visibilitychange', () => { if (document.hidden) clear(); });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) clear();
+  }, { passive: true });
   window.addEventListener('themechange', refresh);
-  motion.addEventListener('change', () => motion.matches ? refresh() : clear());
+  reducedMotion.addEventListener('change', () => {
+    if (leavingAt !== undefined) clear();
+    else if (pointer) schedule();
+  });
+  forcedColors.addEventListener('change', () => forcedColors.matches ? clear() : refresh());
   if (toggle) {
     new MutationObserver(() => { if (!canReact()) clear(); }).observe(toggle, {
       attributes: true,

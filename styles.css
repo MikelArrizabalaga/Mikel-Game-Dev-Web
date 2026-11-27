@@ -87,6 +87,8 @@ button { cursor: pointer; }
   opacity: .045;
   font: 500 .875rem/1.4375rem var(--font-bits);
   letter-spacing: .16em;
+  -webkit-mask-image: var(--background-reveal-mask, none);
+  mask-image: var(--background-reveal-mask, none);
 }
 .binary-background canvas { position: absolute; top: 0; left: 0; color: var(--accent); }
 
@@ -162,6 +164,7 @@ button { cursor: pointer; }
   z-index: -1;
   inset: 0;
   background: radial-gradient(ellipse at center, var(--paper) 12%, var(--hero-glow) 41%, transparent 74%);
+  -webkit-mask-image: var(--background-reveal-mask, none);
   mask-image: var(--background-reveal-mask, none);
   pointer-events: none;
 }
