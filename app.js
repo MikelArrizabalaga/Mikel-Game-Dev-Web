@@ -1,3 +1,36 @@
+function initIntro() {
+  const intro = document.querySelector('.site-intro');
+  if (!intro || (location.hash && location.hash !== '#inicio') || window.scrollY > 0 || document.hidden) return;
+  const staticText = matchMedia('(prefers-reduced-motion: reduce), (forced-colors: active)');
+  if (staticText.matches) return;
+  try {
+    const key = 'portfolio-intro-seen';
+    if (sessionStorage.getItem(key)) return;
+    sessionStorage.setItem(key, '1');
+  } catch {
+    // The intro can still run when storage is unavailable.
+  }
+
+  const listeners = new AbortController();
+  const { signal } = listeners;
+  const timeout = setTimeout(finish, 1500);
+
+  function finish() {
+    intro.hidden = true;
+    clearTimeout(timeout);
+    listeners.abort();
+  }
+
+  intro.addEventListener('animationend', event => {
+    if (event.target === intro) finish();
+  }, { signal });
+  for (const type of ['pointerdown', 'keydown', 'focusin', 'scroll', 'pagehide']) {
+    window.addEventListener(type, finish, { passive: true, signal });
+  }
+  staticText.addEventListener('change', finish, { signal });
+  intro.hidden = false;
+}
+
 function initServiceTabs() {
   const serviceOptions = document.querySelector('.service-options');
   const serviceTabs = [...serviceOptions.querySelectorAll('button')];
@@ -105,6 +138,7 @@ function initNavigation() {
   updateNavigation();
 }
 
+initIntro();
 if (document.querySelector('.service-options')) initServiceTabs();
 initNavigation();
 document.querySelectorAll('[data-needs-js]').forEach((element) => { element.hidden = false; });
