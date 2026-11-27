@@ -205,7 +205,7 @@
       </div>
       <p id="brief-fallback">Para proponer un encargo, <a class="email-link" href="mailto:arrizamikel@gmail.com">escríbeme por correo</a>.</p>
       <div class="project-layout" hidden>
-        <form id="project-form" method="post" data-endpoint="">
+        <form id="project-form" method="post" data-endpoint="https://formsubmit.co/ajax/arrizamikel@gmail.com">
           <label>Tu correo electrónico
             <input type="email" name="email" autocomplete="email" maxlength="254" required>
           </label>
@@ -234,6 +234,7 @@
             <textarea name="description" rows="4" maxlength="1200" required placeholder="Qué quieres crear o mejorar, para qué plataforma y en qué plazo."></textarea>
           </label>
           <div class="form-submit">
+            <p class="form-provider" hidden>FormSubmit procesa tu correo y el contenido del encargo para entregármelo.</p>
             <button class="button button-primary" type="submit">Enviar encargo</button>
             <p class="form-status" id="brief-status" role="status"></p>
           </div>

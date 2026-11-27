@@ -276,6 +276,7 @@ h3 { font-size: clamp(1.25rem, 2.25vw, 1.75rem); line-height: 1.2; letter-spacin
 #project-summary { width: 100%; overflow-wrap: anywhere; white-space: pre-wrap; margin: 10px 0 18px; color: var(--ink); font: 400 .94rem/1.55 var(--font-text); }
 .summary-actions { margin-top: auto; }
 .form-status { min-height: 1.45em; margin-top: 7px; color: var(--action); font-size: .875rem; line-height: 1.45; }
+.form-provider { margin-bottom: 8px; color: var(--muted); font-size: .875rem; line-height: 1.5; }
 .local-note { margin-top: 9px; color: var(--muted); font-size: .875rem; line-height: 1.5; }
 .email-link { display: inline-block; margin-top: 4px; color: var(--action); font-weight: 680; text-underline-offset: 4px; }
 

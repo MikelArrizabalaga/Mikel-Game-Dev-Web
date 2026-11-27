@@ -67,6 +67,7 @@ async function initProjectBrief(form) {
     }
   }
   if (!endpoint) return;
+  const isLocalSubmission = endpoint === 'api/encargos';
 
   function updateSummary() {
     const lines = [];
@@ -91,6 +92,7 @@ async function initProjectBrief(form) {
     const body = new URLSearchParams({ email: email.value.trim(), message });
     if (service.value) body.set('service', service.selectedOptions[0].textContent);
     if (phase.value) body.set('phase', phase.value);
+    if (!isLocalSubmission) body.set('_subject', 'Nuevo encargo desde la web');
     sendButton.disabled = true;
     feedback.textContent = 'Enviando…';
     const controls = [email, service, phase, description];
@@ -102,10 +104,12 @@ async function initProjectBrief(form) {
         body,
         signal: AbortSignal.timeout(12000),
       });
-      if (!response.ok) throw new Error('Submission failed');
+      const result = await response.json();
+      const accepted = result?.success ?? result?.ok;
+      if (!response.ok || (accepted !== true && accepted !== 'true')) throw new Error('Submission failed');
       form.reset();
       updateSummary();
-      feedback.textContent = endpoint === 'api/encargos' ? 'Envío de prueba guardado en este equipo.' : 'Encargo enviado.';
+      feedback.textContent = isLocalSubmission ? 'Envío de prueba guardado en este equipo.' : 'Encargo enviado.';
     } catch {
       feedback.textContent = 'No se pudo enviar. Inténtalo de nuevo o usa el correo de la sección Contacto.';
     } finally {
@@ -145,7 +149,8 @@ async function initProjectBrief(form) {
   });
 
   document.querySelector('#brief-fallback').hidden = true;
-  document.querySelector('.local-note').hidden = endpoint !== 'api/encargos';
+  document.querySelector('.local-note').hidden = !isLocalSubmission;
+  form.querySelector('.form-provider').hidden = isLocalSubmission;
   form.closest('.project-layout').hidden = false;
   updateSummary();
 }
