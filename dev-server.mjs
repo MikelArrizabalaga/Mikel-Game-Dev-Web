@@ -7,6 +7,7 @@ const files = new Map([
   ['/proyectos.html', ['proyectos.html', 'text/html; charset=utf-8']],
   ['/aviso-legal.html', ['aviso-legal.html', 'text/html; charset=utf-8']],
   ['/privacidad.html', ['privacidad.html', 'text/html; charset=utf-8']],
+  ['/sitemap.xml', ['sitemap.xml', 'application/xml; charset=utf-8']],
   ['/styles.css', ['styles.css', 'text/css; charset=utf-8']],
   ['/theme.js', ['theme.js', 'text/javascript; charset=utf-8']],
   ['/binary-background.js', ['binary-background.js', 'text/javascript; charset=utf-8']],
