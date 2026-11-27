@@ -200,7 +200,7 @@ function enableBinaryReveal() {
 
       const elapsed = Math.min(now - previous.time, 60);
       previous.time = now;
-      const duration = element.matches('h1, h2, h3, h4') ? 380 : 260;
+      const duration = element.matches('h1, h2, h3, h4') ? 220 : 150;
       const direction = focused ? 1 : -1;
       previous.progress = Math.max(0, Math.min(1, previous.progress + direction * elapsed / duration));
       render(previous, Math.floor(previous.progress * previous.letters.length));
