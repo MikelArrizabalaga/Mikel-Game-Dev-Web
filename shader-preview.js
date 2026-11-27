@@ -18,6 +18,7 @@ function enablePolygonPreview(preview) {
     varying vec2 point;
     uniform float sides;
     uniform float rotation;
+    uniform float darkTheme;
 
     void main() {
       const float pi = 3.14159265;
@@ -30,8 +31,12 @@ function enablePolygonPreview(preview) {
 
       vec2 cell = abs(fract(point * 5.0 + 0.5) - 0.5);
       float grid = 1.0 - smoothstep(0.0, 0.045, min(cell.x, cell.y));
-      vec3 paper = mix(vec3(1.0), vec3(0.92, 0.87, 0.84), grid);
-      vec3 shape = mix(vec3(1.0, 0.79, 0.69), vec3(0.66, 0.20, 0.09), outline);
+      vec3 surface = mix(vec3(1.0), vec3(0.12, 0.09, 0.08), darkTheme);
+      vec3 gridColor = mix(vec3(0.92, 0.87, 0.84), vec3(0.28, 0.19, 0.15), darkTheme);
+      vec3 polygon = mix(vec3(1.0, 0.79, 0.69), vec3(0.30, 0.14, 0.10), darkTheme);
+      vec3 edge = mix(vec3(0.66, 0.20, 0.09), vec3(1.0, 0.61, 0.46), darkTheme);
+      vec3 paper = mix(surface, gridColor, grid);
+      vec3 shape = mix(polygon, edge, outline);
       gl_FragColor = vec4(mix(paper, shape, fill), 1.0);
     }
   `;
@@ -62,6 +67,7 @@ function enablePolygonPreview(preview) {
   const rotationValue = document.querySelector('#rotation-value');
   const sidesUniform = gl.getUniformLocation(program, 'sides');
   const rotationUniform = gl.getUniformLocation(program, 'rotation');
+  const themeUniform = gl.getUniformLocation(program, 'darkTheme');
   gl.uniform1f(gl.getUniformLocation(program, 'aspectRatio'), canvas.width / canvas.height);
 
   function renderPolygon() {
@@ -71,12 +77,17 @@ function enablePolygonPreview(preview) {
     rotation.setAttribute('aria-valuetext', rotation.value + unit);
     gl.uniform1f(sidesUniform, sides.valueAsNumber);
     gl.uniform1f(rotationUniform, rotation.valueAsNumber * Math.PI / 180);
+    gl.uniform1f(themeUniform, document.documentElement.dataset.theme === 'dark' ? 1 : 0);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
   }
 
   sides.addEventListener('input', renderPolygon);
   rotation.addEventListener('input', renderPolygon);
-  canvas.addEventListener('webglcontextlost', () => { preview.hidden = true; });
+  window.addEventListener('themechange', renderPolygon);
+  canvas.addEventListener('webglcontextlost', () => {
+    window.removeEventListener('themechange', renderPolygon);
+    preview.hidden = true;
+  });
   renderPolygon();
   return true;
 }

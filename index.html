@@ -19,6 +19,7 @@
   <meta property="og:image:alt" content="Mikel Arrizabalaga. Videojuegos y Technical Art freelance. Identidad gráfica con un cero y un uno en naranja.">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" type="image/png" href="assets/favicon.png">
+  <script src="theme.js"></script>
   <link rel="stylesheet" href="styles.css">
   <link rel="preload" href="assets/fonts/geist.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="assets/fonts/spacegrotesk.woff2" as="font" type="font/woff2" crossorigin>
@@ -44,6 +45,11 @@
           </div>
         </div>
       </nav>
+      <select class="theme-select" id="theme-select" aria-label="Tema de color" hidden>
+        <option value="system">Sistema</option>
+        <option value="light">Claro</option>
+        <option value="dark">Oscuro</option>
+      </select>
     </div>
   </header>
 
