@@ -338,34 +338,42 @@ h3 { font-size: clamp(1.25rem, 2.25vw, 1.75rem); line-height: 1.2; letter-spacin
   .service-panel dl, .form-selects { grid-template-columns: minmax(0, 1fr); }
 }
 @media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
-  .binary-run { position: relative; }
-  .binary-copy { animation: binary-copy-in var(--reveal-time, 380ms) ease-out both; }
-  .binary-bits {
+  .binary-original {
     position: absolute;
-    inset-block-start: .12em;
-    inset-inline-start: 0;
-    max-inline-size: 100%;
+    width: 1px;
+    height: 1px;
     overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    user-select: none;
+  }
+  .binary-letter { position: relative; }
+  .binary-glyph { animation: binary-glyph-in 60ms var(--letter-delay) ease-out both; }
+  .binary-letter::after {
+    content: attr(data-bit);
+    position: absolute;
+    inset: 50% 0 auto;
+    transform: translateY(-50%);
+    overflow: hidden;
+    text-align: center;
     color: var(--reveal-color, var(--action));
     -webkit-text-fill-color: currentColor;
     -webkit-text-stroke: 0;
-    font: 600 .78em/1.1 var(--font-bits);
-    white-space: nowrap;
+    font: 600 .66em/1.16 var(--font-bits);
     pointer-events: none;
     user-select: none;
-    animation: binary-bits-out var(--reveal-time, 380ms) ease-out both;
+    animation: binary-bit-out 60ms var(--letter-delay) ease-out both;
   }
-  :is(h1, h2) { --reveal-time: 480ms; }
   .button-primary { --reveal-color: var(--paper); }
-  :focus-visible .binary-copy, label:focus-within .binary-copy { opacity: 1 !important; }
-  :focus-visible .binary-bits, label:focus-within .binary-bits { visibility: hidden; }
-  @keyframes binary-copy-in {
-    0%, 38% { opacity: 0; }
-    100% { opacity: 1; }
+  :focus-visible .binary-glyph, label:focus-within .binary-glyph { animation: none; }
+  :focus-visible .binary-letter::after, label:focus-within .binary-letter::after { visibility: hidden; }
+  @keyframes binary-glyph-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
-  @keyframes binary-bits-out {
-    0%, 26% { opacity: .9; clip-path: inset(0 0 0 0); }
-    55%, 100% { opacity: 0; clip-path: inset(0 0 0 100%); }
+  @keyframes binary-bit-out {
+    from { opacity: .85; }
+    to { opacity: 0; }
   }
 }
 @media (forced-colors: active) {

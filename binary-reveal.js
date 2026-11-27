@@ -3,8 +3,12 @@ const binaryTextSelector = [
   '#project-summary', '.footer-inner > span', '.category-label',
 ].join(', ');
 
+const graphemes = typeof Intl.Segmenter === 'function' ? new Intl.Segmenter('es') : null;
+
 function prepareBinaryText(element) {
   const runs = [];
+  const letters = [];
+
   function wrapText(container) {
     for (const node of [...container.childNodes]) {
       if (node.nodeType === Node.ELEMENT_NODE) {
@@ -14,22 +18,35 @@ function prepareBinaryText(element) {
       if (node.nodeType !== Node.TEXT_NODE || !node.data.trim()) continue;
 
       const run = document.createElement('span');
+      const original = document.createElement('span');
       const copy = document.createElement('span');
-      const bits = document.createElement('span');
-      run.className = 'binary-run';
-      copy.className = 'binary-copy';
-      bits.className = 'binary-bits';
-      bits.setAttribute('aria-hidden', 'true');
-      const first = node.data.trim().codePointAt(0);
-      bits.textContent = first.toString(2).padStart(8, '0').slice(-8);
+      original.className = 'binary-original';
+      copy.setAttribute('aria-hidden', 'true');
+      const characters = graphemes ? Array.from(graphemes.segment(node.data), ({ segment }) => segment) : [...node.data];
+      for (const character of characters) {
+        if (/^\s+$/u.test(character)) {
+          copy.append(character);
+          continue;
+        }
+        const letter = document.createElement('span');
+        const glyph = document.createElement('span');
+        letter.className = 'binary-letter';
+        letter.dataset.bit = String(character.codePointAt(0) % 2);
+        glyph.className = 'binary-glyph';
+        glyph.textContent = character;
+        letter.append(glyph);
+        copy.append(letter);
+        letters.push(letter);
+      }
+
       node.replaceWith(run);
-      copy.append(node);
-      run.append(copy, bits);
-      runs.push({ run, copy, node });
+      original.append(node);
+      run.append(original, copy);
+      runs.push({ run, node });
     }
   }
   wrapText(element);
-  return runs;
+  return { runs, letters };
 }
 
 function initHeroTyping(canAnimate) {
@@ -101,10 +118,15 @@ function enableBinaryReveal() {
       completed.add(target);
       if (target.matches(':focus-within')) continue;
 
-      const runs = prepareBinaryText(target);
-      if (!runs.length) continue;
-      animations.set(target, { runs, timeout: setTimeout(() => finish(target), 600) });
-      runs[0].copy.addEventListener('animationend', () => finish(target), { once: true });
+      const { runs, letters } = prepareBinaryText(target);
+      if (!letters.length) continue;
+      const maxDelay = target.matches('h1, h2') ? 420 : 600;
+      const step = Math.min(44, maxDelay / Math.max(1, letters.length - 1));
+      letters.forEach((letter, index) => {
+        letter.style.setProperty('--letter-delay', Math.round(75 + index * step) + 'ms');
+      });
+      animations.set(target, { runs, timeout: setTimeout(() => finish(target), 230 + (letters.length - 1) * step) });
+      letters.at(-1).firstElementChild.addEventListener('animationend', () => finish(target), { once: true });
     }
   }, { rootMargin: '0px 0px -24px' });
 
