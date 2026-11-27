@@ -88,6 +88,7 @@ button { cursor: pointer; }
   color: var(--ink);
   opacity: .045;
   font: 500 .875rem/1.4375rem var(--font-bits);
+.binary-background canvas { position: absolute; top: 0; left: 0; color: var(--accent); }
   letter-spacing: .16em;
 }
 
@@ -161,6 +162,7 @@ button { cursor: pointer; }
   content: '';
   position: absolute;
   z-index: -1;
+  mask-image: var(--background-reveal-mask, none);
   inset: 0;
   background: radial-gradient(ellipse at center, var(--paper) 12%, var(--hero-glow) 41%, transparent 74%);
   pointer-events: none;

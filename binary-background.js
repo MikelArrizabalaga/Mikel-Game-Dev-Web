@@ -5,6 +5,7 @@ const signature = '01101101 01101001 01101011 01100101 01101100 00100000 0110000
 const loopRows = 6;
 let previousColumns = 0;
 let previousRows = 0;
+let patternLines = [];
 
 function renderPattern() {
   const { clientWidth: width, clientHeight: height } = background;
@@ -18,11 +19,166 @@ function renderPattern() {
   previousRows = rows;
   const repeated = signature.repeat(Math.ceil((columns + signature.length) / signature.length));
 
-  const lines = Array.from({ length: rows }, (_, row) => {
+  patternLines = Array.from({ length: rows }, (_, row) => {
     const offset = (row % loopRows) * (signature.length / loopRows);
     return repeated.slice(offset, offset + columns);
   });
-  pattern.textContent = lines.join('\n');
+  pattern.textContent = patternLines.join('\n');
 }
 
-new ResizeObserver(renderPattern).observe(background);
+function initReactiveBackground() {
+  if (!CSS.supports('mask-image', 'radial-gradient(transparent, black)')) return;
+
+  const motion = matchMedia('(any-hover: hover) and (any-pointer: fine) and (prefers-reduced-motion: no-preference) and (forced-colors: none)');
+  const toggle = document.querySelector('#toggle-animation');
+  const hero = document.querySelector('.hero');
+  const canvas = document.createElement('canvas');
+  const context = canvas.getContext('2d');
+  if (!context) return;
+
+  canvas.hidden = true;
+  background.append(canvas);
+  const sin = Math.sin(rotation);
+  const cos = Math.cos(rotation);
+  const lift = 30;
+  const fadeTime = 190;
+  let geometry;
+  let pointer;
+  let leavingAt;
+  let frame = null;
+
+  function refresh() {
+    if (!motion.matches) return;
+    const style = getComputedStyle(pattern);
+    const font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+    const { clientWidth: width, clientHeight: height } = background;
+    const radius = Math.min(205, Math.max(125, width * .16));
+    const size = Math.ceil(2 * (radius + lift + 14));
+    const scale = Math.min(window.devicePixelRatio || 1, 2);
+    const pixels = Math.ceil(size * scale);
+    if (canvas.width !== pixels || canvas.height !== pixels) {
+      canvas.width = pixels;
+      canvas.height = pixels;
+      canvas.style.width = canvas.style.height = size + 'px';
+    }
+
+    context.font = font;
+    context.textBaseline = 'middle';
+    geometry = {
+      centerX: width / 2,
+      centerY: height / 2,
+      originX: -pattern.offsetWidth / 2,
+      originY: -pattern.offsetHeight / 2,
+      advance: context.measureText('0').width + parseFloat(style.letterSpacing),
+      lineHeight: parseFloat(style.lineHeight),
+      radius,
+      size,
+      scale,
+    };
+    context.fillStyle = getComputedStyle(canvas).color;
+    if (pointer) schedule();
+  }
+
+  function clear() {
+    cancelAnimationFrame(frame);
+    frame = null;
+    pointer = undefined;
+    leavingAt = undefined;
+    canvas.hidden = true;
+    pattern.style.removeProperty('mask-image');
+    hero?.style.removeProperty('--background-reveal-mask');
+  }
+
+  function paint(now) {
+    frame = null;
+    const strength = leavingAt === undefined ? 1 : Math.max(0, 1 - (now - leavingAt) / fadeTime);
+    if (!strength) {
+      clear();
+      return;
+    }
+
+    const { centerX, centerY, originX, originY, advance, lineHeight, radius, size, scale } = geometry;
+    const cursorX = pointer.x - centerX;
+    const cursorY = pointer.y - centerY;
+    const localX = cursorX * cos - cursorY * sin;
+    const localY = cursorX * sin + cursorY * cos;
+    const canvasX = Math.round(pointer.x - size / 2);
+    const canvasY = Math.round(pointer.y - size / 2);
+    const radiusSquared = radius * radius;
+    const heroBox = hero?.getBoundingClientRect();
+
+    canvas.hidden = false;
+    canvas.style.transform = `translate(${canvasX}px, ${canvasY}px)`;
+    pattern.style.maskImage = `radial-gradient(circle ${radius}px at ${localX - originX}px ${localY - originY}px, rgb(0 0 0 / ${1 - strength}) 36%, #000 100%)`;
+    if (heroBox && heroBox.bottom > 0) {
+      const x = pointer.x - heroBox.left;
+      const y = pointer.y - heroBox.top;
+      hero.style.setProperty('--background-reveal-mask', `radial-gradient(circle ${radius}px at ${x}px ${y}px, rgb(0 0 0 / ${1 - .78 * strength}), #000 100%)`);
+    }
+    context.setTransform(1, 0, 0, 1, 0, 0);
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.setTransform(scale, 0, 0, scale, (centerX - canvasX) * scale, (centerY - canvasY) * scale);
+    context.rotate(-rotation);
+
+    const firstRow = Math.max(0, Math.floor((localY - originY - radius) / lineHeight));
+    const lastRow = Math.min(patternLines.length - 1, Math.ceil((localY - originY + radius) / lineHeight));
+    const firstColumn = Math.max(0, Math.floor((localX - originX - radius) / advance));
+    const lastColumn = Math.ceil((localX - originX + radius) / advance);
+    for (let row = firstRow; row <= lastRow; row++) {
+      const line = patternLines[row];
+      const y = originY + (row + .5) * lineHeight;
+      for (let column = firstColumn; column <= lastColumn && column < line.length; column++) {
+        const digit = line[column];
+        if (digit === ' ') continue;
+        const x = originX + column * advance;
+        const dx = x + advance / 2 - localX;
+        const dy = y - localY;
+        const falloff = 1 - (dx * dx + dy * dy) / radiusSquared;
+        if (falloff <= 0) continue;
+        const influence = falloff * falloff * strength;
+        const rise = lift * influence;
+        context.globalAlpha = .64 * influence;
+        context.fillText(digit, x + sin * rise, y - cos * rise);
+      }
+    }
+    if (leavingAt !== undefined) schedule();
+  }
+
+  function schedule() {
+    if (frame === null) frame = requestAnimationFrame(paint);
+  }
+
+  const canReact = () => motion.matches && !document.hidden && toggle?.getAttribute('aria-pressed') !== 'true';
+
+  window.addEventListener('pointermove', event => {
+    if (event.pointerType !== 'mouse' || !canReact()) return;
+    if (!geometry) refresh();
+    pointer = { x: event.clientX, y: event.clientY };
+    leavingAt = undefined;
+    schedule();
+  }, { passive: true });
+
+  document.addEventListener('pointerout', event => {
+    if (!pointer || event.relatedTarget || leavingAt !== undefined) return;
+    leavingAt = performance.now();
+    schedule();
+  });
+  window.addEventListener('blur', clear);
+  window.addEventListener('scroll', () => { if (pointer) schedule(); }, { passive: true });
+  document.addEventListener('visibilitychange', () => { if (document.hidden) clear(); });
+  window.addEventListener('themechange', refresh);
+  motion.addEventListener('change', () => motion.matches ? refresh() : clear());
+  if (toggle) {
+    new MutationObserver(() => { if (!canReact()) clear(); }).observe(toggle, {
+      attributes: true,
+      attributeFilter: ['aria-pressed'],
+    });
+  }
+  return refresh;
+}
+
+const refreshReactive = background.hasAttribute('data-reactive') ? initReactiveBackground() : null;
+new ResizeObserver(() => {
+  renderPattern();
+  refreshReactive?.();
+}).observe(background);
