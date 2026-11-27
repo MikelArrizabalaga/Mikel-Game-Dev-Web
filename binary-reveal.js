@@ -55,6 +55,7 @@ function initHeroTyping(canAnimate) {
     const message = messages[line];
     if (length === message.length) {
       line = (line + 1) % messages.length;
+      mark.dataset.message = line;
       length = 0;
     }
     const current = messages[line];
@@ -84,6 +85,7 @@ function initHeroTyping(canAnimate) {
     if (visible && canAnimate()) {
       line = 0;
       length = 0;
+      mark.dataset.message = line;
       output.textContent = '';
     }
     sync();
@@ -112,13 +114,16 @@ function enableBinaryReveal() {
     const { range, rect, fontSize, bit } = letter;
     const { box, host, inverse } = animation;
     const digit = document.createElement('span');
-    digit.className = 'binary-digit';
-    digit.textContent = bit;
+    digit.className = 'binary-digit ' + (bit ? 'bit-one' : 'bit-zero');
     if (inverse) digit.classList.add('binary-digit-inverse');
     digit.setAttribute('aria-hidden', 'true');
+    const height = fontSize * .57;
+    const width = Math.min(height * .68, rect.width * .92);
     digit.style.left = rect.left - box.left + rect.width / 2 + 'px';
     digit.style.top = rect.top - box.top + rect.height / 2 + 'px';
-    digit.style.fontSize = Math.min(fontSize * .69, rect.width * 1.45) + 'px';
+    digit.style.width = width + 'px';
+    digit.style.height = height + 'px';
+    digit.style.setProperty('--bit-stroke', Math.min(height * .12, width * .25) + 'px');
     queued.delete(range);
     pending.add(range);
     host.append(digit);
