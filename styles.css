@@ -130,10 +130,11 @@ button { cursor: pointer; }
 }
 .hero-digits {
   display: flex;
-  gap: .035em;
+  gap: .06em;
   color: var(--accent);
-  font: 700 clamp(5.5rem, 12vw, 10rem)/.95 var(--font-bits);
-  letter-spacing: -.08em;
+  font: 700 clamp(5.5rem, 12vw, 10rem)/.9 "Space Grotesk", var(--font-text);
+  font-variant-numeric: lining-nums proportional-nums;
+  letter-spacing: -.04em;
 }
 .hero-surname, .hero-digits span:first-child { color: var(--action); }
 @supports (-webkit-text-stroke: 1px currentColor) {
@@ -352,14 +353,13 @@ h3 { font-size: clamp(1.25rem, 2.25vw, 1.75rem); line-height: 1.2; letter-spacin
   .binary-letter::after {
     content: attr(data-bit);
     position: absolute;
-    inset: 50% 0 auto;
-    transform: translateY(-50%);
-    overflow: hidden;
-    text-align: center;
+    inset: 50% auto auto 50%;
+    transform: translate(-50%, -50%);
     color: var(--reveal-color, var(--action));
     -webkit-text-fill-color: currentColor;
     -webkit-text-stroke: 0;
-    font: 600 .66em/1.16 var(--font-bits);
+    font: 650 .55em/1 var(--font-text);
+    font-variant-numeric: lining-nums tabular-nums;
     pointer-events: none;
     user-select: none;
     animation: binary-bit-out 60ms var(--letter-delay) ease-out both;
@@ -372,7 +372,7 @@ h3 { font-size: clamp(1.25rem, 2.25vw, 1.75rem); line-height: 1.2; letter-spacin
     to { opacity: 1; }
   }
   @keyframes binary-bit-out {
-    from { opacity: .85; }
+    from { opacity: .78; }
     to { opacity: 0; }
   }
 }

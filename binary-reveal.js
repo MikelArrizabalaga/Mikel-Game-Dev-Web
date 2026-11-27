@@ -94,7 +94,6 @@ function initHeroTyping(canAnimate) {
 function enableBinaryReveal() {
   const staticText = matchMedia('(prefers-reduced-motion: reduce), (forced-colors: active)');
   const toggle = document.querySelector('#toggle-animation');
-  const completed = new WeakSet();
   const animations = new Map();
   let paused = false;
   const canAnimate = () => !paused && !staticText.matches;
@@ -111,12 +110,12 @@ function enableBinaryReveal() {
   }
 
   const observer = new IntersectionObserver((entries) => {
-    if (!canAnimate()) return;
     for (const { target, isIntersecting } of entries) {
-      if (!isIntersecting || completed.has(target)) continue;
-      observer.unobserve(target);
-      completed.add(target);
-      if (target.matches(':focus-within')) continue;
+      if (!isIntersecting) {
+        finish(target);
+        continue;
+      }
+      if (!canAnimate() || animations.has(target) || target.matches(':focus-within')) continue;
 
       const { runs, letters } = prepareBinaryText(target);
       if (!letters.length) continue;
@@ -132,12 +131,7 @@ function enableBinaryReveal() {
 
   function sync() {
     toggle.hidden = staticText.matches;
-    observer.disconnect();
-    if (canAnimate()) {
-      for (const element of document.querySelectorAll(binaryTextSelector)) {
-        if (!completed.has(element) && !element.closest('[aria-hidden="true"], [role="status"]')) observer.observe(element);
-      }
-    } else {
+    if (!canAnimate()) {
       for (const element of animations.keys()) finish(element);
     }
     syncHeroTyping();
@@ -149,6 +143,9 @@ function enableBinaryReveal() {
     sync();
   });
   staticText.addEventListener('change', sync);
+  for (const element of document.querySelectorAll(binaryTextSelector)) {
+    if (!element.closest('[aria-hidden="true"], [role="status"]')) observer.observe(element);
+  }
   sync();
 }
 
