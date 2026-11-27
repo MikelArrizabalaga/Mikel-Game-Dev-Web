@@ -114,6 +114,7 @@ function initHeroTyping(canAnimate) {
 
 function enableBinaryReveal() {
   const staticText = matchMedia('(prefers-reduced-motion: reduce), (forced-colors: active)');
+  const touchScroll = matchMedia('(pointer: coarse)');
   const toggle = document.querySelector('#toggle-animation');
   const pending = CSS.highlights && typeof Highlight === 'function' ? new Highlight() : null;
   if (pending) CSS.highlights.set('binary-pending', pending);
@@ -122,6 +123,8 @@ function enableBinaryReveal() {
   const focusedText = new Set();
   const effects = new Map();
   let paused = false;
+  let scrolling = false;
+  let scrollEndTimer;
   let frame = null;
   const canAnimate = () => !paused && !staticText.matches;
   const syncHeroTyping = initHeroTyping(canAnimate);
@@ -156,12 +159,12 @@ function enableBinaryReveal() {
   }
 
   function schedule() {
-    if (frame === null && !document.hidden && canAnimate()) frame = requestAnimationFrame(update);
+    if (frame === null && !scrolling && !document.hidden && canAnimate()) frame = requestAnimationFrame(update);
   }
 
   function update(now) {
     frame = null;
-    if (!pending || document.hidden || !canAnimate()) return;
+    if (!pending || scrolling || document.hidden || !canAnimate()) return;
     const height = document.documentElement.clientHeight;
     const headerBottom = header.getBoundingClientRect().bottom;
     const inset = Math.max(0, height - headerBottom) * .15;
@@ -258,6 +261,22 @@ function enableBinaryReveal() {
     focusedText.clear();
   }
 
+  function onScroll() {
+    if (!touchScroll.matches) {
+      schedule();
+      return;
+    }
+    if (!scrolling) {
+      scrolling = true;
+      clearEffects();
+    }
+    clearTimeout(scrollEndTimer);
+    scrollEndTimer = setTimeout(() => {
+      scrolling = false;
+      schedule();
+    }, 120);
+  }
+
   function sync() {
     toggle.hidden = staticText.matches;
     if (canAnimate()) schedule();
@@ -277,7 +296,7 @@ function enableBinaryReveal() {
         if (!element.closest('[data-binary-static], .site-header, .site-footer, .skip-link, [aria-hidden="true"], [role="status"]')) observer.observe(element);
       }
     });
-    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('scroll', onScroll, { passive: true });
     const refreshLayout = () => {
       clearEffects();
       schedule();

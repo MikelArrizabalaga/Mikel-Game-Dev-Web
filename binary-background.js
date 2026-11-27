@@ -30,17 +30,24 @@ function initReactiveBackground() {
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   const forcedColors = matchMedia('(forced-colors: active)');
   const toggle = document.querySelector('#toggle-animation');
-  const hero = document.querySelector('.hero');
+  const layer = document.createElement('div');
   const canvas = document.createElement('canvas');
   const context = canvas.getContext('2d');
-  if (!context) return;
+  const glyphs = document.createElement('canvas');
+  const glyphContext = glyphs.getContext('2d');
+  if (!context || !glyphContext) return;
 
+  layer.className = 'binary-wave';
+  layer.setAttribute('aria-hidden', 'true');
   canvas.hidden = true;
-  background.append(canvas);
+  layer.append(canvas);
+  document.body.append(layer);
   const sin = Math.sin(rotation);
   const cos = Math.cos(rotation);
   let geometry;
   let pointer;
+  let position;
+  let previousFrame;
   let touchId = null;
   let releaseTimer;
   let leavingAt;
@@ -61,20 +68,33 @@ function initReactiveBackground() {
       canvas.style.width = canvas.style.height = size + 'px';
     }
 
-    context.font = font;
-    context.textBaseline = 'middle';
+    glyphContext.font = font;
+    const digitWidth = glyphContext.measureText('0').width;
+    const lineHeight = parseFloat(style.lineHeight);
+    const glyphWidth = Math.ceil((digitWidth + 2) * scale);
+    const glyphHeight = Math.ceil(lineHeight * scale);
+    glyphs.width = glyphWidth * 2;
+    glyphs.height = glyphHeight;
+    glyphContext.scale(scale, scale);
+    glyphContext.font = font;
+    glyphContext.textBaseline = 'middle';
+    glyphContext.fillStyle = getComputedStyle(canvas).color;
+    glyphContext.fillText('0', 1, glyphHeight / scale / 2);
+    glyphContext.fillText('1', glyphWidth / scale + 1, glyphHeight / scale / 2);
+
     geometry = {
       centerX: width / 2,
       centerY: height / 2,
       originX: -pattern.offsetWidth / 2,
       originY: -pattern.offsetHeight / 2,
-      advance: context.measureText('0').width + parseFloat(style.letterSpacing),
-      lineHeight: parseFloat(style.lineHeight),
+      advance: digitWidth + parseFloat(style.letterSpacing),
+      lineHeight,
+      glyphWidth,
+      glyphHeight,
       radius,
       size,
       scale,
     };
-    context.fillStyle = getComputedStyle(canvas).color;
     if (pointer) schedule();
   }
 
@@ -83,44 +103,53 @@ function initReactiveBackground() {
     clearTimeout(releaseTimer);
     frame = null;
     pointer = undefined;
+    position = undefined;
+    previousFrame = undefined;
     touchId = null;
     leavingAt = undefined;
     canvas.hidden = true;
-    pattern.style.removeProperty('--background-reveal-mask');
-    hero?.style.removeProperty('--background-reveal-mask');
   }
 
   function paint(now) {
     frame = null;
     const fadeTime = pointer.touch ? 360 : 190;
     const elapsed = leavingAt === undefined ? 0 : Math.max(0, now - leavingAt);
-    const strength = Math.max(0, 1 - elapsed / fadeTime);
+    const progress = Math.min(1, elapsed / fadeTime);
+    const strength = pointer.touch ? 1 - progress * progress * (3 - 2 * progress) : 1 - progress;
     if (!strength) {
       clear();
       return;
     }
 
-    const { centerX, centerY, originX, originY, advance, lineHeight, radius, size, scale } = geometry;
-    const cursorX = pointer.x - centerX;
-    const cursorY = pointer.y - centerY;
+    let moving = false;
+    if (!position || !pointer.touch || reducedMotion.matches) {
+      position = { x: pointer.x, y: pointer.y };
+    } else {
+      const step = Math.min(40, Math.max(1, now - previousFrame));
+      const follow = 1 - Math.exp(-step / 25);
+      position.x += (pointer.x - position.x) * follow;
+      position.y += (pointer.y - position.y) * follow;
+      moving = Math.hypot(pointer.x - position.x, pointer.y - position.y) > .5;
+      if (!moving) {
+        position.x = pointer.x;
+        position.y = pointer.y;
+      }
+    }
+    previousFrame = now;
+
+    const { centerX, centerY, originX, originY, advance, lineHeight, glyphWidth, glyphHeight, radius, size, scale } = geometry;
+    const cursorX = position.x - centerX;
+    const cursorY = position.y - centerY;
     const localX = cursorX * cos - cursorY * sin;
     const localY = cursorX * sin + cursorY * cos;
-    const canvasX = Math.round(pointer.x - size / 2);
-    const canvasY = Math.round(pointer.y - size / 2);
+    const canvasX = Math.round(position.x - size / 2);
+    const canvasY = Math.round(position.y - size / 2);
     const radiusSquared = radius * radius;
-    const heroBox = hero?.getBoundingClientRect();
     const lift = reducedMotion.matches ? 0 : pointer.touch ? 36 : 30;
     const peakOpacity = pointer.touch ? .88 : .64;
 
     canvas.hidden = false;
-    canvas.style.transform = `translate(${canvasX}px, ${canvasY}px)`;
-    pattern.style.setProperty('--background-reveal-mask', `radial-gradient(circle ${radius}px at ${localX - originX}px ${localY - originY}px, rgb(0 0 0 / ${1 - strength}) 36%, #000 100%)`);
-    if (heroBox && heroBox.bottom > 0) {
-      const x = pointer.x - heroBox.left;
-      const y = pointer.y - heroBox.top;
-      const reveal = pointer.touch ? .9 : .78;
-      hero.style.setProperty('--background-reveal-mask', `radial-gradient(circle ${radius}px at ${x}px ${y}px, rgb(0 0 0 / ${1 - reveal * strength}), #000 100%)`);
-    }
+    canvas.style.transform = `translate3d(${canvasX}px, ${canvasY}px, 0)`;
     context.setTransform(1, 0, 0, 1, 0, 0);
     context.clearRect(0, 0, canvas.width, canvas.height);
     context.setTransform(scale, 0, 0, scale, (centerX - canvasX) * scale, (centerY - canvasY) * scale);
@@ -144,10 +173,11 @@ function initReactiveBackground() {
         const influence = falloff * Math.sqrt(falloff) * strength;
         const rise = lift * influence;
         context.globalAlpha = peakOpacity * influence;
-        context.fillText(digit, x + sin * rise, y - cos * rise);
+        context.drawImage(glyphs, digit === '1' ? glyphWidth : 0, 0, glyphWidth, glyphHeight,
+          x + sin * rise - 1, y - cos * rise - glyphHeight / scale / 2, glyphWidth / scale, glyphHeight / scale);
       }
     }
-    if (leavingAt !== undefined) schedule();
+    if (moving || leavingAt !== undefined) schedule();
   }
 
   function schedule() {
@@ -201,7 +231,6 @@ function initReactiveBackground() {
   window.addEventListener('touchend', releaseTouch, { passive: true });
   window.addEventListener('touchcancel', releaseTouch, { passive: true });
   window.addEventListener('blur', clear);
-  window.addEventListener('scroll', () => { if (pointer) schedule(); }, { passive: true });
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) clear();
   }, { passive: true });
