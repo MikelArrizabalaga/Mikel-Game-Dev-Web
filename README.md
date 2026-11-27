@@ -6,7 +6,7 @@ Web estática en español para presentar servicios freelance de programación de
 
 Abre `index.html` directamente o ejecuta `node dev-server.mjs` desde la carpeta del proyecto y visita [la vista local](http://127.0.0.1:4173). El servidor escucha únicamente en este equipo.
 
-`index.html` reúne la portada, los servicios y el contacto. `proyectos.html` contiene el catálogo. `styles.css` define el diseño adaptable. `binary-background.js` dibuja el fondo y `binary-reveal.js` anima los títulos principales una sola vez. `app.js` controla la navegación, los servicios y el formulario. `shader-preview.js` dibuja la muestra interactiva del polígono con WebGL.
+`index.html` reúne la portada, los servicios y el contacto. `proyectos.html` contiene el catálogo. `styles.css` define el diseño adaptable. `binary-background.js` dibuja el fondo y `binary-reveal.js` descifra brevemente los textos al entrar en pantalla y anima el 01 de la portada. `app.js` controla la navegación, los servicios y el formulario. `shader-preview.js` dibuja la muestra interactiva del polígono con WebGL.
 
 El formulario de encargos guarda cada envío de prueba como un JSON en la carpeta temporal que imprime `node dev-server.mjs`. La vista local no envía correos.
 
