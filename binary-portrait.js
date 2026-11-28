@@ -32,7 +32,23 @@ function samplePortrait(rgba, size) {
     visit(x, y - 1);
     visit(x, y + 1);
   }
-  return { light, backdrop };
+  const silhouette = new Float32Array(light.length);
+  const details = new Float32Array(light.length);
+  const neighbors = [[-3, 0], [3, 0], [0, -4], [0, 4]];
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const index = y * size + x;
+      if (backdrop[index]) continue;
+      for (const [dx, dy] of neighbors) {
+        const neighborX = Math.max(0, Math.min(size - 1, x + dx));
+        const neighborY = Math.max(0, Math.min(size - 1, y + dy));
+        const neighbor = neighborY * size + neighborX;
+        if (backdrop[neighbor]) silhouette[index] += .25;
+        else details[index] = Math.max(details[index], Math.abs(light[index] - light[neighbor]));
+      }
+    }
+  }
+  return { light, backdrop, silhouette, details };
 }
 
 function initBinaryPortrait(background, pattern, angle, getPatternLines) {
@@ -133,10 +149,12 @@ function initBinaryPortrait(background, pattern, angle, getPatternLines) {
           const index = Math.floor(v * resolution) * resolution + Math.floor(u * resolution);
           if (!portrait.backdrop[index]) {
             const light = portrait.light[index];
-            const edge = Math.min(1, u / .08, (1 - u) / .075, v / .055, (1 - v) / .19);
-            level = light > .72 ? 2 : 1;
-            lift = 7 * (1 - light) ** 1.2 * edge;
-            const intensity = light ** .75;
+            const outline = portrait.silhouette[index];
+            const edge = Math.min(1, u / .07, (1 - u) / .065, v / .04, (1 - v) / .17);
+            const baseTone = Math.max(light ** .75, Math.min(.88, 1.15 * outline));
+            const intensity = baseTone + (1 - baseTone) * .42 * portrait.details[index];
+            level = intensity > .72 ? 2 : 1;
+            lift = (7 * (1 - light) ** 1.2 + 2 * outline) * edge;
             const tone = dark ? .24 + .66 * intensity : .15 + .72 * intensity;
             opacity += edge * tone;
           }
