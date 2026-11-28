@@ -176,7 +176,7 @@ button { cursor: pointer; }
   /* Leave the decoded phrase visible briefly before moving the marker. */
   @keyframes cycle-zero {
     0%, 22%, 98%, 100% { transform: none; }
-    36%, 82% { transform: translate(calc(76% + .035em), .31em) scale(.2); }
+    36%, 82% { transform: translate(calc(76% + .035em + var(--digit-center-offset)), .31em) scale(.2); }
   }
   @keyframes cycle-outline {
     0%, 25%, 95%, 100% { opacity: 1; }
@@ -188,7 +188,7 @@ button { cursor: pointer; }
   }
   @keyframes cycle-one {
     0%, 22%, 98%, 100% { transform: none; }
-    36%, 82% { transform: translateX(calc(-100% - .035em)); }
+    36%, 82% { transform: translateX(calc(-100% - .035em + var(--digit-center-offset))); }
   }
 }
 
@@ -235,6 +235,7 @@ button { cursor: pointer; }
   user-select: none;
 }
 .hero-digits {
+  --digit-center-offset: .16em;
   display: flex;
   align-items: center;
   gap: .035em;
