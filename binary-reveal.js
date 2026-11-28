@@ -55,31 +55,21 @@ function initHeroMessages(canAnimate, replaceMessage) {
   if (!message) return () => {};
   const mark = message.closest('.hero-mark');
   const messages = [message.textContent, message.dataset.heroEffects, message.dataset.heroCollaboration];
+  const cycleDuration = 2300;
+  mark.style.setProperty('--hero-cycle-duration', cycleDuration + 'ms');
   let index = 0;
   let visible = false;
   let timer;
 
-  function playSwitch() {
-    if (mark.hasAttribute('data-switch')) {
-      mark.removeAttribute('data-switch');
-      // Apply the reset before restarting the CSS animations.
-      void mark.offsetWidth;
-    }
-    mark.setAttribute('data-switch', '');
-  }
-
   function sync() {
     clearInterval(timer);
-    if (!visible || document.hidden || !canAnimate()) {
-      mark.removeAttribute('data-switch');
-      return;
-    }
-    playSwitch();
+    const active = visible && !document.hidden && canAnimate();
+    mark.toggleAttribute('data-cycle', active);
+    if (!active) return;
     timer = setInterval(() => {
       index = (index + 1) % messages.length;
-      playSwitch();
       replaceMessage(message, messages[index]);
-    }, 2300);
+    }, cycleDuration);
   }
 
   const observer = new IntersectionObserver(([entry]) => {
@@ -183,8 +173,7 @@ function enableBinaryReveal() {
         fragment.append(overlay);
       }
       for (const { range } of measured.letters) pending.add(range);
-      const switchDelay = element.matches('.hero-message-decoded') ? 550 : 0;
-      effects.set(element, { ...measured, started: performance.now() + switchDelay, decoded: 0, written: 0 });
+      effects.set(element, { ...measured, started: performance.now(), decoded: 0, written: 0 });
     }
     document.body.append(fragment);
     if (frame === null) frame = requestAnimationFrame(update);

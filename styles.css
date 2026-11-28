@@ -157,11 +157,14 @@ button { cursor: pointer; }
 @media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
   .hero[data-intro] .eyebrow { animation: intro-rise 360ms ease-out both; }
   .hero[data-intro] h1 { animation: intro-title 780ms cubic-bezier(.24, .75, .25, 1) 80ms both; }
-  .hero-mark[data-switch] .hero-zero { animation: switch-zero 760ms ease-in-out both; }
-  .hero-mark[data-switch] .hero-zero > span { animation: switch-zero-outline 760ms ease-in-out both; }
-  .hero-mark[data-switch] .hero-zero::after { animation: switch-dot 760ms ease-in-out both; }
-  .hero-mark[data-switch] .hero-one { animation: switch-one 760ms ease-in-out both; }
-  .hero-mark[data-switch]::after { animation: switch-signal 320ms ease-out 280ms both; }
+  .hero-mark[data-cycle] :is(.hero-zero, .hero-zero > span, .hero-one),
+  .hero-mark[data-cycle] .hero-zero::after {
+    animation: var(--digit-animation) var(--hero-cycle-duration) ease-in-out infinite;
+  }
+  .hero-zero { --digit-animation: cycle-zero; }
+  .hero-zero > span { --digit-animation: cycle-outline; }
+  .hero-zero::after { --digit-animation: cycle-dot; }
+  .hero-one { --digit-animation: cycle-one; }
   @keyframes intro-rise {
     from { opacity: 0; transform: translateY(7px); }
     to { opacity: 1; transform: translateY(0); }
@@ -170,29 +173,21 @@ button { cursor: pointer; }
     from { opacity: 0; clip-path: inset(-.15em 100% -.2em -.1em); transform: translateY(7px); }
     to { opacity: 1; clip-path: inset(-.15em -.1em -.2em -.1em); transform: translateY(0); }
   }
-  @keyframes switch-zero {
-    0%, 64% { transform: none; }
-    to { transform: translate(calc(76% + .035em), .31em) scale(.2); }
+  @keyframes cycle-zero {
+    0%, 18%, 98%, 100% { transform: none; }
+    36%, 82% { transform: translate(calc(76% + .035em), .31em) scale(.2); }
   }
-  @keyframes switch-zero-outline {
-    from { opacity: 1; clip-path: inset(0 0 100% 0); }
-    33%, 75% { opacity: 1; clip-path: inset(-.08em); }
-    to { opacity: 0; clip-path: inset(-.08em); }
+  @keyframes cycle-outline {
+    0%, 23%, 95%, 100% { opacity: 1; }
+    36%, 82% { opacity: 0; }
   }
-  @keyframes switch-dot {
-    0%, 75% { opacity: 0; }
-    to { opacity: 1; }
+  @keyframes cycle-dot {
+    0%, 23%, 95%, 100% { opacity: 0; }
+    36%, 82% { opacity: 1; }
   }
-  @keyframes switch-one {
-    0%, 30% { opacity: .2; text-shadow: none; transform: translateX(0); }
-    46% { opacity: 1; text-shadow: 0 0 .22em var(--accent); transform: translateX(0); }
-    64% { opacity: 1; text-shadow: none; transform: translateX(0); }
-    100% { opacity: 1; text-shadow: none; transform: translateX(calc(-100% - .035em)); }
-  }
-  @keyframes switch-signal {
-    from { opacity: 0; background-position: var(--switch-start); }
-    32% { opacity: .7; }
-    to { opacity: 0; background-position: var(--switch-end); }
+  @keyframes cycle-one {
+    0%, 18%, 98%, 100% { transform: none; }
+    36%, 82% { transform: translateX(calc(-100% - .035em)); }
   }
 }
 
@@ -228,7 +223,6 @@ button { cursor: pointer; }
 .button-outline:disabled { color: var(--muted); background: transparent; cursor: default; }
 
 .hero-mark {
-  position: relative;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
@@ -238,17 +232,6 @@ button { cursor: pointer; }
   color: var(--ink);
   text-align: left;
   user-select: none;
-}
-.hero-mark::after {
-  --switch-start: 14% 50%;
-  --switch-end: 100% 50%;
-  content: '';
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  background: linear-gradient(90deg, transparent, var(--accent), transparent) no-repeat;
-  background-size: 28% 2px;
-  pointer-events: none;
 }
 .hero-digits {
   display: flex;
@@ -527,12 +510,6 @@ h3 { font-size: clamp(1.25rem, 2.25vw, 1.75rem); line-height: 1.2; letter-spacin
   .main-nav a { font-size: .875rem; }
   .service-panel dl { grid-template-columns: minmax(0, 1fr); }
   .hero-mark { grid-template-columns: minmax(0, 1fr); justify-items: center; gap: 7px; padding-block: 16px 4px; text-align: center; }
-  .hero-mark::after {
-    --switch-start: 50% 30%;
-    --switch-end: 50% 100%;
-    background-image: linear-gradient(transparent, var(--accent), transparent);
-    background-size: 2px 42%;
-  }
   .hero-digits { padding-inline-end: 0; border-inline-end: 0; }
   .hero-message { width: 100%; padding-inline-start: 0; }
 }
