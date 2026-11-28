@@ -24,7 +24,7 @@
   --action-hover: #86270e;
   --text-hover: #7f230c;
   --stroke: #cc3918;
-  --hero-glow: #ffffffc9;
+  --hero-glow: #ffffffad;
   --shadow: #211a1712;
   --ink: #211a17;
   --muted: #5c4f48;
@@ -55,7 +55,7 @@
   --action-hover: #ff9b70;
   --text-hover: #ff9b70;
   --stroke: #ff834f;
-  --hero-glow: #080808c9;
+  --hero-glow: #080808ad;
   --shadow: #0005;
 }
 
@@ -207,15 +207,18 @@ button { cursor: pointer; }
   position: absolute;
   z-index: -1;
   inset: 0;
-  background: radial-gradient(ellipse at center, var(--paper) 12%, var(--hero-glow) 41%, transparent 74%);
+  background: radial-gradient(ellipse at center, var(--hero-glow) 24%, color-mix(in srgb, var(--paper) 34%, transparent) 58%, transparent 78%);
   pointer-events: none;
 }
 .hero-portrait {
-  width: min(87%, 21rem);
-  margin-block: -12px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(87%, 38rem, 70svh);
   aspect-ratio: 1;
   color: color-mix(in srgb, var(--action) 56%, var(--ink));
   pointer-events: none;
+  transform: translate(-50%, -50%);
 }
 .eyebrow { color: var(--action); font-size: .9375rem; font-weight: 650; }
 .hero h1 { margin-top: 18px; font-size: clamp(2.8rem, 8.4vw, 7.35rem); letter-spacing: -.072em; line-height: .95; }
@@ -276,28 +279,6 @@ button { cursor: pointer; }
 }
 .hero-message-text { white-space: pre-wrap; overflow-wrap: anywhere; }
 .hero-surname { color: var(--action); }
-@media (max-width: 899px) {
-  .hero::before { inset-block-end: 44%; }
-}
-@media (min-width: 900px) {
-  .hero { justify-items: start; text-align: start; }
-  .hero::before {
-    background: radial-gradient(ellipse at 27% 50%, var(--paper) 12%, var(--hero-glow) 41%, transparent 74%);
-  }
-  .hero-portrait {
-    position: absolute;
-    inset-block-start: 50%;
-    inset-inline-end: 0;
-    width: min(51%, 35rem);
-    margin-block: 0;
-    transform: translateY(-50%);
-  }
-  .hero-copy { width: min(55%, 39rem); }
-  .hero h1 { font-size: clamp(3.5rem, 7.3vw, 6.65rem); }
-  .hero-description { margin-inline: 0; }
-  .hero-actions { justify-content: flex-start; }
-  .hero-mark { width: min(55%, 36rem); }
-}
 @supports (-webkit-text-stroke: 1px currentColor) {
   .hero-surname, .hero-zero > span {
     -webkit-text-fill-color: transparent;
