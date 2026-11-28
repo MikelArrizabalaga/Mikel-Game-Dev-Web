@@ -3,14 +3,6 @@ function initIntro() {
   if (!hero || (location.hash && location.hash !== '#inicio') || window.scrollY > 0 || document.hidden) return;
   const staticText = matchMedia('(prefers-reduced-motion: reduce), (forced-colors: active)');
   if (staticText.matches) return;
-  try {
-    const key = 'portfolio-intro-seen';
-    if (sessionStorage.getItem(key)) return;
-    sessionStorage.setItem(key, '1');
-  } catch {
-    // The intro can still run when storage is unavailable.
-  }
-
   const listeners = new AbortController();
   const { signal } = listeners;
   const timeout = setTimeout(finish, 1500);
