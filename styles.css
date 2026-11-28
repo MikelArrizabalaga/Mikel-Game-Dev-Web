@@ -157,8 +157,10 @@ button { cursor: pointer; }
 @media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
   .hero[data-intro] .eyebrow { animation: intro-rise 360ms ease-out both; }
   .hero[data-intro] h1 { animation: intro-title 780ms cubic-bezier(.24, .75, .25, 1) 80ms both; }
-  .hero-mark[data-switch] .hero-digits span:first-child { animation: switch-zero 760ms ease-in-out both; }
-  .hero-mark[data-switch] .hero-digits span:last-child { animation: switch-one 760ms ease-in-out both; }
+  .hero-mark[data-switch] .hero-zero { animation: switch-zero 760ms ease-in-out both; }
+  .hero-mark[data-switch] .hero-zero > span { animation: switch-zero-outline 760ms ease-in-out both; }
+  .hero-mark[data-switch] .hero-zero::after { animation: switch-dot 760ms ease-in-out both; }
+  .hero-mark[data-switch] .hero-one { animation: switch-one 760ms ease-in-out both; }
   .hero-mark[data-switch]::after { animation: switch-signal 320ms ease-out 280ms both; }
   @keyframes intro-rise {
     from { opacity: 0; transform: translateY(7px); }
@@ -169,9 +171,17 @@ button { cursor: pointer; }
     to { opacity: 1; clip-path: inset(-.15em -.1em -.2em -.1em); transform: translateY(0); }
   }
   @keyframes switch-zero {
-    from { opacity: 1; clip-path: inset(0 0 100% 0); transform: scale(1); }
-    33%, 64% { opacity: 1; clip-path: inset(-.08em); transform: scale(1); }
-    to { opacity: 0; clip-path: inset(-.08em); transform: scale(.15); }
+    0%, 64% { transform: none; }
+    to { transform: translate(calc(76% + .035em), .31em) scale(.2); }
+  }
+  @keyframes switch-zero-outline {
+    from { opacity: 1; clip-path: inset(0 0 100% 0); }
+    33%, 75% { opacity: 1; clip-path: inset(-.08em); }
+    to { opacity: 0; clip-path: inset(-.08em); }
+  }
+  @keyframes switch-dot {
+    0%, 75% { opacity: 0; }
+    to { opacity: 1; }
   }
   @keyframes switch-one {
     0%, 30% { opacity: .2; text-shadow: none; transform: translateX(0); }
@@ -250,7 +260,20 @@ button { cursor: pointer; }
   font: 700 clamp(3.5rem, 6.8vw, 5.75rem)/.95 var(--font-bits);
   letter-spacing: -.08em;
 }
-.hero-digits span:first-child { color: var(--action); }
+.hero-zero { position: relative; color: var(--action); }
+.hero-zero > span { display: block; }
+.hero-zero::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: .64em;
+  height: .64em;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0;
+  transform: translate(-50%, -50%);
+}
 .hero-message {
   display: grid;
   align-items: center;
@@ -261,11 +284,11 @@ button { cursor: pointer; }
 .hero-message-text { white-space: pre-wrap; overflow-wrap: anywhere; }
 .hero-surname { color: var(--action); }
 @supports (-webkit-text-stroke: 1px currentColor) {
-  .hero-surname, .hero-digits span:first-child {
+  .hero-surname, .hero-zero > span {
     -webkit-text-fill-color: transparent;
     -webkit-text-stroke: clamp(1.45px, .177vw, 2.5px) var(--stroke);
   }
-  .hero-digits span:first-child { -webkit-text-stroke-width: clamp(1.5px, .19vw, 2.5px); }
+  .hero-zero > span { -webkit-text-stroke-width: clamp(1.5px, .19vw, 2.5px); }
 }
 
 @media (min-width: 831px) and (min-height: 680px) {
@@ -541,6 +564,6 @@ h3 { font-size: clamp(1.25rem, 2.25vw, 1.75rem); line-height: 1.2; letter-spacin
 }
 @media (forced-colors: active) {
   .brand-mark { border: 1px solid ButtonText; }
-  .hero-surname, .hero-digits span:first-child { -webkit-text-fill-color: currentColor; -webkit-text-stroke: 0; }
+  .hero-surname, .hero-zero > span { -webkit-text-fill-color: currentColor; -webkit-text-stroke: 0; }
   .service-options button[aria-selected="true"] { border: 2px solid Highlight; }
 }
