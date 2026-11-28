@@ -350,7 +350,10 @@ function initReactiveBackground() {
 }
 
 const refreshReactive = background.hasAttribute('data-reactive') ? initReactiveBackground() : null;
+const refreshPortrait = typeof initBinaryPortrait === 'function' ?
+  initBinaryPortrait(background, pattern, rotation, () => patternLines) : null;
 new ResizeObserver(() => {
   renderPattern();
   refreshReactive?.();
+  refreshPortrait?.();
 }).observe(background);

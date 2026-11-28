@@ -90,6 +90,7 @@ button { cursor: pointer; }
 }
 .binary-wave { position: fixed; z-index: -1; inset: 0; overflow: hidden; pointer-events: none; color: var(--accent); }
 .binary-wave canvas { position: absolute; top: 0; left: 0; }
+.binary-portrait-grid { position: absolute; inset: 0; width: 100%; height: 100%; }
 @media (pointer: coarse) {
   .binary-background, .binary-wave {
     bottom: auto;
@@ -210,14 +211,10 @@ button { cursor: pointer; }
   pointer-events: none;
 }
 .hero-portrait {
-  position: absolute;
-  z-index: -1;
-  inset-block-start: 10%;
-  inset-inline-end: 0;
-  width: min(100%, 27rem);
+  width: min(87%, 21rem);
+  margin-block: -12px;
   aspect-ratio: 1;
-  opacity: .36;
-  mask-image: linear-gradient(126deg, transparent, #000 45%, #000 65%, transparent);
+  color: color-mix(in srgb, var(--action) 56%, var(--ink));
   pointer-events: none;
 }
 .eyebrow { color: var(--action); font-size: .9375rem; font-weight: 650; }
@@ -279,16 +276,20 @@ button { cursor: pointer; }
 }
 .hero-message-text { white-space: pre-wrap; overflow-wrap: anywhere; }
 .hero-surname { color: var(--action); }
+@media (max-width: 899px) {
+  .hero::before { inset-block-end: 44%; }
+}
 @media (min-width: 900px) {
   .hero { justify-items: start; text-align: start; }
   .hero::before {
     background: radial-gradient(ellipse at 27% 50%, var(--paper) 12%, var(--hero-glow) 41%, transparent 74%);
   }
   .hero-portrait {
+    position: absolute;
     inset-block-start: 50%;
+    inset-inline-end: 0;
     width: min(51%, 35rem);
-    opacity: .82;
-    mask-image: linear-gradient(90deg, transparent, #000 25%);
+    margin-block: 0;
     transform: translateY(-50%);
   }
   .hero-copy { width: min(55%, 39rem); }
