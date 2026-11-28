@@ -157,7 +157,9 @@ button { cursor: pointer; }
 @media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
   .hero[data-intro] .eyebrow { animation: intro-rise 360ms ease-out both; }
   .hero[data-intro] h1 { animation: intro-title 780ms cubic-bezier(.24, .75, .25, 1) 80ms both; }
-  .hero[data-intro] .hero-digits { animation: intro-rise 520ms ease-out 100ms both; }
+  .hero[data-intro] .hero-digits span:first-child { animation: switch-zero 250ms ease-out both; }
+  .hero[data-intro] .hero-digits span:last-child { animation: switch-one 370ms ease-out 230ms both; }
+  .hero[data-intro] .hero-mark::after { animation: switch-signal 320ms ease-out 280ms both; }
   @keyframes intro-rise {
     from { opacity: 0; transform: translateY(7px); }
     to { opacity: 1; transform: translateY(0); }
@@ -165,6 +167,20 @@ button { cursor: pointer; }
   @keyframes intro-title {
     from { opacity: 0; clip-path: inset(-.15em 100% -.2em -.1em); transform: translateY(7px); }
     to { opacity: 1; clip-path: inset(-.15em -.1em -.2em -.1em); transform: translateY(0); }
+  }
+  @keyframes switch-zero {
+    from { clip-path: inset(0 0 100% 0); }
+    to { clip-path: inset(-.08em); }
+  }
+  @keyframes switch-one {
+    0% { opacity: .2; text-shadow: none; }
+    32% { opacity: 1; text-shadow: 0 0 .22em var(--accent); }
+    100% { opacity: 1; text-shadow: none; }
+  }
+  @keyframes switch-signal {
+    from { opacity: 0; background-position: var(--switch-start); }
+    32% { opacity: .7; }
+    to { opacity: 0; background-position: var(--switch-end); }
   }
 }
 
@@ -200,6 +216,7 @@ button { cursor: pointer; }
 .button-outline:disabled { color: var(--muted); background: transparent; cursor: default; }
 
 .hero-mark {
+  position: relative;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
@@ -209,6 +226,17 @@ button { cursor: pointer; }
   color: var(--ink);
   text-align: left;
   user-select: none;
+}
+.hero-mark::after {
+  --switch-start: 14% 50%;
+  --switch-end: 100% 50%;
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent) no-repeat;
+  background-size: 28% 2px;
+  pointer-events: none;
 }
 .hero-digits {
   display: flex;
@@ -474,6 +502,12 @@ h3 { font-size: clamp(1.25rem, 2.25vw, 1.75rem); line-height: 1.2; letter-spacin
   .main-nav a { font-size: .875rem; }
   .service-panel dl { grid-template-columns: minmax(0, 1fr); }
   .hero-mark { grid-template-columns: minmax(0, 1fr); justify-items: center; gap: 7px; padding-block: 16px 4px; text-align: center; }
+  .hero-mark::after {
+    --switch-start: 50% 30%;
+    --switch-end: 50% 100%;
+    background-image: linear-gradient(transparent, var(--accent), transparent);
+    background-size: 2px 42%;
+  }
   .hero-digits { padding-inline-end: 0; border-inline-end: 0; }
   .hero-message { width: 100%; padding-inline-start: 0; }
 }

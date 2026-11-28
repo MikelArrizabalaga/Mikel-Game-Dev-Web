@@ -115,6 +115,7 @@ function enableBinaryReveal() {
     const blankDuration = 45;
     const writingDuration = 185;
     for (const [element, effect] of effects) {
+      if (now < effect.started && !element.closest('.hero[data-intro]')) effect.started = now;
       const elapsed = now - effect.started;
       const written = Math.max(0, Math.min(1, (elapsed - blankDuration) / writingDuration));
       const decoding = Math.max(0, (elapsed - blankDuration - writingDuration) / 240);
@@ -168,7 +169,8 @@ function enableBinaryReveal() {
         fragment.append(overlay);
       }
       for (const { range } of measured.letters) pending.add(range);
-      effects.set(element, { ...measured, started: performance.now(), decoded: 0, written: 0 });
+      const switchDelay = element.matches('.hero[data-intro] .hero-message-decoded') ? 550 : 0;
+      effects.set(element, { ...measured, started: performance.now() + switchDelay, decoded: 0, written: 0 });
     }
     document.body.append(fragment);
     if (frame === null) frame = requestAnimationFrame(update);
