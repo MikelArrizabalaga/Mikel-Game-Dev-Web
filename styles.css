@@ -24,7 +24,7 @@
   --action-hover: #86270e;
   --text-hover: #7f230c;
   --stroke: #cc3918;
-  --hero-glow: #ffffffad;
+  --hero-glow: #ffffff86;
   --shadow: #211a1712;
   --ink: #211a17;
   --muted: #5c4f48;
@@ -278,6 +278,9 @@ button { cursor: pointer; }
   font: 650 clamp(1.15rem, 2.25vw, 1.875rem)/1.25 "Space Grotesk", var(--font-text);
 }
 .hero-message-text { white-space: pre-wrap; overflow-wrap: anywhere; }
+:root[data-theme="light"] .hero :is(.eyebrow, .hero-description, .hero-message-text) {
+  text-shadow: 0 0 3px var(--paper), 0 0 8px var(--paper);
+}
 .hero-surname { color: var(--action); }
 @supports (-webkit-text-stroke: 1px currentColor) {
   .hero-surname, .hero-zero > span {
@@ -552,6 +555,7 @@ h3 { font-size: clamp(1.25rem, 2.25vw, 1.75rem); line-height: 1.2; letter-spacin
 @media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
   ::highlight(binary-pending) {
     color: transparent;
+    text-shadow: none;
     -webkit-text-fill-color: transparent;
     -webkit-text-stroke-color: transparent;
     stroke-color: transparent;

@@ -83,7 +83,10 @@ function initBinaryPortrait(background, pattern, angle, getPatternLines) {
     context.rotate(-angle);
 
     const style = getComputedStyle(pattern);
-    const palette = [style.color, style.getPropertyValue('--accent').trim(), getComputedStyle(region).color];
+    const dark = document.documentElement.dataset.theme === 'dark';
+    const accent = style.getPropertyValue('--accent').trim();
+    const detail = dark ? getComputedStyle(region).color : style.getPropertyValue('--action-hover').trim();
+    const palette = [style.color, accent, detail];
     const font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
     glyphs.font = font;
     const digitWidth = glyphs.measureText('0').width;
@@ -133,7 +136,9 @@ function initBinaryPortrait(background, pattern, angle, getPatternLines) {
             const edge = Math.min(1, u / .08, (1 - u) / .075, v / .055, (1 - v) / .19);
             level = light > .72 ? 2 : 1;
             lift = 7 * (1 - light) ** 1.2 * edge;
-            opacity += edge * (.24 + .66 * light ** .75);
+            const intensity = light ** .75;
+            const tone = dark ? .24 + .66 * intensity : .15 + .72 * intensity;
+            opacity += edge * tone;
           }
         }
         context.globalAlpha = opacity;
