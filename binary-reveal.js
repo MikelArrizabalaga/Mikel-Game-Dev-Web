@@ -50,7 +50,7 @@ function measureBinaryText(element) {
   return { letters, lines };
 }
 
-function initHeroMessages(canAnimate) {
+function initHeroMessages(canAnimate, replaceMessage) {
   const message = document.querySelector('.hero-message-decoded');
   if (!message) return () => {};
   const messages = [message.textContent, message.dataset.heroEffects, message.dataset.heroCollaboration];
@@ -63,7 +63,7 @@ function initHeroMessages(canAnimate) {
     if (!visible || document.hidden || !canAnimate()) return;
     timer = setInterval(() => {
       index = (index + 1) % messages.length;
-      message.textContent = messages[index];
+      replaceMessage(message, messages[index]);
     }, 2300);
   }
 
@@ -90,7 +90,11 @@ function enableBinaryReveal() {
   let headerHeight;
   let viewportWidth = document.documentElement.clientWidth;
   const canAnimate = () => !paused && !staticText.matches;
-  const syncHero = initHeroMessages(canAnimate);
+  const syncHero = initHeroMessages(canAnimate, (message, text) => {
+    finish(message);
+    message.textContent = text;
+    if (pending && visible.has(message)) enter([message], true);
+  });
 
   function finish(element) {
     const effect = effects.get(element);
@@ -134,14 +138,14 @@ function enableBinaryReveal() {
     if (effects.size) frame = requestAnimationFrame(update);
   }
 
-  function enter(elements) {
+  function enter(elements, replay = false) {
     const measurements = new Map();
     for (const element of elements) {
-      if (visible.has(element)) continue;
+      if (!replay && visible.has(element)) continue;
       visible.add(element);
       if (!canAnimate() || document.hidden || element.matches(':focus-within')) continue;
       // These elements are already moving as part of the opening animation.
-      if (element.matches('.hero[data-intro] :is(.eyebrow, h1, .hero-message-decoded)')) continue;
+      if (element.matches('.hero[data-intro] :is(.eyebrow, h1)')) continue;
       const measured = measureBinaryText(element);
       if (measured.letters.length) measurements.set(element, measured);
     }
