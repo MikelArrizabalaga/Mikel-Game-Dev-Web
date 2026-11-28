@@ -61,8 +61,11 @@ function initBinaryPortrait(background, pattern, angle, getPatternLines) {
     frame = undefined;
     const bounds = region.getBoundingClientRect();
     const { width, height, left, top } = background.getBoundingClientRect();
+    const portraitX = bounds.left + bounds.width / 2;
+    const portraitY = bounds.top + bounds.height / 2;
+    const portraitHalfHeight = (bounds.width * sin + bounds.height * cos) / 2;
     const active = portrait && !forcedColors.matches && bounds.width &&
-      bounds.bottom > top && bounds.top < top + height;
+      portraitY + portraitHalfHeight > top && portraitY - portraitHalfHeight < top + height;
     canvas.hidden = !active;
     pattern.style.visibility = active ? 'hidden' : '';
     if (!active) return;
@@ -116,8 +119,10 @@ function initBinaryPortrait(background, pattern, angle, getPatternLines) {
         if (screenX < -lineHeight || screenX > width + lineHeight ||
             screenY < -lineHeight || screenY > height + lineHeight) continue;
 
-        const u = (screenX + left - bounds.left) / bounds.width;
-        const v = (screenY + top - bounds.top) / bounds.height;
+        const dx = screenX + left - portraitX;
+        const dy = screenY + top - portraitY;
+        const u = .5 + (dx * cos - dy * sin) / bounds.width;
+        const v = .5 + (dx * sin + dy * cos) / bounds.height;
         let level = 0;
         let lift = 0;
         let opacity = .045;
