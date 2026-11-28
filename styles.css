@@ -24,7 +24,7 @@
   --action-hover: #86270e;
   --text-hover: #7f230c;
   --stroke: #cc3918;
-  --hero-glow: #ffffff86;
+  --hero-glow: #ffffffc9;
   --shadow: #211a1712;
   --ink: #211a17;
   --muted: #5c4f48;
@@ -55,7 +55,7 @@
   --action-hover: #ff9b70;
   --text-hover: #ff9b70;
   --stroke: #ff834f;
-  --hero-glow: #080808ad;
+  --hero-glow: #080808c9;
   --shadow: #0005;
 }
 
@@ -90,7 +90,6 @@ button { cursor: pointer; }
 }
 .binary-wave { position: fixed; z-index: -1; inset: 0; overflow: hidden; pointer-events: none; color: var(--accent); }
 .binary-wave canvas { position: absolute; top: 0; left: 0; }
-.binary-portrait-grid { position: absolute; inset: 0; width: 100%; height: 100%; }
 @media (pointer: coarse) {
   .binary-background, .binary-wave {
     bottom: auto;
@@ -207,18 +206,8 @@ button { cursor: pointer; }
   position: absolute;
   z-index: -1;
   inset: 0;
-  background: radial-gradient(ellipse at center, var(--hero-glow) 24%, color-mix(in srgb, var(--paper) 34%, transparent) 58%, transparent 78%);
+  background: radial-gradient(ellipse at center, var(--paper) 12%, var(--hero-glow) 41%, transparent 74%);
   pointer-events: none;
-}
-.hero-portrait {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: min(87%, 38rem, 70svh);
-  aspect-ratio: 1;
-  color: color-mix(in srgb, var(--action) 56%, var(--ink));
-  pointer-events: none;
-  transform: translate(-50%, -50%);
 }
 .eyebrow { color: var(--action); font-size: .9375rem; font-weight: 650; }
 .hero h1 { margin-top: 18px; font-size: clamp(2.8rem, 8.4vw, 7.35rem); letter-spacing: -.072em; line-height: .95; }
@@ -278,9 +267,6 @@ button { cursor: pointer; }
   font: 650 clamp(1.15rem, 2.25vw, 1.875rem)/1.25 "Space Grotesk", var(--font-text);
 }
 .hero-message-text { white-space: pre-wrap; overflow-wrap: anywhere; }
-:root[data-theme="light"] .hero :is(.eyebrow, .hero-description, .hero-message-text) {
-  text-shadow: 0 0 3px var(--paper), 0 0 8px var(--paper);
-}
 .hero-surname { color: var(--action); }
 @supports (-webkit-text-stroke: 1px currentColor) {
   .hero-surname, .hero-zero > span {
@@ -555,7 +541,6 @@ h3 { font-size: clamp(1.25rem, 2.25vw, 1.75rem); line-height: 1.2; letter-spacin
 @media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
   ::highlight(binary-pending) {
     color: transparent;
-    text-shadow: none;
     -webkit-text-fill-color: transparent;
     -webkit-text-stroke-color: transparent;
     stroke-color: transparent;
@@ -580,7 +565,6 @@ h3 { font-size: clamp(1.25rem, 2.25vw, 1.75rem); line-height: 1.2; letter-spacin
   .binary-line-inverse { color: var(--on-action); }
 }
 @media (forced-colors: active) {
-  .hero-portrait { display: none; }
   .brand-mark { border: 1px solid ButtonText; }
   .hero-surname, .hero-zero > span { -webkit-text-fill-color: currentColor; -webkit-text-stroke: 0; }
   .service-options button[aria-selected="true"] { border: 2px solid Highlight; }
