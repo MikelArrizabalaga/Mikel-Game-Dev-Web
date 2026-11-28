@@ -418,11 +418,18 @@ h3 { font-size: clamp(1.25rem, 2.25vw, 1.75rem); line-height: 1.2; letter-spacin
 .shader-controls output { color: var(--action); font-variant-numeric: tabular-nums; }
 .shader-preview > p { margin-top: 5px; color: var(--muted); font-size: .8125rem; line-height: 1.4; }
 
-.collaboration { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: var(--heading-gap) clamp(28px, 5vw, 60px); }
-.collaboration .section-heading { display: block; margin: 0; }
-.collaboration .section-heading p { margin-top: 12px; }
-.process { border-top: 1px solid var(--line); }
-.process-step { padding: clamp(18px, 2.5vw, 26px) clamp(16px, 2.5vw, 28px); border-bottom: 1px solid var(--line); background: var(--surface); }
+.collaboration { padding-block: clamp(44px, 5.5vw, 76px); }
+.collaboration .section-heading { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.collaboration .section-heading p { justify-self: end; }
+.process {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+}
+.process-step { padding: clamp(18px, 2.5vw, 26px) clamp(16px, 2.5vw, 28px); }
+.process-step + .process-step { border-inline-start: 1px solid var(--line); }
 .process-step h3 { font-size: 1.125rem; letter-spacing: -.02em; }
 .process-step p { max-width: 61ch; margin-top: 9px; color: var(--muted); line-height: 1.55; }
 
@@ -483,6 +490,9 @@ h3 { font-size: clamp(1.25rem, 2.25vw, 1.75rem); line-height: 1.2; letter-spacin
 .motion-toggle { padding: 0; border: 0; background: transparent; }
 
 @media (max-width: 760px) {
+  .collaboration .section-heading, .process { grid-template-columns: minmax(0, 1fr); }
+  .collaboration .section-heading p { justify-self: start; }
+  .process-step + .process-step { border-inline-start: 0; border-block-start: 1px solid var(--line); }
   [id] { scroll-margin-block-start: max(120px, calc(var(--header-height, 0px) + 12px)); }
   .header-inner { grid-template-columns: minmax(0, 1fr) auto; padding-block: 8px; row-gap: 2px; }
   .header-inner > .main-nav { grid-column: 1 / -1; grid-row: 2; justify-content: flex-start; }
@@ -495,7 +505,7 @@ h3 { font-size: clamp(1.25rem, 2.25vw, 1.75rem); line-height: 1.2; letter-spacin
   .hero-description { margin-top: 15px; }
   .hero-actions { margin-top: 18px; }
   .service-section { --service-columns: minmax(0, 1fr); }
-  .collaboration, .work-entry, .work-grid, .contact-panel { grid-template-columns: minmax(0, 1fr); }
+  .work-entry, .work-grid, .contact-panel { grid-template-columns: minmax(0, 1fr); }
   .service-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .service-options button { min-height: 49px; padding-inline: 10px; font-size: .9rem; }
   .service-options button:last-child:nth-child(odd) { grid-column: 1 / -1; }
