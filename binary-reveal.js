@@ -54,24 +54,27 @@ function initHeroMessages(canAnimate, replaceMessage) {
   const message = document.querySelector('.hero-message-decoded');
   if (!message) return () => {};
   const mark = message.closest('.hero-mark');
+  const one = mark.querySelector('.hero-one');
   const messages = [message.textContent, message.dataset.heroEffects, message.dataset.heroCollaboration];
   const cycleDuration = 2300;
   mark.style.setProperty('--hero-cycle-duration', cycleDuration + 'ms');
   let index = 0;
   let visible = false;
-  let timer;
 
   function sync() {
-    clearInterval(timer);
-    const active = visible && !document.hidden && canAnimate();
-    mark.toggleAttribute('data-cycle', active);
-    if (!active) return;
-    timer = setInterval(() => {
-      index = (index + 1) % messages.length;
-      replaceMessage(message, messages[index]);
-    }, cycleDuration);
+    mark.toggleAttribute('data-cycle', visible && !document.hidden && canAnimate());
   }
 
+  function syncPhrase(event) {
+    if (event.animationName !== 'cycle-one' || !mark.hasAttribute('data-cycle')) return;
+    if (event.type === 'animationiteration') index = (index + 1) % messages.length;
+    const animation = one.getAnimations().find(effect => effect.animationName === event.animationName);
+    const elapsed = (animation?.currentTime ?? 0) % cycleDuration;
+    replaceMessage(message, messages[index], document.timeline.currentTime - elapsed);
+  }
+
+  one.addEventListener('animationstart', syncPhrase);
+  one.addEventListener('animationiteration', syncPhrase);
   const observer = new IntersectionObserver(([entry]) => {
     visible = entry.isIntersecting;
     sync();
@@ -95,10 +98,10 @@ function enableBinaryReveal() {
   let headerHeight;
   let viewportWidth = document.documentElement.clientWidth;
   const canAnimate = () => !paused && !staticText.matches;
-  const syncHero = initHeroMessages(canAnimate, (message, text) => {
+  const syncHero = initHeroMessages(canAnimate, (message, text, started) => {
     finish(message);
     message.textContent = text;
-    if (pending && visible.has(message)) enter([message], true);
+    if (pending && visible.has(message)) enter([message], started);
   });
 
   function finish(element) {
@@ -143,10 +146,10 @@ function enableBinaryReveal() {
     if (effects.size) frame = requestAnimationFrame(update);
   }
 
-  function enter(elements, replay = false) {
+  function enter(elements, started) {
     const measurements = new Map();
     for (const element of elements) {
-      if (!replay && visible.has(element)) continue;
+      if (started === undefined && visible.has(element)) continue;
       visible.add(element);
       if (!canAnimate() || document.hidden || element.matches(':focus-within')) continue;
       // These elements are already moving as part of the opening animation.
@@ -173,7 +176,7 @@ function enableBinaryReveal() {
         fragment.append(overlay);
       }
       for (const { range } of measured.letters) pending.add(range);
-      effects.set(element, { ...measured, started: performance.now(), decoded: 0, written: 0 });
+      effects.set(element, { ...measured, started: started ?? performance.now(), decoded: 0, written: 0 });
     }
     document.body.append(fragment);
     if (frame === null) frame = requestAnimationFrame(update);

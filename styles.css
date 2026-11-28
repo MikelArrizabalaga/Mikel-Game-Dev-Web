@@ -173,21 +173,22 @@ button { cursor: pointer; }
     from { opacity: 0; clip-path: inset(-.15em 100% -.2em -.1em); transform: translateY(7px); }
     to { opacity: 1; clip-path: inset(-.15em -.1em -.2em -.1em); transform: translateY(0); }
   }
+  /* The phrase starts writing at 45ms and finishes decoding at 470ms of the 2300ms cycle. */
   @keyframes cycle-zero {
-    0%, 18%, 98%, 100% { transform: none; }
-    36%, 82% { transform: translate(calc(76% + .035em), .31em) scale(.2); }
+    0%, 2%, 98%, 100% { transform: none; }
+    20.4%, 82% { transform: translate(calc(76% + .035em), .31em) scale(.2); }
   }
   @keyframes cycle-outline {
-    0%, 23%, 95%, 100% { opacity: 1; }
-    36%, 82% { opacity: 0; }
+    0%, 7%, 95%, 100% { opacity: 1; }
+    20.4%, 82% { opacity: 0; }
   }
   @keyframes cycle-dot {
-    0%, 23%, 95%, 100% { opacity: 0; }
-    36%, 82% { opacity: 1; }
+    0%, 7%, 95%, 100% { opacity: 0; }
+    20.4%, 82% { opacity: 1; }
   }
   @keyframes cycle-one {
-    0%, 18%, 98%, 100% { transform: none; }
-    36%, 82% { transform: translateX(calc(-100% - .035em)); }
+    0%, 2%, 98%, 100% { transform: none; }
+    20.4%, 82% { transform: translateX(calc(-100% - .035em)); }
   }
 }
 
