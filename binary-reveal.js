@@ -53,16 +53,31 @@ function measureBinaryText(element) {
 function initHeroMessages(canAnimate, replaceMessage) {
   const message = document.querySelector('.hero-message-decoded');
   if (!message) return () => {};
+  const mark = message.closest('.hero-mark');
   const messages = [message.textContent, message.dataset.heroEffects, message.dataset.heroCollaboration];
   let index = 0;
   let visible = false;
   let timer;
 
+  function playSwitch() {
+    if (mark.hasAttribute('data-switch')) {
+      mark.removeAttribute('data-switch');
+      // Apply the reset before restarting the CSS animations.
+      void mark.offsetWidth;
+    }
+    mark.setAttribute('data-switch', '');
+  }
+
   function sync() {
     clearInterval(timer);
-    if (!visible || document.hidden || !canAnimate()) return;
+    if (!visible || document.hidden || !canAnimate()) {
+      mark.removeAttribute('data-switch');
+      return;
+    }
+    playSwitch();
     timer = setInterval(() => {
       index = (index + 1) % messages.length;
+      playSwitch();
       replaceMessage(message, messages[index]);
     }, 2300);
   }
@@ -115,7 +130,6 @@ function enableBinaryReveal() {
     const blankDuration = 45;
     const writingDuration = 185;
     for (const [element, effect] of effects) {
-      if (now < effect.started && !element.closest('.hero[data-intro]')) effect.started = now;
       const elapsed = now - effect.started;
       const written = Math.max(0, Math.min(1, (elapsed - blankDuration) / writingDuration));
       const decoding = Math.max(0, (elapsed - blankDuration - writingDuration) / 240);
@@ -169,7 +183,7 @@ function enableBinaryReveal() {
         fragment.append(overlay);
       }
       for (const { range } of measured.letters) pending.add(range);
-      const switchDelay = element.matches('.hero[data-intro] .hero-message-decoded') ? 550 : 0;
+      const switchDelay = element.matches('.hero-message-decoded') ? 550 : 0;
       effects.set(element, { ...measured, started: performance.now() + switchDelay, decoded: 0, written: 0 });
     }
     document.body.append(fragment);

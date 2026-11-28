@@ -157,9 +157,9 @@ button { cursor: pointer; }
 @media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
   .hero[data-intro] .eyebrow { animation: intro-rise 360ms ease-out both; }
   .hero[data-intro] h1 { animation: intro-title 780ms cubic-bezier(.24, .75, .25, 1) 80ms both; }
-  .hero[data-intro] .hero-digits span:first-child { animation: switch-zero 250ms ease-out both; }
-  .hero[data-intro] .hero-digits span:last-child { animation: switch-one 370ms ease-out 230ms both; }
-  .hero[data-intro] .hero-mark::after { animation: switch-signal 320ms ease-out 280ms both; }
+  .hero-mark[data-switch] .hero-digits span:first-child { animation: switch-zero 760ms ease-in-out both; }
+  .hero-mark[data-switch] .hero-digits span:last-child { animation: switch-one 760ms ease-in-out both; }
+  .hero-mark[data-switch]::after { animation: switch-signal 320ms ease-out 280ms both; }
   @keyframes intro-rise {
     from { opacity: 0; transform: translateY(7px); }
     to { opacity: 1; transform: translateY(0); }
@@ -169,13 +169,15 @@ button { cursor: pointer; }
     to { opacity: 1; clip-path: inset(-.15em -.1em -.2em -.1em); transform: translateY(0); }
   }
   @keyframes switch-zero {
-    from { clip-path: inset(0 0 100% 0); }
-    to { clip-path: inset(-.08em); }
+    from { opacity: 1; clip-path: inset(0 0 100% 0); transform: scale(1); }
+    33%, 64% { opacity: 1; clip-path: inset(-.08em); transform: scale(1); }
+    to { opacity: 0; clip-path: inset(-.08em); transform: scale(.15); }
   }
   @keyframes switch-one {
-    0% { opacity: .2; text-shadow: none; }
-    32% { opacity: 1; text-shadow: 0 0 .22em var(--accent); }
-    100% { opacity: 1; text-shadow: none; }
+    0%, 30% { opacity: .2; text-shadow: none; transform: translateX(0); }
+    46% { opacity: 1; text-shadow: 0 0 .22em var(--accent); transform: translateX(0); }
+    64% { opacity: 1; text-shadow: none; transform: translateX(0); }
+    100% { opacity: 1; text-shadow: none; transform: translateX(calc(-100% - .035em)); }
   }
   @keyframes switch-signal {
     from { opacity: 0; background-position: var(--switch-start); }
