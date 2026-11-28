@@ -51,7 +51,7 @@ function samplePortrait(rgba, size) {
   return { light, backdrop, silhouette, details };
 }
 
-function initBinaryPortrait(background, pattern, angle, getPatternLines) {
+function initBinaryPortrait(background, pattern, angle, tile, wrapIndex) {
   const region = document.querySelector('[data-portrait]');
   if (!region) return;
   const canvas = document.createElement('canvas');
@@ -78,10 +78,10 @@ function initBinaryPortrait(background, pattern, angle, getPatternLines) {
     const bounds = region.getBoundingClientRect();
     const { width, height, left, top } = background.getBoundingClientRect();
     const portraitX = bounds.left + bounds.width / 2;
-    const portraitY = bounds.top + bounds.height / 2;
-    const portraitHalfHeight = (bounds.width * sin + bounds.height * cos) / 2;
-    const active = portrait && !forcedColors.matches && bounds.width &&
-      portraitY + portraitHalfHeight > top && portraitY - portraitHalfHeight < top + height;
+    const scroll = window.scrollY;
+    const portraitY = bounds.top + scroll + bounds.height / 2;
+    const active = Boolean(portrait && !forcedColors.matches && bounds.width);
+    background.toggleAttribute('data-document-grid', active);
     canvas.hidden = !active;
     pattern.style.visibility = active ? 'hidden' : '';
     if (!active) return;
@@ -95,7 +95,7 @@ function initBinaryPortrait(background, pattern, angle, getPatternLines) {
     }
     context.setTransform(1, 0, 0, 1, 0, 0);
     context.clearRect(0, 0, pixelWidth, pixelHeight);
-    context.setTransform(scale, 0, 0, scale, pixelWidth / 2, pixelHeight / 2);
+    context.setTransform(scale, 0, 0, scale, pixelWidth / 2, (height / 2 - scroll) * scale);
     context.rotate(-angle);
 
     const style = getComputedStyle(pattern);
@@ -124,22 +124,31 @@ function initBinaryPortrait(background, pattern, angle, getPatternLines) {
 
     const originX = -pattern.offsetWidth / 2;
     const originY = -pattern.offsetHeight / 2;
-    const lines = getPatternLines();
-    for (let row = 0; row < lines.length; row++) {
+    // Project the viewport into the tilted grid, whose indices stay anchored to the document.
+    const viewX = -scroll * sin;
+    const viewY = scroll * cos;
+    const halfWidth = (width * cos + height * sin) / 2 + lineHeight;
+    const halfHeight = (height * cos + width * sin) / 2 + lineHeight;
+    const firstRow = Math.floor((viewY - halfHeight - originY) / lineHeight);
+    const lastRow = Math.ceil((viewY + halfHeight - originY) / lineHeight);
+    const firstColumn = Math.floor((viewX - halfWidth - originX) / advance);
+    const lastColumn = Math.ceil((viewX + halfWidth - originX) / advance);
+    for (let row = firstRow; row <= lastRow; row++) {
       const y = originY + (row + .5) * lineHeight;
-      const line = lines[row];
-      for (let column = 0; column < line.length; column++) {
-        const digit = line[column];
+      const line = tile[wrapIndex(row, tile.length)];
+      for (let column = firstColumn; column <= lastColumn; column++) {
+        const digit = line[wrapIndex(column, line.length)];
         if (digit === ' ') continue;
         const x = originX + column * advance;
         const centerX = x + digitWidth / 2;
         const screenX = centerX * cos + y * sin + width / 2;
-        const screenY = y * cos - centerX * sin + height / 2;
+        const pageY = y * cos - centerX * sin + height / 2;
+        const screenY = pageY - scroll;
         if (screenX < -lineHeight || screenX > width + lineHeight ||
             screenY < -lineHeight || screenY > height + lineHeight) continue;
 
         const dx = screenX + left - portraitX;
-        const dy = screenY + top - portraitY;
+        const dy = pageY + top - portraitY;
         const u = .5 + (dx * cos - dy * sin) / bounds.width;
         const v = .5 + (dx * sin + dy * cos) / bounds.height;
         let level = 0;

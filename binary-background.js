@@ -3,9 +3,16 @@ const pattern = background.querySelector('pre');
 const rotation = 16 * Math.PI / 180;
 const signature = '01101101 01101001 01101011 01100101 01101100 00100000 01100001 01110010 01110010 01101001 01111010 01100001 01100010 01100001 01101100 01100001 01100111 01100001 ';
 const loopRows = 6;
+const patternTile = Array.from({ length: loopRows }, (_, row) => {
+  const offset = Math.floor(row * signature.length / loopRows);
+  return signature.slice(offset) + signature.slice(0, offset);
+});
 let previousColumns = 0;
 let previousRows = 0;
-let patternLines = [];
+
+function wrapGridIndex(index, length) {
+  return (index % length + length) % length;
+}
 
 function renderPattern() {
   const { clientWidth: width, clientHeight: height } = background;
@@ -17,12 +24,9 @@ function renderPattern() {
   if (columns === previousColumns && rows === previousRows) return;
   previousColumns = columns;
   previousRows = rows;
-  const repeated = signature.repeat(Math.ceil((columns + signature.length) / signature.length));
-
-  patternLines = Array.from({ length: rows }, (_, row) => {
-    const offset = (row % loopRows) * (signature.length / loopRows);
-    return repeated.slice(offset, offset + columns);
-  });
+  const repeats = Math.ceil(columns / signature.length);
+  const patternLines = Array.from({ length: rows }, (_, row) =>
+    patternTile[row % loopRows].repeat(repeats).slice(0, columns));
   pattern.textContent = patternLines.join('\n');
 }
 
@@ -63,6 +67,7 @@ function initReactiveBackground() {
   const liftHeight = 30;
   const hoverOpacity = .64;
   const pulseOpacity = .82;
+  const gridScroll = () => background.hasAttribute('data-document-grid') ? window.scrollY : 0;
 
   function refresh() {
     if (forcedColors.matches) return;
@@ -160,29 +165,34 @@ function initReactiveBackground() {
     canvas.style.transform = `translate3d(${canvasX}px, ${canvasY}px, 0)`;
     context.setTransform(1, 0, 0, 1, 0, 0);
     context.clearRect(0, 0, canvas.width, canvas.height);
-    context.setTransform(scale, 0, 0, scale, (centerX - canvasX) * scale, (centerY - canvasY) * scale);
+    const scroll = gridScroll();
+    context.setTransform(scale, 0, 0, scale, (centerX - canvasX) * scale, (centerY - canvasY - scroll) * scale);
     context.rotate(-rotation);
-    drawDigits(context, pointer, radius, (distanceSquared) => {
+    drawDigits(context, pointer, radius, scroll, (distanceSquared) => {
       const falloff = Math.max(0, 1 - distanceSquared / radiusSquared);
       return falloff * Math.sqrt(falloff) * strength;
     }, lift, hoverOpacity);
   }
 
-  function drawDigits(target, { x, y }, reach, getInfluence, lift, opacity) {
-    const { centerX, centerY, originX, originY, advance, lineHeight, glyphWidth, glyphHeight, scale } = geometry;
+  function drawDigits(target, { x, y }, reach, scroll, getInfluence, lift, opacity) {
+    const { width, height, centerX, centerY, originX, originY, advance, lineHeight, glyphWidth, glyphHeight, scale } = geometry;
     const cursorX = x - centerX;
-    const cursorY = y - centerY;
+    const cursorY = y - centerY + scroll;
     const localX = cursorX * cos - cursorY * sin;
     const localY = cursorX * sin + cursorY * cos;
-    const firstRow = Math.max(0, Math.floor((localY - originY - reach) / lineHeight));
-    const lastRow = Math.min(patternLines.length - 1, Math.ceil((localY - originY + reach) / lineHeight));
-    const firstColumn = Math.max(0, Math.floor((localX - originX - reach) / advance));
-    const lastColumn = Math.ceil((localX - originX + reach) / advance);
+    const viewX = -scroll * sin;
+    const viewY = scroll * cos;
+    const halfWidth = (width * cos + height * sin) / 2 + lineHeight + lift;
+    const halfHeight = (height * cos + width * sin) / 2 + lineHeight + lift;
+    const firstRow = Math.floor((Math.max(localY - reach, viewY - halfHeight) - originY) / lineHeight);
+    const lastRow = Math.ceil((Math.min(localY + reach, viewY + halfHeight) - originY) / lineHeight);
+    const firstColumn = Math.floor((Math.max(localX - reach, viewX - halfWidth) - originX) / advance);
+    const lastColumn = Math.ceil((Math.min(localX + reach, viewX + halfWidth) - originX) / advance);
     for (let row = firstRow; row <= lastRow; row++) {
-      const line = patternLines[row];
+      const line = patternTile[wrapGridIndex(row, loopRows)];
       const y = originY + (row + .5) * lineHeight;
-      for (let column = firstColumn; column <= lastColumn && column < line.length; column++) {
-        const digit = line[column];
+      for (let column = firstColumn; column <= lastColumn; column++) {
+        const digit = line[wrapGridIndex(column, line.length)];
         if (digit === ' ') continue;
         const x = originX + column * advance;
         const dx = x + advance / 2 - localX;
@@ -203,6 +213,7 @@ function initReactiveBackground() {
     if (!pulses.length) return;
 
     const { width, height, centerX, centerY } = geometry;
+    const scroll = gridScroll();
     const scale = Math.min(window.devicePixelRatio || 1, 1.5, Math.sqrt(3000000 / (width * height)));
     const pixelWidth = Math.ceil(width * scale);
     const pixelHeight = Math.ceil(height * scale);
@@ -227,11 +238,11 @@ function initReactiveBackground() {
         .22 * Math.cos(5 * angle - progress * 6)
       );
       pulseContext.save();
-      pulseContext.translate(centerX, centerY);
+      pulseContext.translate(centerX, centerY - scroll);
       pulseContext.rotate(-rotation);
       const inner = Math.max(0, radius - 1.5 * band - ripple);
       const outer = radius + crestWidth * band + ripple;
-      drawDigits(pulseContext, pulse, outer, (distanceSquared, dx, dy) => {
+      drawDigits(pulseContext, pulse, outer, scroll, (distanceSquared, dx, dy) => {
         if (distanceSquared < inner * inner || distanceSquared > outer * outer) return 0;
         const angle = Math.atan2(dy, dx) - rotation;
         const phase = (Math.sqrt(distanceSquared) - radius - offsetAt(angle)) / band;
@@ -321,6 +332,11 @@ function initReactiveBackground() {
     if (document.hidden) clear();
   }, { passive: true });
   window.addEventListener('themechange', refresh);
+  window.addEventListener('scroll', () => {
+    if (!pointer || !background.hasAttribute('data-document-grid')) return;
+    hoverDirty = true;
+    schedule();
+  }, { passive: true });
   reducedMotion.addEventListener('change', () => {
     if (reducedMotion.matches) {
       pulses.length = 0;
@@ -351,7 +367,7 @@ function initReactiveBackground() {
 
 const refreshReactive = background.hasAttribute('data-reactive') ? initReactiveBackground() : null;
 const refreshPortrait = typeof initBinaryPortrait === 'function' ?
-  initBinaryPortrait(background, pattern, rotation, () => patternLines) : null;
+  initBinaryPortrait(background, pattern, rotation, patternTile, wrapGridIndex) : null;
 new ResizeObserver(() => {
   renderPattern();
   refreshReactive?.();
